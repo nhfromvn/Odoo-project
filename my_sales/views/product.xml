@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_product_form" model="ir.ui.view">
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="before">
+                <field name="Date_from"/>
+                <field name="Date_to"/>
+                <field name="product_warranty_code"/>
+                <field name="discount"/>
+                <field name="Sale_order_discount_estimated"/>
+                <field name="Calculated_discount_total"/>
+                <field name="interval_warranty_days"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_product_tree" model="ir.ui.view">
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="before">
+                <field name="Date_from"/>
+                <field name="Date_to"/>
+                <field name="product_warranty_code"/>
+                <field name="discount"/>
+                <field name="Sale_order_discount_estimated"/>
+                <field name="Calculated_discount_total"/>
+                <field name="interval_warranty_days"/>
+            </field>
+        </field>
+    </record>
+<!--       <record id="action_product_warranty" model="ir.actions.act_window">-->
+<!--        <field name="name">Products are still under warranty</field>-->
+<!--            <field name="view_mode">kanban,tree,form,activity</field>-->
+<!--        <field name="res_model">product.product.template</field>-->
+<!--        <field name="domain">[('interval_warranty_days')], '!=', False)]</field>-->
+<!--    </record>-->
+<!--    <menuitem name="Products are still under warranty" id="menu_product_warranty" parent="product.menu_report_product_all"-->
+<!--              action="action_product_warranty"/>-->
+</odoo>

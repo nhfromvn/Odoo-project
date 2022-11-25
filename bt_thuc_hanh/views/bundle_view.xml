@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='product_bundle_action' model='ir.actions.act_window'>
+        <field name="name">Product Bundle</field>
+        <field name="res_model">product.bundle</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+    <menuitem name="Product Bundle" id="bundle_base_menu"/>
+    <menuitem name="Product Bundle" id="product_bundle_menu" action="product_bundle_action" parent="bundle_base_menu"/>
+    <record id="product_bundle_view_form" model="ir.ui.view">
+        <field name="name">Product Bundle Form</field>
+        <field name="model">product.bundle</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="id"/>
+                            <field name="discount_type"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+
+                            <field name="start_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
+                            <field name="end_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
+                            <field name="indefinite_bundle"/>
+                            <field name="type"/>
+                            <field name="discount_value"/>
+                        </group>
+                    </group>
+
+                        <field name="tier_quantity"
+                               widget="section_and_note_one2many"
+                               mode="tree,kanban"
+                               attrs="{'invisible':[('type','!=','tier')]}">
+                            <tree>
+                                <field name="is_add_range"/>
+                                <field name="qty_start" string="Quantity"/>
+                                <field name="to" string=" "/>
+                                <field name="qty_end" string =" "/>
+                                <field name="discount_value"/>
+
+                            </tree>
+                        </field>
+                    <notebook>
+                        <page string="Products" name="product">
+                            <field
+                                    name="products"
+                                    widget="section_and_note_one2many"
+                                    mode="tree,kanban"
+
+                            >
+                                <tree
+                                        string="Products Lines"
+                                        editable="bottom"
+                                >
+                                    <control>
+                                        <create name="add_product_control" string="Add a product"/>
+                                    </control>
+                                    <field name="product_id"/>
+                                    <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
+                                    <field name="product_vendor"/>
+                                    <field name="variants"/>
+                                    <field name="discount" attrs="{'column_invisible':['|',('parent.discount_type','=','total_fix'),
+                                                                                           ('parent.type','=','tier')]}"/>
+                                </tree>
+                                <form>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="product_bundle_view_tree" model="ir.ui.view">
+        <field name="name">Product Bundle List</field>
+        <field name="model">product.bundle</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="discount_type"/>
+                <field name="discount_value"/>
+                <field name="products"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

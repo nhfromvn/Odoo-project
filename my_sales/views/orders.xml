@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_sales_order_filter" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="." position="inside">
+                <field name="customer_discount_code"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_order_form" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="customer_discount_code"/>
+                <field name="discount"/>
+                <field name="check_discount"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_order_tree" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="customer_discount_code"/>
+                <field name="discount"/>
+                <field name="check_discount"/>
+            </field>
+        </field>
+    </record>
+    <record id="action_special_customer" model="ir.actions.act_window">
+        <field name="name">Order with special customer</field>
+            <field name="view_mode">kanban,tree,form,activity</field>
+        <field name="res_model">sale.order</field>
+        <field name="domain">[('check_discount', '=', True)]</field>
+    </record>
+    <record id="action_my_cart" model="ir.actions.act_window">
+        <field name="name">My Cart</field>
+            <field name="view_mode">tree,kanban,form,activity</field>
+        <field name="res_model">sale.order</field>
+        <field name="domain">[('customer_discount_code', '=', 'VIP_10')]</field>
+    </record>
+    <record id="model_sale_order_update_discount_code" model="ir.actions.server">
+        <field name="name">Update Discount Code</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.update_discount_code()</field>
+    </record>
+    <menuitem name="Sales with special customers" id="menu_special_customer" parent="sale.sale_order_menu"
+              action="action_special_customer"/>
+     <menuitem name="My cart" id="menu_my_cart" parent="sale.sale_order_menu"
+              action="action_my_cart"/>
+</odoo>

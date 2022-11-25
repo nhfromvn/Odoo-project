@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bt_thuc_hanh_bt_thuc_hanh,bt_thuc_hanh.product_bundle,model_product_bundle,base.group_user,1,1,1,1
