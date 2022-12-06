@@ -21,7 +21,9 @@
 
     # any module necessary for this one to work correctly
     'depends': ['base',
-                'product'],
+                'product',
+                'website',
+                'website_sale'],
 
     # always loaded
     'data': [

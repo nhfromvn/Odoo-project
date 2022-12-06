@@ -1,24 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-<!--    <data>-->
 
-<!--        <template id="listing">-->
-<!--          <ul>-->
-<!--            <li t-foreach="objects" t-as="object">-->
-<!--              <a t-attf-href="#{ root }/objects/#{ object.id }">-->
-<!--                <t t-esc="object.display_name"/>-->
-<!--              </a>-->
-<!--            </li>-->
-<!--          </ul>-->
-<!--        </template>-->
-<!--        <template id="object">-->
-<!--          <h1><t t-esc="object.display_name"/></h1>-->
-<!--          <dl>-->
-<!--            <t t-foreach="object._fields" t-as="field">-->
-<!--              <dt><t t-esc="field"/></dt>-->
-<!--              <dd><t t-esc="object[field]"/></dd>-->
-<!--            </t>-->
-<!--          </dl>-->
-<!--        </template>-->
+    <template id="test" inherit_id="website_sale.products" customize_show="True" name="Test">
+        <xpath expr="//div[hasclass('products_header')]/t[@t-call='website_sale.pricelist_list']" position="after">
+            <p>
+                akldsjfaklsdjdaflsjk
+            </p>
+        </xpath>
 
-<!--    </data>-->
+    </template>
+    <template id="add_bundles" inherit_id="website_sale.product" customize_show="True" name="Add Bundles">
+
+        <xpath expr="//div[@id='add_to_cart_wrap']" position="after">
+            <br/>
+            <a t-attf-href="/bundles/?product_id={{product.id}}" class="text-muted btn btn-primary btn-sm">Bundles</a>
+        </xpath>
+
+    </template>
+    <template id="bundles" name="Bundles">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Bundles</t>
+            <div class="container">
+                <t t-foreach="bundles" t-as="bundle">
+                    <div t-attf-class="card mt-3 #{'bg-info' if bundle_odd else ''}">
+                        <div class="card-body" id="card_body">
+                            <h3 t-field="bundle.name"/>
+                            <a t-attf-href="/bundles/#{bundle.id}" class="btn btn-primary">
+                                <i/>
+                                Bundle Detail
+                            </a>
+                        </div>
+                    </div>
+                </t>
+
+            </div>
+        </t>
+    </template>
+    <template id="bundle" name="Bundle">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="row mt16">
+                    <div class="col-5">
+                        <span t-field="bundle.image"
+                              t-options="{'widget': 'image', 'class': 'mx-auto d-block img-thumbnail'}"/>
+                    </div>
+                    <div class="offset-1 col-6">
+                        <h1 t-field="bundle.name"/>
+                        <b class="mt8">Product</b>
+                        <ul>
+                            <li t-foreach="bundle.products" t-as="product">
+                                <span t-esc="product.product_id.name"/>
+                            </li>
+                        </ul>
+                        <div id="add_bundle" class="d-inline">
+                            <a role="button" id="add_bundle"
+                               class="btn btn-primary btn-lg a-submit my-1 mr-1 px-5 font-weight-bold flex-grow-1"
+                               href="#"><i/>ADD BUNDlE
+                            </a>
+                            <div id="product_option_block" class="d-inline-block align-middle"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
 </odoo>

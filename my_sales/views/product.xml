@@ -12,6 +12,7 @@
                 <field name="Sale_order_discount_estimated"/>
                 <field name="Calculated_discount_total"/>
                 <field name="interval_warranty_days"/>
+                <field name="id"/>
             </field>
         </field>
     </record>

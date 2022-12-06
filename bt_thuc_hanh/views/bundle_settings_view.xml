@@ -38,5 +38,5 @@
         <field name="context">{'module' : 'bt_thuc_hanh'}</field>
     </record>
     <menuitem name="Settings" id="product_bundle_setting_menu" parent="bundle_base_menu"
-              action="product_bundle_settings_action"/>
+              action="product_bundle_settings_action" sequence ="20" />
 </odoo>

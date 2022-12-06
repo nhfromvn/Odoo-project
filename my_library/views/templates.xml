@@ -74,20 +74,66 @@
             <div t-field="book.html_description"/>
         </t>
     </template>
-     <template id="show_website_info" inherit_id="website.show_website_info">
+    <template id="show_website_info" inherit_id="website.show_website_info">
         <xpath expr="//dl[@t-foreach='apps']" position="replace">
             <table class="table">
                 <tr t-foreach="apps" t-as="app">
                     <th>
                         <a t-att-href="app.website">
-                            <t t-esc="app.name" />
+                            <t t-esc="app.name"/>
                         </a>
                     </th>
                     <td>
-                        <t t-esc="app.summary" />
+                        <t t-esc="app.summary"/>
                     </td>
                 </tr>
             </table>
         </xpath>
+    </template>
+    <template id="books_issue_form" name="Book Issues Form">
+        <t t-call="website.layout">
+            <div class="container mt32">
+                <!-- add the page elements here(step 3 and 4)
+                -->
+                <t t-if="submitted">
+                    <h3 class="alert alert-success mt16 mb16">
+                        <i class="fa fa-thumbs-up"/>
+                        Book submitted successfully
+                    </h3>
+                    <h1>Report the another book issue</h1>
+                </t>
+                <t t-else="">
+                    <h1>Report the book issue</h1>
+                </t>
+                <div class="row mt16">
+                    <div class="col-6">
+                        <form method="post">
+                            <input type="hidden" name="csrf_token"
+                                   t-att-value="request.csrf_token()"/>
+                            <div class="form-group">
+                                <label>Select Book</label>
+                                <select class="form-control" name="book_id">
+                                    <t t-foreach="books" t-as="book">
+                                        <option t-att-value="book.id">
+                                            <t t-esc="book.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Issue Description</label>
+                                <textarea name="issue_description"
+                                          class="form-control"
+                                          placeholder="e.g. pages are missing"/>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+
     </template>
 </odoo>

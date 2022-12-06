@@ -23,19 +23,21 @@ Description related to library.
         'views/library_rent_statistics.xml',
         'views/res_config_settings.xml',
         'views/templates.xml',
+        'views/snippets.xml',
         'security/groups.xml',
         'security/security_rules.xml',
         'security/ir.model.access.csv',
         'data/data.xml'
-
     ],
     'demo': [
         'data/demo.xml'
     ],'assets': {
         'web.assets_frontend': [
             'my_library/static/src/js/my_library.js',
+            'my_library/static/src/js/snippets.js',
             'my_library/static/src/css/my_library.css',
-            'my_library/static/src/scss/my_library.scss'
+            'my_library/static/src/scss/my_library.scss',
+
 
         ],
     },

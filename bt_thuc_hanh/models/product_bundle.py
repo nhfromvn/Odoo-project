@@ -3,7 +3,9 @@ from odoo import models, fields, api
 
 class ProductBundle(models.Model):
     _name = 'product.bundle'
+    sp_shop = fields.Many2one('res.company',string = "SP Shop")
     user_id = fields.Many2one('res.users', string="Customer")
+    total_sale = fields.Text()
     name = fields.Char('Name')
     description = fields.Char()
     type = fields.Selection([('bundle', 'Multiple Product Bundle'),
@@ -26,6 +28,9 @@ class ProductBundle(models.Model):
     end_time = fields.Datetime()
     indefinite_bundle = fields.Boolean(default=False)
     tier_quantity = fields.One2many('product.bundle.qty','bundle_id')
+    total_save = fields.Integer()
+    image = fields.Binary(attachment=True)
+
 
     @api.onchange('indefinite_bundle')
     def _change_indefinite(self):

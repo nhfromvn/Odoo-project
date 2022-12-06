@@ -10,11 +10,11 @@ class ProductBundleQuantity(models.Model):
     @api.constrains('qty_start','qty_end')
     def check_qty_range(self):
         if self.qty_start > 0:
-            if self.qty_start and self.qty_end:
+            if not( self.qty_start and self.qty_end):
                 raise models.ValidationError(
                         'Quantity must be positive in every cases')
         if self.qty_end >= self.qty_start:
-                        raise models.ValidationError(
+                raise models.ValidationError(
                             'Quantity must be positive in every cases')
         else:
             print("do some thing")

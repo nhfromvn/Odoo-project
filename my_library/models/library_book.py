@@ -85,6 +85,7 @@ class LibraryBook(models.Model):
     )
     image = fields.Binary(attachment=True)
     html_description = fields.Html()
+    book_issue_id = fields.One2many('book.issue', 'book_id')
 
     def report_missing_book(self):
         self.ensure_one()
@@ -324,6 +325,7 @@ class LibraryBook(models.Model):
             return_form.borrower_id = self.env.user.partner_id
             record = return_form.save()
             record.books_returns()
+
 class ResPartner(models.Model):
     _inherit = 'res.partner'
     _oder = 'name'
@@ -371,3 +373,8 @@ class LibraryMember(models.Model):
     date_end = fields.Date('Termination Date')
     member_number = fields.Char()
     date_of_birth = fields.Date('Date of birth')
+class LibraryBookIssues(models.Model):
+    _name = 'book.issue'
+    book_id = fields.Many2one('library.book', required=True)
+    submitted_by = fields.Many2one('res.users')
+    issue_description = fields.Text()

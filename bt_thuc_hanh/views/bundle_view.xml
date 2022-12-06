@@ -13,72 +13,92 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <group>
+                        <field name="sp_shop"/>
+                    </group>
                     <div class="oe_title">
                         <h1>
-                            <field name="name"/>
+                            General Settings
                         </h1>
                     </div>
                     <group>
                         <group>
+
+                            <field name="name"/>
                             <field name="user_id"/>
                             <field name="id"/>
                             <field name="discount_type"/>
                             <field name="active"/>
-                        </group>
-                        <group>
-
                             <field name="start_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
                             <field name="end_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
-                            <field name="indefinite_bundle"/>
-                            <field name="type"/>
-                            <field name="discount_value"/>
+                        </group>
+                        <group>
+                            <field name="priority"/>
                         </group>
                     </group>
+                    <div class="oe_title">
+                        <h1>
+                            Discount Settings
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="discount_rule"/>
+                        <field name="indefinite_bundle"/>
+                        <field name="type"/>
+                        <field name="discount_value"/>
+                    </group>
+                    <p>
+                        Choose products which are applied in this bundle
+                        <br/>
+                        <b>Note:</b>
+                        Choose the variant if you want to set your bundle at variant level. With products with out
+                        product variants, the product variant color will be blank.
+                    </p>
 
-                        <field name="tier_quantity"
-                               widget="section_and_note_one2many"
-                               mode="tree,kanban"
-                               attrs="{'invisible':[('type','!=','tier')]}">
-                            <tree>
-                                <field name="is_add_range"/>
-                                <field name="qty_start" string="Quantity"/>
-                                <field name="to" string=" "/>
-                                <field name="qty_end" string =" "/>
-                                <field name="discount_value"/>
+                    <field name="tier_quantity"
+                           widget="section_and_note_one2many"
+                           mode="tree,kanban"
+                           attrs="{'invisible':[('type','!=','tier')]}">
+                        <tree>
+                            <field name="is_add_range"/>
+                            <field name="qty_start" string="Quantity"/>
+                            <field name="to" string=" "/>
+                            <field name="qty_end" string=" "/>
+                            <field name="discount_value"/>
 
-                            </tree>
-                        </field>
-                    <notebook>
-                        <page string="Products" name="product">
-                            <field
-                                    name="products"
-                                    widget="section_and_note_one2many"
-                                    mode="tree,kanban"
+                        </tree>
+                    </field>
+                    <button title="Add product" class="btn btn-primary o_form_button_edit">
+                        Add Product
+                    </button>
+                    <field
+                            name="products"
+                            widget="section_and_note_one2many"
+                            mode="tree,kanban"
 
-                            >
-                                <tree
-                                        string="Products Lines"
-                                        editable="bottom"
-                                >
-                                    <control>
-                                        <create name="add_product_control" string="Add a product"/>
-                                    </control>
-                                    <field name="product_id"/>
-                                    <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
-                                    <field name="product_vendor"/>
-                                    <field name="variants"/>
-                                    <field name="discount" attrs="{'column_invisible':['|',('parent.discount_type','=','total_fix'),
+                    >
+                        <tree
+                                string="Products Lines"
+                                editable = "bottom"
+                        >
+
+                            <field name="product_id"/>
+                            <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
+                            <field name="product_vendor"/>
+                            <field name="variants"/>
+                            <field name="discount" attrs="{'column_invisible':['|',('parent.discount_type','=','total_fix'),
                                                                                            ('parent.type','=','tier')]}"/>
-                                </tree>
-                                <form>
-                                    <field name="name"/>
-                                    <field name="product_id"/>
-                                </form>
-                            </field>
-                        </page>
-                    </notebook>
+                        </tree>
+                        <form>
+                            <field name="name"/>
+                            <field name="product_id"/>
+                        </form>
+                    </field>
+
                 </sheet>
             </form>
+
+
         </field>
     </record>
     <record id="product_bundle_view_tree" model="ir.ui.view">
@@ -87,6 +107,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="id"/>
+                <field name="priority" widget="badge" decoration-info="priority != False"/>
                 <field name="name"/>
                 <field name="user_id"/>
                 <field name="discount_type"/>

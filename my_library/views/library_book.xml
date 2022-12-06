@@ -74,6 +74,16 @@
                             <field name="description"/>
                         </group>
                     </group>
+                    <group string="Book Issues">
+                        <field name="book_issue_id" nolabel="1">
+                            <tree>
+                                <field name="create_date"/>
+                                <field name="submitted_by"/>
+                                <field name="issue_description"/>
+
+                            </tree>
+                        </field>
+                    </group>
                     <button name="book_rent"
                             string="Rent this book"
                             type="object" class="btn-primary"
