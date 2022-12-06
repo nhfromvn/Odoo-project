@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <template id="test" inherit_id="website_sale.products" customize_show="True" name="Test">
-        <xpath expr="//div[hasclass('products_header')]/t[@t-call='website_sale.pricelist_list']" position="after">
-            <p>
-                akldsjfaklsdjdaflsjk
-            </p>
-        </xpath>
+<!--    <template id="test" inherit_id="website_sale.products" customize_show="True" name="Test">-->
+<!--        <xpath expr="//div[hasclass('products_header')]/t[@t-call='website_sale.pricelist_list']" position="after">-->
+<!--            <p>-->
+<!--                akldsjfaklsdjdaflsjk-->
+<!--            </p>-->
+<!--        </xpath>-->
 
-    </template>
+<!--    </template>-->
     <template id="add_bundles" inherit_id="website_sale.product" customize_show="True" name="Add Bundles">
 
         <xpath expr="//div[@id='add_to_cart_wrap']" position="after">
@@ -27,12 +27,11 @@
                             <h3 t-field="bundle.name"/>
                             <a t-attf-href="/bundles/#{bundle.id}" class="btn btn-primary">
                                 <i/>
-                                Bundle Detail
+                                    Bundle Detail
                             </a>
                         </div>
                     </div>
                 </t>
-
             </div>
         </t>
     </template>
@@ -55,7 +54,7 @@
                         <div id="add_bundle" class="d-inline">
                             <a role="button" id="add_bundle"
                                class="btn btn-primary btn-lg a-submit my-1 mr-1 px-5 font-weight-bold flex-grow-1"
-                               href="#"><i/>ADD BUNDlE
+                               t-attf-href="/bundle-update/?bundle_id={{bundle.id}}"><i/>ADD BUNDlE
                             </a>
                             <div id="product_option_block" class="d-inline-block align-middle"/>
                         </div>

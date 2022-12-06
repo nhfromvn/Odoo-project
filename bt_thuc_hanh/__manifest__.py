@@ -30,7 +30,8 @@
         'security/ir.model.access.csv',
         'views/templates.xml',
         'views/bundle_view.xml',
-        'views/bundle_settings_view.xml'
+        'views/bundle_settings_view.xml',
+        'views/bundle_report.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
