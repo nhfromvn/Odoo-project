@@ -7,7 +7,7 @@ from odoo.tests.common import Form
 
 import logging
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class BaseArchive(models.AbstractModel):
     _name = 'base.archive'
@@ -316,7 +316,7 @@ class LibraryBook(models.Model):
         GROUP BY lb.name;"""
         self.env.cr.execute(sql_query)
         result = self.env.cr.fetchall()
-        _logger.info("Average book occupation: %s", result)
+        logger.info("Average book occupation: %s", result)
 
     def return_all_books(self):
         self.ensure_one()

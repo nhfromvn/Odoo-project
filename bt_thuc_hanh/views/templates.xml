@@ -25,9 +25,10 @@
                     <div t-attf-class="card mt-3 #{'bg-info' if bundle_odd else ''}">
                         <div class="card-body" id="card_body">
                             <h3 t-field="bundle.name"/>
-                            <a t-attf-href="/bundles/#{bundle.id}" class="btn btn-primary">
+                            <a t-attf-href="/bundles/#{bundle.id}/{{product_id}}" class="btn btn-primary">
                                 <i/>
                                     Bundle Detail
+
                             </a>
                         </div>
                     </div>
@@ -54,7 +55,7 @@
                         <div id="add_bundle" class="d-inline">
                             <a role="button" id="add_bundle"
                                class="btn btn-primary btn-lg a-submit my-1 mr-1 px-5 font-weight-bold flex-grow-1"
-                               t-attf-href="/bundle-update/?bundle_id={{bundle.id}}"><i/>ADD BUNDlE
+                               t-attf-href="/bundle-update/?bundle_id={{bundle.id}}&amp;product_id={{product_id}}"><i/>ADD BUNDlE
                             </a>
                             <div id="product_option_block" class="d-inline-block align-middle"/>
                         </div>

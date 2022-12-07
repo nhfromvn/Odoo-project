@@ -10,7 +10,6 @@
                     </div>
                 </section>
             </div>
-
             <div class="container">
                 <t t-foreach="books" t-as="book">
                     <div t-attf-class="card mt-3 #{'bg-info' if book_odd else ''}">

@@ -66,7 +66,7 @@ class Main(http.Controller):
     @http.route('/books', type='http', auth="user", website=True)
     def library_books(self):
             return request.render(
-                'my_lib    <div t-field="book.html_description"/>rary.books', {
+                'my_library.books', {
                     'books': request.env['library.book'].search([]),})
 
     @http.route('/books/<model("library.book"):book>',type='http', auth="user", website=True)
