@@ -31,7 +31,8 @@ Description related to library.
     ],
     'demo': [
         'data/demo.xml'
-    ],'assets': {
+    ],
+    'assets': {
         'web.assets_frontend': [
             'my_library/static/src/js/my_library.js',
             'my_library/static/src/js/snippets.js',

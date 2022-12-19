@@ -17,7 +17,9 @@ class BaseArchive(models.AbstractModel):
         for record in self:
             record.active = not record.active
 
-
+class Currency(models.Model):
+    _inherit = 'res.currency'
+    book_id = fields.One2many('library.book','currency_id')
 class LibraryBook(models.Model):
     _name = 'library.book'
     isbn = fields.Char('ISBN')
@@ -56,7 +58,7 @@ class LibraryBook(models.Model):
         'res.currency', string='Currency')
     retail_price = fields.Monetary(
         'Retail Price',
-        # optional: currency_field='currency_id',
+        currency_field='currency_id',
     )
     publisher_id = fields.Many2one(
         'res.partner', string='Publisher',

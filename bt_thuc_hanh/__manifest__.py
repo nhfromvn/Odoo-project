@@ -37,4 +37,9 @@
     'demo': [
         'demo/demo.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+        'bt_thuc_hanh/static/src/css/bundle_css.css',
+        ],
+    },
 }

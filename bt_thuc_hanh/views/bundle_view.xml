@@ -23,13 +23,12 @@
                     </div>
                     <group>
                         <group>
-
                             <field name="name"/>
                             <field name="user_id"/>
                             <field name="id"/>
                             <field name="discount_type"/>
                             <field name="active"/>
-                            <field name="start_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
+                            <field name="start_time"/>
                             <field name="end_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
                         </group>
                         <group>
@@ -65,7 +64,6 @@
                             <field name="to" string=" "/>
                             <field name="qty_end" string=" "/>
                             <field name="discount_value"/>
-
                         </tree>
                     </field>
                     <button title="Add product" class="btn btn-primary o_form_button_edit">
@@ -79,14 +77,15 @@
                     >
                         <tree
                                 string="Products Lines"
-                                editable = "bottom"
+                                editable="bottom"
                         >
-
+                            <field name="image_128"
+                             widget="image" string=" "/>
                             <field name="product_id"/>
                             <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
                             <field name="product_vendor"/>
                             <field name="variants"/>
-                            <field name="discount" attrs="{'column_invisible':['|',('parent.discount_type','=','total_fix'),
+                            <field name="discount" attrs="{'column_invisible':['|',('parent.discount_rule','=','bundle'),
                                                                                            ('parent.type','=','tier')]}"/>
                         </tree>
                         <form>

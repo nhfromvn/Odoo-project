@@ -13,6 +13,7 @@
                 <field name="Calculated_discount_total"/>
                 <field name="interval_warranty_days"/>
                 <field name="id"/>
+                <field name="currency_id"/>
             </field>
         </field>
     </record>

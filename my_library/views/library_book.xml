@@ -54,7 +54,7 @@
                             <field name="notes"/>
                             <field name="publisher_id"/>
                             <field name="category_id"/>
-                            <!--                            <field name="manager_remarks"/>-->
+
                             <field name="old_edition"/>
                         </group>
                         <group>
