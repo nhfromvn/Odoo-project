@@ -32,20 +32,22 @@ class ProductBundle(models.Model):
     image = fields.Binary(attachment=True)
     total_price = fields.Float(compute='_compute_total')
     subtotal_price = fields.Float(compute='_compute_subtotal')
-
+    is_active = fields.Boolean()
     @api.depends('products.list_price')
     def _compute_total(self):
         for bundle in self:
             bundle.total_price = 0
-            for product in bundle.products:
-                bundle.total_price += product.list_price
+            if bundle.type == 'bundle':
+                for product in bundle.products:
+                    bundle.total_price += product.list_price * product.quantity
 
     @api.depends('products.product_id.list_price')
     def _compute_subtotal(self):
         for bundle in self:
             bundle.subtotal_price = 0
-            for product in bundle.products:
-                bundle.subtotal_price += product.product_id.list_price
+            if bundle.type == 'bundle':
+                for product in bundle.products:
+                    bundle.subtotal_price += product.product_id.list_price * product.quantity
 
     @api.onchange('indefinite_bundle')
     def _change_indefinite(self):

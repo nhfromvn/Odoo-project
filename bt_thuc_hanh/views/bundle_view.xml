@@ -28,7 +28,7 @@
                             <field name="id"/>
                             <field name="discount_type"/>
                             <field name="active"/>
-                            <field name="start_time"/>
+                            <field name="start_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
                             <field name="end_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
                         </group>
                         <group>
@@ -80,11 +80,12 @@
                                 editable="bottom"
                         >
                             <field name="image_128"
-                             widget="image" string=" "/>
+                                   widget="image" string=" "/>
                             <field name="product_id"/>
                             <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
                             <field name="product_vendor"/>
-                            <field name="variants"/>
+                            <field name="product_template_attribute_value_ids" string="Variant" widget="many2many_tags"
+                                       />
                             <field name="discount" attrs="{'column_invisible':['|',('parent.discount_rule','=','bundle'),
                                                                                            ('parent.type','=','tier')]}"/>
                         </tree>
@@ -93,11 +94,8 @@
                             <field name="product_id"/>
                         </form>
                     </field>
-
                 </sheet>
             </form>
-
-
         </field>
     </record>
     <record id="product_bundle_view_tree" model="ir.ui.view">
@@ -111,7 +109,6 @@
                 <field name="user_id"/>
                 <field name="discount_type"/>
                 <field name="discount_value"/>
-                <field name="products"/>
             </tree>
         </field>
     </record>

@@ -39,7 +39,8 @@
     ],
     'assets': {
         'web.assets_frontend': [
-        'bt_thuc_hanh/static/src/css/bundle_css.css',
+            'bt_thuc_hanh/static/src/css/bundle_css.css',
+            'bt_thuc_hanh/static/src/css/bundle_js.js'
         ],
     },
 }

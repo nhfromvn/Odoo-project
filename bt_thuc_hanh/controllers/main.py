@@ -4,6 +4,8 @@ from odoo.addons.website.controllers.main import Website
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 from odoo.addons.website.controllers.main import QueryURL
+from odoo import fields
+from odoo.tools.json import scriptsafe as json_scriptsafe
 
 
 # class BundlePage(http.Controller):
@@ -100,22 +102,106 @@ class InheritWebsiteSale(WebsiteSale):
             'bundles': bundles
         }
 
+    # @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    # def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
+    #     """This route is called when adding a product to cart (no options)."""
+    #     sale_order = request.website.sale_get_order(force_create=True)
+    #     if sale_order.state != 'draft':
+    #         request.session['sale_order_id'] = None
+    #         sale_order = request.website.sale_get_order(force_create=True)
+    #
+    #     product_custom_attribute_values = None
+    #     if kw.get('product_custom_attribute_values'):
+    #         product_custom_attribute_values = json_scriptsafe.loads(kw.get('product_custom_attribute_values'))
+    #
+    #     no_variant_attribute_values = None
+    #     if kw.get('no_variant_attribute_values'):
+    #         no_variant_attribute_values = json_scriptsafe.loads(kw.get('no_variant_attribute_values'))
+    #
+    #     sale_order._cart_update(
+    #         product_id=int(product_id),
+    #         add_qty=add_qty,
+    #         set_qty=set_qty,
+    #         product_custom_attribute_values=product_custom_attribute_values,
+    #         no_variant_attribute_values=no_variant_attribute_values
+    #     )
+    #
+    #     if kw.get('express'):
+    #         return request.redirect("/shop/checkout?express=1")
+    #
+    #     return request.redirect("/shop/cart")
+    #
+    # @http.route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True, csrf=False)
+    # def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, display=True, **kw):
+    #     """
+    #     This route is called :
+    #         - When changing quantity from the cart.
+    #         - When adding a product from the wishlist.
+    #         - When adding a product to cart on the same page (without redirection).
+    #     """
+    #     order = request.website.sale_get_order(force_create=1)
+    #     if order.state != 'draft':
+    #         request.website.sale_reset()
+    #         if kw.get('force_create'):
+    #             order = request.website.sale_get_order(force_create=1)
+    #         else:
+    #             return {}
+    #
+    #     pcav = kw.get('product_custom_attribute_values')
+    #     nvav = kw.get('no_variant_attribute_values')
+    #     value = order._cart_update(
+    #         product_id=product_id,
+    #         line_id=line_id,
+    #         add_qty=add_qty,
+    #         set_qty=set_qty,
+    #         product_custom_attribute_values=json_scriptsafe.loads(pcav) if pcav else None,
+    #         no_variant_attribute_values=json_scriptsafe.loads(nvav) if nvav else None
+    #     )
+    #
+    #     if not order.cart_quantity:
+    #         request.website.sale_reset()
+    #         return value
+    #
+    #     order = request.website.sale_get_order()
+    #     value['cart_quantity'] = order.cart_quantity
+    #
+    #     if not display:
+    #         return value
+    #
+    #     value['website_sale.cart_lines'] = request.env['ir.ui.view']._render_template("website_sale.cart_lines", {
+    #         'website_sale_order': order,
+    #         'date': fields.Date.today(),
+    #         'suggested_products': order._cart_accessories()
+    #     })
+    #     value['website_sale.short_cart_summary'] = request.env['ir.ui.view']._render_template("website_sale.short_cart_summary", {
+    #         'website_sale_order': order,
+    #     })
+    #     return value
     @http.route(['/shop/<model("product.template"):product>'], type='http', auth="public", website=True, sitemap=True)
     def product(self, product, category='', search='', **kwargs):
         return request.render("website_sale.product", self._prepare_product_values(product, category, search, **kwargs))
 
-    @http.route('/bundle-update/<int:bundle_id>/<int:product_id>', type='http', auth="user", website=True)
+    @http.route("/bundle-update/<model('product.bundle'):bundle>/<int:product_id>", type='http', auth="user", website=True)
     def _add_bundle(self, **post):
         print(post)
         count = 0
-        bundle_id = post.get('bundle_id')
+        bundle = post.get('bundle')
         product_id = post.get('product_id')
+        sale_order = request.website.sale_get_order(force_create=True)
+        # request.website.sale_reset()
+        # sale_order.write({'order_line': [(5, 0, 0)]})
         bundles = request.env['product.bundle.reports'].search([])
+        for product in bundle.products:
+            print(product)
+
+            sale_order._cart_update(product_id=product.product_id.id, line_id=None, add_qty=product.quantity,
+                                    set_qty=None)
         for bundle in bundles:
             count += 1
         request.env['product.bundle.reports'].sudo().create({
-            'bundle_id': bundle_id,
+            'bundle_id': bundle.id,
             'total_save': count + 1,
             'product_id': product_id
         })
+        return request.redirect("/shop/cart")
 
