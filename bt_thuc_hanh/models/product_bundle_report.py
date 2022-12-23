@@ -3,6 +3,6 @@ class ProductBundleReport(models.Model):
     _name = 'product.bundle.reports'
     bundle_id =fields.Integer()
     product_id = fields.Integer()
-    total_save = fields.Integer()
-    total_sale = fields.Integer(default = 0)
+    save_id = fields.Integer()
+    sale_id = fields.Integer(default = 0)
 

@@ -181,27 +181,35 @@ class InheritWebsiteSale(WebsiteSale):
     def product(self, product, category='', search='', **kwargs):
         return request.render("website_sale.product", self._prepare_product_values(product, category, search, **kwargs))
 
-    @http.route("/bundle-update/<model('product.bundle'):bundle>/<int:product_id>", type='http', auth="user", website=True)
+    @http.route("/bundle-update/<model('product.bundle'):bundle>/<int:product_id>", type='http', auth="user",
+                website=True)
     def _add_bundle(self, **post):
-        print(post)
+
         count = 0
         bundle = post.get('bundle')
+        bundle_id = bundle.id
         product_id = post.get('product_id')
         sale_order = request.website.sale_get_order(force_create=True)
-        # request.website.sale_reset()
+        request.website.sale_reset()
         # sale_order.write({'order_line': [(5, 0, 0)]})
         bundles = request.env['product.bundle.reports'].search([])
         for product in bundle.products:
-            print(product)
-
             sale_order._cart_update(product_id=product.product_id.id, line_id=None, add_qty=product.quantity,
                                     set_qty=None)
+            for line in sale_order.order_line:
+                if line.product_id.id == product.product_id.id:
+                    if bundle.discount_rule == 'product':
+                        line.discount = product.discount
+                    else:
+                        line.discount = bundle.discount_type
+
         for bundle in bundles:
             count += 1
+
         request.env['product.bundle.reports'].sudo().create({
-            'bundle_id': bundle.id,
-            'total_save': count + 1,
-            'product_id': product_id
+            'bundle_id': bundle_id,
+            'save_id': count + 1,
+            'product_id': product_id,
+            'sale_id': sale_order.id
         })
         return request.redirect("/shop/cart")
-

@@ -41,10 +41,10 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="discount_rule"/>
+                        <field name="discount_rule"  attrs="{'invisible':[('type','=','tier')]}" />
                         <field name="indefinite_bundle"/>
                         <field name="type"/>
-                        <field name="discount_value"/>
+                        <field name="discount_value" attrs="{'invisible':['|',('type','=','tier'),('discount_rule','=','product')]}"/>
                     </group>
                     <p>
                         Choose products which are applied in this bundle

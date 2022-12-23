@@ -193,11 +193,14 @@
                                                   t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
                                             />
                                         </h3>
-                                        <a id="add_to_cart" t-attf-href="/bundle-update/#{bundle}/#{product.id}"
-                                           class="btn btn-primary">
-                                            <i/>
-                                            Add Bundle
-                                        </a>
+                                       <div id="add_to_cart_wrap" class="d-inline">
+                                            <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
+                                               class="btn btn-primary">
+                                                <i/>
+                                                Add Bundle
+                                            </a>
+                                            <div id="product_option_block" class="d-inline-block align-middle"/>
+                                        </div>
                                     </div>
                                     <!--                                    <div id="add_to_cart_wrap" class="d-inline">-->
                                     <!--                                        <a role="button" id="add_to_cart"-->
