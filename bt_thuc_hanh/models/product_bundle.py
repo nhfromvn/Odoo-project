@@ -3,8 +3,6 @@ from odoo import models, fields, api
 
 class ProductBundle(models.Model):
     _name = 'product.bundle'
-    sp_shop = fields.Many2one('res.company', string="SP Shop")
-    user_id = fields.Many2one('res.users', string="Customer")
     total_sale = fields.Text()
     name = fields.Char('Name')
     description = fields.Char()
@@ -12,34 +10,53 @@ class ProductBundle(models.Model):
                              ('tier', 'Quantity Break Bundle')],
                             'Type', default='bundle')
     products = fields.One2many('product.bundle.product', 'bundle_id', String="Products")
-    # variant_ids = fields.One2many('product.bundle.variant', 'bundle_id', String="Variants")
+    product2 = fields.Many2one('product.product', String="Product Tier")
     discount_rule = fields.Selection([('bundle', 'Discount on total bundle'),
                                       ('product', 'Discount on each product'),
                                       ], default="bundle")
     discount_type = fields.Selection([('percentage', 'Percentage'),
-                                      ('hard_fix', 'Hard Fix'),
-                                      ('total_fix', 'Total Fix')], default="percentage")
-
-    discount_value = fields.Integer()
-    enable = fields.Boolean()
+                                      ('total_fix', 'Total Fix'),
+                                      ('hard_fix', 'Hard Fix')], default="percentage")
+    discount_value = fields.Float()
+    discount_value_percent = fields.Float()
     active = fields.Boolean('Active', default=True)
     priority = fields.Integer()
     start_time = fields.Datetime()
     end_time = fields.Datetime()
     indefinite_bundle = fields.Boolean(default=False)
     tier_quantity = fields.One2many('product.bundle.qty', 'bundle_id')
-    total_save = fields.Integer()
     image = fields.Binary(attachment=True)
     total_price = fields.Float(compute='_compute_total')
     subtotal_price = fields.Float(compute='_compute_subtotal')
-    is_active = fields.Boolean()
+    is_active = fields.Boolean(compute='_check_time', default=True)
+    today = fields.Datetime.today()
+    tier_unit_price = fields.Float(compute="_tier_unit_compute")
+    enable = fields.Boolean(default=False)
+    @api.depends('type', 'tier_quantity.discount_value')
+    def _tier_unit_compute(self):
+        for bundle in self:
+            if bundle.discount_type == "percentage":
+                bundle.tier_unit_price = bundle.product2.list_price * (1 - bundle.tier_quantity.discount.value)
+            elif bundle.discount_type == "total_fix":
+                bundle.tier_unit_price = bundle.product2.list_price - bundle.tier_quantity.discount_value
+            else:
+                bundle.tier_unit_price = bundle.tier_quantity.discount_value
+
     @api.depends('products.list_price')
     def _compute_total(self):
         for bundle in self:
-            bundle.total_price = 0
             if bundle.type == 'bundle':
-                for product in bundle.products:
-                    bundle.total_price += product.list_price * product.quantity
+                if bundle.discount_rule == 'product':
+                    bundle.total_price = 0
+                    for product in bundle.products:
+                        bundle.total_price += product.list_price * product.quantity
+                if bundle.discount_rule == 'bundle':
+                    if bundle.discount_type == 'total_fix':
+                        bundle.total_price = bundle.subtotal_price - bundle.discount_value
+                    elif bundle.discount_type == 'hard_fix':
+                        bundle.total_price = bundle.discount_value
+                    else:
+                        bundle.total_price += bundle.subtotal_price * (1 - bundle.discount_value / 100)
 
     @api.depends('products.product_id.list_price')
     def _compute_subtotal(self):
@@ -52,20 +69,38 @@ class ProductBundle(models.Model):
     @api.onchange('indefinite_bundle')
     def _change_indefinite(self):
         if self.indefinite_bundle:
-            if self.start_time and self.end_time:
-                self.start_time = False
-                self.end_time = False
+            self.is_active = True
+
+    @api.constrains('discount_value', 'discount_rule')
+    def _check_discount_rule(self):
+        for bundle in self:
+            if bundle.discount_rule == 'bundle' and bundle.type != 'tier':
+                if bundle.discount_value <= 0:
+                    raise models.ValidationError(
+                        'Discount value must be positive')
+
+    @api.depends('start_time', 'end_time', 'indefinite_bundle')
+    def _check_time(self):
+        if self.indefinite_bundle:
+            self.is_active = True
         else:
-            print("do something")
+            if self.start_time and self.end_time:
+                if (self.start_time > self.today) or (self.end_time < self.today):
+                    self.is_active = False
+                else:
+                    self.is_active = True
+            else:
+                if (self.start_time > self.today) or (self.end_time < self.today):
+                    self.is_active = False
+                else:
+                    self.is_active = True
 
-    _sql_constraints = [
-        ('name_uniq', 'UNIQUE (name)',
-         'bundle name must be unique.'),
-        ('positive_discount', 'CHECK(discount_value>0)',
-         'discount must be positive')
-    ]
 
+class SaleOderLineInherit(models.Model):
+    _inherit = 'sale.order.line'
+    qty_not_in_bundle = fields.Float()
+    qty_in_bundle = fields.Float()
+class SaleOderLineInherit(models.Model):
+    _inherit = 'sale.order'
+    amount_bundle = fields.Float()
 
-class User(models.Model):
-    _inherit = 'res.users'
-    bundle_ids = fields.One2many('product.bundle', 'user_id', string="Bundle")

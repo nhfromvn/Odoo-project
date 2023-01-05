@@ -1,255 +1,222 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
-    <!--    <template id="test" inherit_id="website_sale.products" customize_show="True" name="Test">-->
-    <!--        <xpath expr="//div[hasclass('products_header')]/t[@t-call='website_sale.pricelist_list']" position="after">-->
-    <!--            <p>-->
-    <!--                akldsjfaklsdjdaflsjk-->
-    <!--            </p>-->
-    <!--        </xpath>-->
-
-    <!--        </template>-->
-    <!--    <template id="bundle_product_price">-->
-    <!--        <div itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer"-->
-    <!--             class="product_price d-inline-block mt-2 mb-3">-->
-    <!--            <h3 class="css_editable_mode_hidden">-->
-    <!--                <span class="oe_price" style="white-space: nowrap;" t-esc="combination_info['price']"-->
-    <!--                      t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>-->
-    <!--                <span itemprop="price" style="display:none;" t-esc="combination_info['price']"/>-->
-    <!--                <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name"/>-->
-    <!--                <span t-attf-class="text-danger oe_default_price ml-1 h5 {{'' if combination_info['has_discounted_price'] else 'd-none'}}"-->
-    <!--                      style="text-decoration: line-through; white-space: nowrap;"-->
-    <!--                      t-esc="combination_info['list_price']"-->
-    <!--                      t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"-->
-    <!--                />-->
-    <!--            </h3>-->
-    <!--            <h3 style="text-decoration : line-through"-->
-    <!--                class="css_non_editable_mode_hidden decimal_precision"-->
-    <!--                t-att-data-precision="str(website.currency_id.decimal_places)">-->
-    <!--                <span t-field="product.list_price"-->
-    <!--                      t-options='{-->
-    <!--                   "widget": "monetary",-->
-    <!--                   "display_currency": product.currency_id,-->
-    <!--               }'/>-->
-    <!--            </h3>-->
-    <!--        </div>-->
-    <!--    </template>-->
-
     <template id="add_bundles" inherit_id="website_sale.product" customize_show="True" name="Add Bundles">
         <xpath expr="//div[@id='add_to_cart_wrap']" position="after">
             <br/>
             <t t-foreach="bundles" t-as="bundle">
-                <t t-foreach="bundle.products" t-as="product_bundle">
-
-                    <t t-if="product_bundle.product_id.name==product.name">
-                        <t t-set="check" t-value="True"/>
-                    </t>
-                </t>
-                <t t-if="check">
-                    <t t-if="bundle.type!='tier'">
-                        <t t-if="bundle.discount_rule=='product'">
-                            <div class="card-body p-1 oe_product_image">
-                                <div class="card-body" id="card_body">
-                                    <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
-                                    <t t-foreach="bundle.products" t-as="product_bundle">
-                                        <t t-if="product_bundle.product_id.name==product.name">
-                                            <div class="grid-bundle">
-                                                <div class="grid-image">
-                                                    <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
-                                                        t-field="product_bundle.image_128"
-                                                        t-options="{'widget': 'image'}"/>
-                                                </div>
-                                                <div class="grid-title">
-                                                    <h4 class="grid-title" t-field="product_bundle.product_id"/>
-                                                </div>
-                                                <div class="grid-discount" style="display: flex">
-                                                    <h3 class="css_editable_mode_hidden">
-                                                        <span t-field="product_bundle.list_price"
-                                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                              style="text-decoration: line-through; white-space: nowrap;"
-                                                              t-field="product_bundle.product_id.list_price"
-                                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                                        />
-                                                    </h3>
-                                                </div>
-                                                <div class="grid-footer" style="display: flex">
-                                                    <h4>GET&#160;<span t-field="product_bundle.discount"/>%&#160;OFF
-                                                    </h4>
-
-                                                </div>
-                                            </div>
-                                        </t>
-                                        <t t-else="">
-                                            <div class="grid-bundle">
-                                                <span t-field="product_bundle.quantity"/>&#160;x&#160;
-                                                <span class="grid-image" t-field="product_bundle.product_id.image_128"
-                                                      t-options="{'widget': 'image'}"/>
-                                                <p class="grid-title" t-field="product_bundle.product_id"/>
-                                                <div class="grid-discount" style="display: flex">
-                                                    <p class="css_editable_mode_hidden">
-                                                        <span t-field="product_bundle.list_price"
-                                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                              style="text-decoration: line-through; white-space: nowrap;"
-                                                              t-field="product_bundle.product_id.list_price"
-                                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                                        />
-                                                    </p>
-                                                </div>
-                                                <div class="grid_footer" style="display: flex">
-                                                    GET&#160;<p class="grid-discount"
-                                                                t-field="product_bundle.discount"/>%&#160;OFF
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                    <div>
-                                        <h3>
-                                            Total:&#160;
-                                            <span t-field="bundle.total_price"
-                                                  t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                            <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                  style="text-decoration: line-through; white-space: nowrap;"
-                                                  t-field="bundle.subtotal_price"
-                                                  t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                            />
-                                        </h3>
-                                        <div id="add_to_cart_wrap" class="d-inline">
-                                            <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
-                                               class="btn btn-primary">
-                                                <i/>
-                                                Add Bundle
-                                            </a>
-                                            <div id="product_option_block" class="d-inline-block align-middle"/>
-                                        </div>
-
-
-                                    </div>
-
-                                </div>
-                            </div>
-                        </t>
-
-                        <t t-if="bundle.discount_rule=='bundle'">
-                            <div class="card-body p-1 oe_product_image">
-                                <div class="card-body" id="card_body">
-                                    <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
-                                    <div style="display: flex">
-                                        GET&#160;<p t-field="bundle.discount_value"/>%&#160;OFF
-                                    </div>
-                                    <t t-foreach="bundle.products" t-as="product_bundle">
-                                        <t t-if="product_bundle.product_id.name==product.name">
-                                            <div class="grid-bundle">
-                                                <div class="grid-image">
-                                                    <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
-                                                        t-field="product_bundle.image_128"
-                                                        t-options="{'widget': 'image'}"/>
-                                                </div>
-                                                <div class="grid-title">
-                                                    <h4 class="grid-title" t-field="product_bundle.product_id"/>
-                                                </div>
-                                                <div class="grid-discount" style="display: flex">
-                                                    <h3 class="css_editable_mode_hidden">
-                                                        <span t-field="product_bundle.list_price"
-                                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                              style="text-decoration: line-through; white-space: nowrap;"
-                                                              t-field="product_bundle.product_id.list_price"
-                                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                                        />
-                                                    </h3>
-                                                </div>
-                                            </div>
-                                        </t>
-                                        <t t-else="">
-                                            <div class="grid-bundle">
-                                                <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
-                                                    class="grid-image" t-field="product_bundle.product_id.image_128"
-                                                    t-options="{'widget': 'image'}"/>
-                                                <p class="grid-title" t-field="product_bundle.product_id"/>
-                                                <div class="grid-discount" style="display: flex">
-                                                    <p class="css_editable_mode_hidden">
-                                                        <span t-field="product_bundle.list_price"
-                                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                              style="text-decoration: line-through; white-space: nowrap;"
-                                                              t-field="product_bundle.product_id.list_price"
-                                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                                        />
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                    <div>
-                                        <h3>
-                                            Total:&#160;
-                                            <span t-field="bundle.total_price"
-                                                  t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
-                                            <span t-attf-class="text-danger oe_default_price ml-1 h5"
-                                                  style="text-decoration: line-through; white-space: nowrap;"
-                                                  t-field="bundle.subtotal_price"
-                                                  t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                            />
-                                        </h3>
-                                       <div id="add_to_cart_wrap" class="d-inline">
-                                            <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
-                                               class="btn btn-primary">
-                                                <i/>
-                                                Add Bundle
-                                            </a>
-                                            <div id="product_option_block" class="d-inline-block align-middle"/>
-                                        </div>
-                                    </div>
-                                    <!--                                    <div id="add_to_cart_wrap" class="d-inline">-->
-                                    <!--                                        <a role="button" id="add_to_cart"-->
-                                    <!--                                           class="btn btn-primary btn-lg js_check_product a-submit my-1 mr-1 px-5 font-weight-bold flex-grow-1"-->
-                                    <!--                                           href="#"><i class="fa fa-shopping-cart mr-2"/>ADD TO CART-->
-                                    <!--                                        </a>-->
-                                    <!--                                        <div id="product_option_block" class="d-inline-block align-middle"/>-->
-                                    <!--                                    </div>-->
-                                </div>
-                            </div>
-                        </t>
-                    </t>
-                    <t t-else="">
+                <!--                <t t-if="bundle.is_active">-->
+                <t t-if="bundle.type!='tier'">
+                    <t t-if="bundle.discount_rule=='product'">
                         <div class="card-body p-1 oe_product_image">
                             <div class="card-body" id="card_body">
                                 <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
                                 <t t-foreach="bundle.products" t-as="product_bundle">
                                     <t t-if="product_bundle.product_id.name==product.name">
-                                        <t t-set="check1" t-value="True"/>
                                         <div class="grid-bundle">
                                             <div class="grid-image">
-                                                <span t-field="product_bundle.image_128"
-                                                      t-options="{'widget': 'image'}"/>
+                                                <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
+                                                    t-field="product_bundle.image_128"
+                                                    t-options="{'widget': 'image'}"/>
                                             </div>
-                                            <t t-foreach="bundle.tier_quantity" t-as="tier">
-                                                <div id="tier-container">
-                                                    <div id="tier-description" style="display: flex">
-                                                        Add &#160;
-                                                        <p t-field="tier.qty_start"/> &#160;
-                                                        <t t-if="tier.is_add_range">
-                                                            - &#160;
-                                                            <p t-field="tier.qty_end"/> &#160;
-                                                        </t>
-                                                        items
-                                                    </div>
-                                                    <div id="tier-discount_value" style="display: flex">
-                                                        GET &#160;<p t-field="tier.discount_value"/>% OFF
-                                                    </div>
+                                            <div class="grid-title">
+                                                <h4 class="grid-title" t-field="product_bundle.product_id"/>
+                                            </div>
+                                            <div class="grid-discount" style="display: flex">
+                                                <h3 class="css_editable_mode_hidden">
+                                                    <span t-field="product_bundle.list_price"
+                                                          t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                                    <span t-attf-class="text-danger oe_default_price ml-1 h5"
+                                                          style="text-decoration: line-through; white-space: nowrap;"
+                                                          t-field="product_bundle.product_id.list_price"
+                                                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                                    />
+                                                </h3>
+                                            </div>
+                                            <t t-if="discount_type=='percentage'">
+                                                <div class="grid-footer" style="display: flex">
+                                                    <h4>GET&#160;<span t-field="product_bundle.discount"/>%&#160;OFF
+                                                    </h4>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="grid-bundle">
+                                            <span t-field="product_bundle.quantity"/>&#160;x&#160;
+                                            <span class="grid-image" t-field="product_bundle.product_id.image_128"
+                                                  t-options="{'widget': 'image'}"/>
+                                            <p class="grid-title" t-field="product_bundle.product_id"/>
+                                            <div class="grid-discount" style="display: flex">
+                                                <p class="css_editable_mode_hidden">
+                                                    <span t-field="product_bundle.list_price"
+                                                          t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                                    <span t-attf-class="text-danger oe_default_price ml-1 h5"
+                                                          style="text-decoration: line-through; white-space: nowrap;"
+                                                          t-field="product_bundle.product_id.list_price"
+                                                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                                    />
+                                                </p>
+                                            </div>
+                                            <t t-if="discount_type=='percentage'">
+                                                <div class="grid_footer" style="display: flex">
+                                                    GET&#160;<p class="grid-discount"
+                                                                t-field="product_bundle.discount"/>%&#160;OFF
                                                 </div>
                                             </t>
                                         </div>
                                     </t>
                                 </t>
+                                <div>
+                                    <h3>
+                                        Total:&#160;
+                                        <span t-field="bundle.total_price"
+                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
+                                              style="text-decoration: line-through; white-space: nowrap;"
+                                              t-field="bundle.subtotal_price"
+                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                        />
+                                    </h3>
+                                    <div id="add_to_cart_wrap" class="d-inline">
+                                        <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
+                                           class="btn btn-primary">
+                                            <i/>
+                                            Add Bundle
+                                        </a>
+                                        <div id="product_option_block" class="d-inline-block align-middle"/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </t>
-                    <t t-set="check" t-value="False"/>
+                    <t t-if="bundle.discount_rule=='bundle'">
+                        <div class="card-body p-1 oe_product_image">
+                            <div class="card-body" id="card_body">
+                                <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
+                                <t t-if="discount_type=='percentage'">
+                                    <div style="display: flex">
+                                        GET&#160;<p t-field="bundle.discount_value"/>%&#160;OFF
+                                    </div>
+                                </t>
+                                <t t-foreach="bundle.products" t-as="product_bundle">
+                                    <t t-if="product_bundle.product_id.name==product.name">
+                                        <div class="grid-bundle">
+                                            <div class="grid-image">
+                                                <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
+                                                    t-field="product_bundle.image_128"
+                                                    t-options="{'widget': 'image'}"/>
+                                            </div>
+                                            <div class="grid-title">
+                                                <h4 class="grid-title" t-field="product_bundle.product_id"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="grid-bundle">
+                                            <div class="grid-image">
+                                                <span t-field="product_bundle.quantity"/>&#160;x&#160;<span
+                                                    t-field="product_bundle.image_128"
+                                                    t-options="{'widget': 'image'}"/>
+                                            </div>
+                                            <div class="grid-title">
+                                                <p class="grid-title" t-field="product_bundle.product_id"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                                <div>
+                                    <h3>
+                                        Total:&#160;
+                                        <span t-field="bundle.total_price"
+                                              t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                        <span t-attf-class="text-danger oe_default_price ml-1 h5"
+                                              style="text-decoration: line-through; white-space: nowrap;"
+                                              t-field="bundle.subtotal_price"
+                                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                        />
+                                    </h3>
+                                    <div id="add_to_cart_wrap" class="d-inline">
+                                        <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
+                                           class="btn btn-primary">
+                                            <i/>
+                                            Add Bundle
+                                        </a>
+                                        <div id="product_option_block" class="d-inline-block align-middle"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
                 </t>
+                <t t-else="">
+                    <t t-if="bundle.product2.name==product.name">
+                        <div class="card-body p-1 oe_product_image">
+                            <div class="card-body" id="card_body">
+                                <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
+
+                                <div class="grid-bundle">
+                                    <div class="grid-image">
+                                        <span t-field="bundle.product2.image_128"
+                                              t-options="{'widget': 'image'}"/>
+                                    </div>
+    <!--                                    <span t-field="bundle.tier_unit_price"-->
+    <!--                                          t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>-->
+    <!--                                    <span t-attf-class="text-danger oe_default_price ml-1 h5"-->
+    <!--                                          style="text-decoration: line-through; white-space: nowrap;"-->
+    <!--                                          t-field="bundle.product2.list_price"-->
+    <!--                                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"-->
+    <!--                                    />-->
+                                    <t t-foreach="bundle.tier_quantity" t-as="tier">
+                                        <div id="tier-container">
+                                            <div id="tier-description" style="display: flex">
+                                                Add &#160;
+                                                <p t-field="tier.qty_start"/> &#160;
+                                                <t t-if="tier.is_add_range">
+                                                    - &#160;
+                                                    <p t-field="tier.qty_end"/> &#160;
+                                                </t>
+                                                items
+                                            </div>
+                                            <div id="tier-discount_value" style="display: flex">
+                                                GET &#160;<p t-field="tier.discount_value"/>% OFF
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <!--                </t>-->
             </t>
         </xpath>
     </template>
+    <!--    <template id="cart_bundles" inherit_id="website_sale.cart_lines" customize_show="True">-->
+    <!--        <xpath expr="//table[@id='cart_products']" position="after">-->
+    <!--            <t t-foreach="bundles" t-as="bundle">-->
+    <!--                <table>-->
+    <!--                    <thead>-->
+    <!--                        <span t-field="bundle.name"/>&#160;-->
+    <!--                         <span t-field="bundle.total_price"-->
+    <!--                          t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>-->
+
+    <!--                    </thead>-->
+    <!--                    <tbody>-->
+    <!--                        <t t-foreach="bundle.products" t-as="product">-->
+    <!--                            <td>-->
+    <!--                                <span t-field="product.product_id.name"/>-->
+    <!--                            </td>-->
+    <!--                            <td>-->
+    <!--                                <span t-field="product.quantity"/>&#160;x&#160;<span-->
+    <!--                                    t-field="product.image_128"-->
+    <!--                                    t-options="{'widget': 'image'}"/>-->
+    <!--                            </td>-->
+
+    <!--                        </t>-->
+    <!--                    </tbody>-->
+
+    <!--                </table>-->
+    <!--            </t>-->
+    <!--        </xpath>-->
+    <!--    </template>-->
 </odoo>

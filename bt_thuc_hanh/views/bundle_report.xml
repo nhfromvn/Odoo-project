@@ -13,8 +13,9 @@
             <tree>
                 <field name="bundle_id"/>
                 <field name="product_id"/>
-                <field name="save_id"/>
-                <field name="sale_id"/>
+                <field name="save_id" sum="Total Save"/>
+                <field name="sale_id" sum="Total Sale"/>
+
             </tree>
         </field>
     </record>

@@ -9,6 +9,7 @@ class ProductBundleQuantity(models.Model):
     to = fields.Text(default="to")
     discount_value = fields.Integer()
     bundle_id = fields.Many2one('product.bundle', ondelete='set null')
+    product2 = fields.Many2one('product.product')
 
     @api.constrains('qty_start', 'qty_end')
     def check_qty_range(self):
@@ -21,14 +22,13 @@ class ProductBundleQuantity(models.Model):
                 raise models.ValidationError(
                     'Quantity start must be less than quantity end')
         else:
-            self.to=""
+            self.to = ""
 
-
-        @api.onchange('is_add_range')
-        def change_add_range(self):
-            if not self.is_add_range:
-                self.to = " "
-                self.qty_end = False
-                print("asd")
-            else:
-                self.to = "to"
+    @api.onchange('is_add_range')
+    def change_add_range(self):
+        if not self.is_add_range:
+            self.to = " "
+            self.qty_end = False
+            print("asd")
+        else:
+            self.to = "to"

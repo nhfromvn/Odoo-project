@@ -23,7 +23,8 @@
     'depends': ['base',
                 'product',
                 'website',
-                'website_sale'],
+                'website_sale',
+                'sale'],
 
     # always loaded
     'data': [
@@ -40,7 +41,7 @@
     'assets': {
         'web.assets_frontend': [
             'bt_thuc_hanh/static/src/css/bundle_css.css',
-            'bt_thuc_hanh/static/src/css/bundle_js.js'
+            'bt_thuc_hanh/static/src/js/bundle_js.js'
         ],
     },
 }
