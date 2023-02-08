@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='menu_root_sp_app_action' model='ir.actions.act_window'>
+        <field name="name">Shopify App</field>
+        <field name="res_model">sp.app</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="menu_root_sp_app_action_form" model="ir.ui.view">
+        <field name="name">app Form</field>
+        <field name="model">sp.app</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field string="shop_url" name="shop_url"/>
+                        <field string="api key" name="sp_api_key"/>
+                        <field string="secret key" name="sp_api_secret_key"/>
+                        <field string="version" name="sp_api_version"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="menu_root_sp_app_action_tree" model="ir.ui.view">
+        <field name="name">App Tree</field>
+        <field name="model">sp.app</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="shop_url"/>
+                <field name="sp_api_key"/>
+                <field name="sp_api_secret_key"/>
+                <field name="sp_api_version"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <menuitem name="App" id="shopify_app_menu"
+              parent="bt_thuc_hanh2.menu_root_sp_shop" action="menu_root_sp_app_action"/>
+
+
+</odoo>

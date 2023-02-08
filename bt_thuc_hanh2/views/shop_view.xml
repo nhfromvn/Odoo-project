@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='menu_root_sp_shop_action' model='ir.actions.act_window'>
+        <field name="name">Shopify Shop</field>
+        <field name="res_model">sp.shop</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="menu_root_sp_shop_action_form" model="ir.ui.view">
+        <field name="name">Shop Form</field>
+        <field name="model">sp.shop</field>
+        <field name="arch" type="xml">
+            <form string="Shopify Bundle Shop Settings" create="false" delete="false" >
+                <sheet>
+                    <group>
+                        <field name="shop_url"/>
+                        <field name="currency_code"/>
+                        <field name="country"/>
+                        <field name="email"/>
+                        <field name="token"/>
+                        <field name="password"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="menu_root_sp_shop_action_tree" model="ir.ui.view">
+        <field name="name">Shop Tree</field>
+        <field name="model">sp.shop</field>
+        <field name="arch" type="xml">
+            <tree string="Shopify Bundle Shop Settings" create="false" delete="false">
+                <field name="shop_url"/>
+                <field name="currency_code"/>
+                <field name="country"/>
+                <field name="email"/>
+                <field name="token"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem name="Shopify" id="menu_root_sp_shop"/>
+    <menuitem name="Shop" id="sp_shop_menu"
+              parent="menu_root_sp_shop" action="menu_root_sp_shop_action"/>
+
+
+</odoo>

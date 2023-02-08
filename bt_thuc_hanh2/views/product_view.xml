@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='menu_product' model='ir.actions.act_window'>
+        <field name="name">Products</field>
+        <field name="res_model">sp.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="menu_product_form" model="ir.ui.view">
+        <field name="name">Product Form</field>
+        <field name="model">sp.product</field>
+        <field name="arch" type="xml">
+            <form string="Shopify Bundle Shop Settings" create="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="product_id"/>
+                        <field name="price"/>
+                        <field name="store_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="menu_product_tree" model="ir.ui.view">
+        <field name="name">Product Tree</field>
+        <field name="model">sp.product</field>
+        <field name="arch" type="xml">
+            <tree string="Shopify Bundle Shop Settings" create="false" delete="false">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="price"/>
+                <field name="store_id"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <menuitem name="Product" id="sp_product_menu"
+              parent="menu_root_sp_shop" action="menu_product"/>
+
+</odoo>

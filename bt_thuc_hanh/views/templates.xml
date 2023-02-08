@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+    <template id="subtotal" inherit_id="website_sale.total" customize_show="True" name="subtotal">
+        <xpath expr="//tr[@id='order_total_untaxed']" position="replace">
+            <tr>
+                <td class="text-right border-0">Subtotal:</td>
+                <td class="text-xl-right border-0">
+                    <t t-if="website_sale_order.is_active_bundle">
+                        <span t-field="website_sale_order.amount_untaxed" class="monetary_field"
+                              t-attf-class=" oe_default_price ml-1 h5"
+                              style="text-decoration: line-through; white-space: nowrap; "
+                              t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+                    </t>
+                    <t t-else="">
+                        <span t-field="website_sale_order.amount_untaxed" class="monetary_field"
+                              t-attf-class=" oe_default_price ml-1 h5"
+                              style=" white-space: nowrap; "
+                              t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+
+                    </t>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+    <template id="discount" inherit_id="website_sale.total" customize_show="True" name="discount">
+        <xpath expr="//tr[@id='order_total_taxes']" position="replace">
+            <tr>
+                <td class="text-right border-0">Discount:</td>
+                <td class="text-xl-right border-0">
+                    <span t-field="website_sale_order.discount_on_cart" class="monetary_field"
+                          t-attf-class="oe_default_price ml-1 h5"
+                          style="white-space: nowrap;"
+                          t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
     <template id="add_bundles" inherit_id="website_sale.product" customize_show="True" name="Add Bundles">
         <xpath expr="//div[@id='add_to_cart_wrap']" position="after">
             <br/>
@@ -32,11 +67,24 @@
                                                     />
                                                 </h3>
                                             </div>
-                                            <t t-if="discount_type=='percentage'">
-                                                <div class="grid-footer" style="display: flex">
+                                            <t t-if="bundle.discount_type=='percentage'">
+                                                <div style="display: flex">
                                                     <h4>GET&#160;<span t-field="product_bundle.discount"/>%&#160;OFF
                                                     </h4>
                                                 </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='total_fix'">
+                                                <div style="display: flex">
+                                                    <h4>GET&#160;<span t-field="product_bundle.discount"
+                                                                       t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>&#160;OFF
+                                                    </h4>
+                                                </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='hard_fix'">
+                                                <h4>PRODUCT&#160;PRICE&#160;IS&#160;<span
+                                                        t-field="product_bundle.discount"
+                                                        t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                                </h4>
                                             </t>
                                         </div>
                                     </t>
@@ -57,11 +105,24 @@
                                                     />
                                                 </p>
                                             </div>
-                                            <t t-if="discount_type=='percentage'">
+                                            <t t-if="bundle.discount_type=='percentage'">
                                                 <div class="grid_footer" style="display: flex">
                                                     GET&#160;<p class="grid-discount"
                                                                 t-field="product_bundle.discount"/>%&#160;OFF
                                                 </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='total_fix'">
+                                                <div style="display: flex">
+                                                    <p>GET&#160;<span t-field="product_bundle.discount"
+                                                                      t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>&#160;OFF
+                                                    </p>
+                                                </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='hard_fix'">
+                                                <p>PRODUCT&#160;PRICE&#160;IS&#160;<span
+                                                        t-field="product_bundle.discount"
+                                                        t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                                </p>
                                             </t>
                                         </div>
                                     </t>
@@ -93,9 +154,22 @@
                         <div class="card-body p-1 oe_product_image">
                             <div class="card-body" id="card_body">
                                 <h3 id="top" class="o_header_standard o_top_fixed_element" t-field="bundle.name"/>
-                                <t t-if="discount_type=='percentage'">
+                                <t t-if="bundle.discount_type=='percentage'">
                                     <div style="display: flex">
                                         GET&#160;<p t-field="bundle.discount_value"/>%&#160;OFF
+                                    </div>
+                                </t>
+                                <t t-if="bundle.discount_type=='total_fix'">
+                                    <div style="display: flex">
+                                        GET&#160;<span t-field="bundle.discount_value"
+                                                       t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
+                                        &#160;OFF
+                                    </div>
+                                </t>
+                                <t t-if="bundle.discount_type=='hard_fix'">
+                                    <div style="display: flex">
+                                        TOTAL&#160;PRICE&#160;IS&#160;<span t-field="bundle.discount_value"
+                                                                            t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>
                                     </div>
                                 </t>
                                 <t t-foreach="bundle.products" t-as="product_bundle">
@@ -159,13 +233,6 @@
                                         <span t-field="bundle.product2.image_128"
                                               t-options="{'widget': 'image'}"/>
                                     </div>
-    <!--                                    <span t-field="bundle.tier_unit_price"-->
-    <!--                                          t-options='{"widget": "monetary","display_currency": website.currency_id,}'/>-->
-    <!--                                    <span t-attf-class="text-danger oe_default_price ml-1 h5"-->
-    <!--                                          style="text-decoration: line-through; white-space: nowrap;"-->
-    <!--                                          t-field="bundle.product2.list_price"-->
-    <!--                                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"-->
-    <!--                                    />-->
                                     <t t-foreach="bundle.tier_quantity" t-as="tier">
                                         <div id="tier-container">
                                             <div id="tier-description" style="display: flex">
@@ -177,9 +244,33 @@
                                                 </t>
                                                 items
                                             </div>
-                                            <div id="tier-discount_value" style="display: flex">
-                                                GET &#160;<p t-field="tier.discount_value"/>% OFF
-                                            </div>
+                                            <t t-if="bundle.discount_type=='percentage'">
+                                                <div id="tier-discount_value" style="display: flex">
+                                                    GET &#160;<p t-field="tier.discount_value"/>%&#160;OFF
+                                                </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='total_fix'">
+                                                <div id="tier-discount_value" style="display: flex">
+                                                    GET&#160;<span t-field="tier.discount_value"
+                                                                   t-options='{"widget": "monetary","display_currency": website.currency_id,}'
+                                                />&#160;OFF
+                                                </div>
+                                            </t>
+                                            <t t-if="bundle.discount_type=='hard_fix'">
+                                                <div id="tier-discount_value" style="display: flex">
+                                                    TOTAL&#160;PRICE&#160;IS&#160;<span t-field="tier.discount_value"
+                                                                                        t-options='{"widget": "monetary","display_currency": website.currency_id,}'
+                                                />
+                                                </div>
+                                            </t>
+                                        </div>
+                                        <div id="add_to_cart_wrap" class="d-inline">
+                                            <a role="button" t-attf-href="/bundle-update/#{bundle.id}/#{product.id}"
+                                               class="btn btn-primary">
+                                                <i/>
+                                                Add Bundle
+                                            </a>
+                                            <div id="product_option_block" class="d-inline-block align-middle"/>
                                         </div>
                                     </t>
                                 </div>

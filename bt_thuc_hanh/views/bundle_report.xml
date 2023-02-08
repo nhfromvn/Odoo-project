@@ -4,7 +4,7 @@
         <field name="name">Bundle Report</field>
         <field name="res_model">product.bundle.reports</field>
         <field name="view_mode">tree</field>
-         <field name="limit">25</field>
+        <field name="limit">25</field>
     </record>
     <record id="bundle_report_view_tree" model="ir.ui.view">
         <field name="name">Bundle Report List</field>
@@ -13,8 +13,8 @@
             <tree>
                 <field name="bundle_id"/>
                 <field name="product_id"/>
-                <field name="save_id" sum="Total Save"/>
-                <field name="sale_id" sum="Total Sale"/>
+                <field name="total_save" sum="Total Save"/>
+                <field name="total_sale" sum="Total Sale"/>
 
             </tree>
         </field>

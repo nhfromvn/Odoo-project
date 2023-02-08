@@ -8,24 +8,38 @@ from odoo import fields
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from werkzeug.exceptions import Forbidden, NotFound
 
+
 class InheritWebsiteSale(WebsiteSale):
-    def _compute_total_price(self, bundles, order, **kwargs):
+    def _compute_total_price(self, bundles, order):
         lines = order.order_line
-        for line in lines:
-            if line.product_id in bundles.products.product_id:
-                if line.product_uom_qty > 0:
-                    bundles_valid = []
-                    for bundle in bundles:
-                        bundles_valid.append(bundle)
-                        if bundle.type == 'bundle':
-                            for bundle_product in bundle.products:
-                                if bundle_product.product_id:
-                                    if bundle_product.product_id not in lines.product_id:
-                                        bundles_valid.remove(bundle)
-                                        break
-                        else:
-                            if bundle.product2 not in lines.product_id:
+        bundles_valid = []
+        for bundle in bundles:
+            if bundle.type == 'bundle':
+                if bundle.products:
+                    for bundle_product in bundle.products:
+                        if bundle_product.product_id in lines.product_id:
+                            for line in lines:
+                                if bundle_product.product_id.id == line.product_id.id:
+                                    if line.product_uom_qty >= bundle_product.quantity:
+                                        if bundle not in bundles_valid:
+                                            bundles_valid.append(bundle)
+                    for bundle_product in bundle.products:
+                        if bundle_product.product_id not in lines.product_id:
+                            if bundle in bundles_valid:
                                 bundles_valid.remove(bundle)
+                        for line in lines:
+                            if bundle_product.product_id.id == line.product_id.id:
+                                if line.product_uom_qty < bundle_product.quantity:
+                                    if bundle in bundles_valid:
+                                        bundles_valid.remove(bundle)
+            else:
+                if bundle.product2 in lines.product_id:
+                    for line in lines:
+                        if bundle.product2.id == line.product_id.id:
+                            if bundle.tier_quantity:
+                                if line.product_uom_qty >= bundle.tier_quantity[0].qty_start:
+                                    if bundle not in bundles_valid:
+                                        bundles_valid.append(bundle)
         list = []
         for bundle in bundles_valid:
             list.append(bundle.priority)
@@ -57,10 +71,71 @@ class InheritWebsiteSale(WebsiteSale):
                 total_price = total_not_in_bundle_price1 + total_not_in_bundle_price2 + best_bundle.total_price * amount_bundle
                 return total_price
             else:
-                total_price = 0
-                for line in lines:
-                    total_price += line.product_id.list_price * line.product_uom_qty
-                return total_price
+                if best_bundle.tier_quantity[0].is_add_range:
+                    total_not_in_bundle_price = 0
+                    total_price = 0
+                    total_in_bundle_price = 0
+                    for line in lines:
+                        if best_bundle.product2.id == line.product_id.id:
+                            if line.product_uom_qty < best_bundle.tier_quantity[0].qty_start:
+                                amount_not_in_bundle = line.product_uom_qty
+                                total_not_in_bundle_price = line.product_id.list_price * amount_not_in_bundle
+                            elif line.product_uom_qty >= best_bundle.tier_quantity[
+                                0].qty_start and line.product_uom_qty <= \
+                                    best_bundle.tier_quantity[0].qty_end:
+                                amount_in_bundle = line.product_uom_qty
+                                if best_bundle.discount_type == 'total_fix':
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle - \
+                                                            best_bundle.tier_quantity[0].discount_value
+                                elif best_bundle.discount_type == 'hard_fix':
+                                    total_in_bundle_price = best_bundle.tier_quantity[0].discount_value
+                                else:
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle * (
+                                            1 - best_bundle.tier_quantity[0].discount_value / 100)
+                            else:
+                                amount_in_bundle = best_bundle.tier_quantity[0].qty_end
+                                amount_not_in_bundle = line.product_uom_qty - amount_in_bundle
+                                if best_bundle.discount_type == 'total_fix':
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle - \
+                                                            best_bundle.tier_quantity[0].discount_value
+                                elif best_bundle.discount_type == 'hard_fix':
+                                    total_in_bundle_price = best_bundle.tier_quantity[0].discount_value
+                                else:
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle * (
+                                            1 - best_bundle.tier_quantity[0].discount_value / 100)
+                                total_not_in_bundle_price = line.product_id.list_price * amount_not_in_bundle
+                    for line in lines:
+                        if line.product_id.id != best_bundle.product2.id:
+                            total_not_in_bundle_price += line.product_id.list_price * line.product_uom_qty
+                    total_price += total_in_bundle_price + total_not_in_bundle_price
+                    return total_price
+                else:
+                    total_not_in_bundle_price = 0
+                    total_price = 0
+                    total_in_bundle_price = 0
+                    for line in lines:
+                        if best_bundle.product2.id == line.product_id.id:
+                            if line.product_uom_qty < best_bundle.tier_quantity[0].qty_start:
+                                amount_not_in_bundle = line.product_uom_qty
+                                total_not_in_bundle_price = line.product_id.list_price * amount_not_in_bundle
+                            else:
+                                amount_in_bundle = best_bundle.tier_quantity[0].qty_start
+                                amount_not_in_bundle = line.product_uom_qty - amount_in_bundle
+                                if best_bundle.discount_type == 'total_fix':
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle - \
+                                                            best_bundle.tier_quantity[0].discount_value
+                                elif best_bundle.discount_type == 'hard_fix':
+                                    total_in_bundle_price = best_bundle.tier_quantity[0].discount_value
+                                else:
+                                    total_in_bundle_price = best_bundle.product2.list_price * amount_in_bundle * (
+                                            1 - best_bundle.tier_quantity[0].discount_value / 100)
+                                total_not_in_bundle_price = line.product_id.list_price * amount_not_in_bundle
+                    for line in lines:
+                        if line.product_id.id != best_bundle.product2.id:
+                            total_not_in_bundle_price += line.product_id.list_price * line.product_uom_qty
+                    total_price += total_in_bundle_price + total_not_in_bundle_price
+                    return total_price
+
         else:
             total_price = 0
             for line in lines:
@@ -125,7 +200,7 @@ class InheritWebsiteSale(WebsiteSale):
         """
         order = request.website.sale_get_order()
         bundles = request.env['product.bundle'].search([])
-        order.amount_untaxed = self._compute_total_price(bundles, order)
+        order.amount_total = self._compute_total_price(bundles, order)
         if order and order.state != 'draft':
             request.session['sale_order_id'] = None
             order = request.website.sale_get_order()
@@ -179,17 +254,22 @@ class InheritWebsiteSale(WebsiteSale):
         request.website.sale_reset()
         # sale_order.write({'order_line': [(5, 0, 0)]})
         reports = request.env['product.bundle.reports'].search([])
-        for product in bundle.products:
-            sale_order._cart_update(product_id=product.product_id.id, line_id=None, add_qty=product.quantity,
+        if bundle.type == 'bundle':
+            for product in bundle.products:
+                sale_order._cart_update(product_id=product.product_id.id, line_id=None, add_qty=product.quantity,
+                                        set_qty=None)
+        else:
+            sale_order._cart_update(product_id=bundle.product2.id, line_id=None,
+                                    add_qty=bundle.tier_quantity[0].qty_start,
                                     set_qty=None)
         for report in reports:
             count += 1
 
         request.env['product.bundle.reports'].sudo().create({
             'bundle_id': bundle_id,
-            'save_id': count + 1,
+            'total_save': count + 1,
             'product_id': product_id,
-            'sale_id': sale_order.id
+            'total_sale': sale_order.amount_total
         })
         return request.redirect("/shop/cart")
 
@@ -218,14 +298,13 @@ class InheritWebsiteSale(WebsiteSale):
             product_custom_attribute_values=json_scriptsafe.loads(pcav) if pcav else None,
             no_variant_attribute_values=json_scriptsafe.loads(nvav) if nvav else None
         )
-
+        order = request.website.sale_get_order()
+        bundles = request.env['product.bundle'].search([])
+        order.amount_total = self._compute_total_price(bundles, order)
         if not order.cart_quantity:
             request.website.sale_reset()
             return value
         value['cart_quantity'] = order.cart_quantity
-        order = request.website.sale_get_order()
-        bundles = request.env['product.bundle'].search([])
-        order.amount_untaxed = self._compute_total_price(bundles, order)
 
         if not display:
             return value
@@ -239,4 +318,5 @@ class InheritWebsiteSale(WebsiteSale):
             "website_sale.short_cart_summary", {
                 'website_sale_order': order,
             })
+
         return value

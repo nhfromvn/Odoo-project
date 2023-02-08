@@ -28,19 +28,9 @@ class ProductBundle(models.Model):
     image = fields.Binary(attachment=True)
     total_price = fields.Float(compute='_compute_total')
     subtotal_price = fields.Float(compute='_compute_subtotal')
-    is_active = fields.Boolean(compute='_check_time', default=True)
+    is_active = fields.Boolean(compute='_check_time_2', default=True)
     today = fields.Datetime.today()
-    tier_unit_price = fields.Float(compute="_tier_unit_compute")
     enable = fields.Boolean(default=False)
-    @api.depends('type', 'tier_quantity.discount_value')
-    def _tier_unit_compute(self):
-        for bundle in self:
-            if bundle.discount_type == "percentage":
-                bundle.tier_unit_price = bundle.product2.list_price * (1 - bundle.tier_quantity.discount.value)
-            elif bundle.discount_type == "total_fix":
-                bundle.tier_unit_price = bundle.product2.list_price - bundle.tier_quantity.discount_value
-            else:
-                bundle.tier_unit_price = bundle.tier_quantity.discount_value
 
     @api.depends('products.list_price')
     def _compute_total(self):
@@ -79,8 +69,15 @@ class ProductBundle(models.Model):
                     raise models.ValidationError(
                         'Discount value must be positive')
 
-    @api.depends('start_time', 'end_time', 'indefinite_bundle')
+    @api.constrains('start_time', 'end_time')
     def _check_time(self):
+        if self.start_time>= self.end_time:
+            raise models.ValidationError(
+                'End time must come after start time')
+
+
+    @api.depends('start_time', 'end_time', 'indefinite_bundle')
+    def _check_time_2(self):
         if self.indefinite_bundle:
             self.is_active = True
         else:
@@ -90,17 +87,31 @@ class ProductBundle(models.Model):
                 else:
                     self.is_active = True
             else:
-                if (self.start_time > self.today) or (self.end_time < self.today):
-                    self.is_active = False
-                else:
-                    self.is_active = True
+                # if (self.start_time > self.today) or (self.end_time < self.today):
+                #     self.is_active = False
+                # else:
+                self.is_active = True
 
 
 class SaleOderLineInherit(models.Model):
     _inherit = 'sale.order.line'
     qty_not_in_bundle = fields.Float()
     qty_in_bundle = fields.Float()
-class SaleOderLineInherit(models.Model):
+
+
+class SaleOderInherit(models.Model):
     _inherit = 'sale.order'
     amount_bundle = fields.Float()
+    discount_on_cart = fields.Float(compute='_compute_discount_on_cart')
+    is_active_bundle = fields.Boolean(default=False, compute='_compute_is_active_bundle')
 
+    @api.depends('amount_untaxed', 'amount_total')
+    def _compute_discount_on_cart(self):
+        self.discount_on_cart = self.amount_untaxed - self.amount_total
+
+    @api.depends('amount_untaxed', 'amount_total')
+    def _compute_is_active_bundle(self):
+        if self.amount_untaxed == self.amount_total:
+            self.is_active_bundle = False
+        else:
+            self.is_active_bundle = True
