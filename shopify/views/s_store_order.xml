@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="s_store_orders_form_view" model="ir.ui.view">
+            <field name="name">s.store.orders.form</field>
+            <field name="model">s.store.orders</field>
+            <field name="arch" type="xml">
+                <form string="Store Info">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="s_store_id"/>
+                                <field name="item_ids"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="s_store_orders_tree_view" model="ir.ui.view">
+            <field name="name">s_store_orders.tree</field>
+            <field name="model">s.store.orders</field>
+            <field name="arch" type="xml">
+                <tree string="ModelTitle">
+                    <field name="name"/>
+                    <field name="s_store_id"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="s_store_orders_act_window" model="ir.actions.act_window">
+            <field name="name">Shopify Order</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">s.store.orders</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Shopify Order" id="s_shopify_order_root" parent="s_shopify_root" action="s_store_orders_act_window"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,143 @@
+<odoo>
+    <data>
+
+        <record id='menu_root_client_xero_action' model='ir.actions.act_window'>
+            <field name="name">Shopify Action Window</field>
+            <field name="res_model">shopify.shop.xero</field>
+            <field name="view_mode">form</field>
+        </record>
+        <record id="menu_root_client_xero_action_form" model="ir.ui.view">
+            <field name="name">Shopify App</field>
+            <field name="model">shopify.shop.xero</field>
+            <field name="arch" type="xml">
+                <form string="Shopify Bundle Shop Settings" create="false" delete="false">
+                    <header>
+                        <button type="object" name="fetch_order">#Fetch Order</button>
+                        <button type="object" name="fetch_product">#Fetch Product</button>
+                    </header>
+                    <sheet>
+                        <notebook>
+                            <page string="Shopify">
+                                <group>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                </group>
+                                <group>
+                                    <field name="products">
+                                        <tree create="false">
+                                            <field name="product_id"/>
+                                            <field name="product_name"/>
+                                            <field name="product_handle"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <field name="orders">
+                                        <tree create="false">
+                                            <field name="order_id"/>
+                                            <field name="order_name"/>
+                                            <field name="order_lines_data"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
+                            <page string="Xero Integration">
+                                <group>
+                                    <button type="object" name="get_xero_token">Xero Integration</button>
+                                    <group>
+                                         <field name="sales_account_code"/>
+                                         <field name="payment_account_code"/>
+                                         <field name="shipping_account_code"/>
+                                    </group>
+                                    <button type="object" name="redirect_to_sync_xero_page">Go to Sync Page</button>
+                                </group>
+                            </page>
+                        </notebook>
+
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <menuitem name="Shopify App" id="menu_root_client"/>
+        <menuitem name="Xero" id="menu_root_client_xero" sequence="300"
+                  action="shopify_test_module.menu_root_client_xero_action"
+                  parent="shopify_test_module.menu_root_client"/>
+
+        <!--Discount-->
+        <record id='menu_root_client_discount_action' model='ir.actions.act_window'>
+            <field name="name">Shopify Action Window</field>
+            <field name="res_model">shopify.discount</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="menu_root_client_xero_action_form" model="ir.ui.view">
+            <field name="name">Shopify App</field>
+            <field name="model">shopify.shop.xero</field>
+            <field name="arch" type="xml">
+                <form string="Shopify">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="discount_type"/>
+                            <field name="discount_amount"/>
+                        </group>
+                        <group>
+                            <field name="products">
+                                <tree>
+                                    <field name="product_id"/>
+                                    <field name="product_handle"/>
+                                    <field name="qty"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id='menu_root_client_discount_bundle_settings' model='ir.actions.act_window'>
+            <field name="name">Shopify Action Window</field>
+            <field name="res_model">shopify.discount.settings</field>
+            <field name="view_mode">form</field>
+        </record>
+
+        <record id='menu_root_client_discount_bundle_report' model='ir.actions.act_window'>
+            <field name="name">Shopify Action Window</field>
+            <field name="res_model">shopify.discount.report</field>
+            <field name="view_mode">form</field>
+        </record>
+
+         <record id="menu_root_discount_report_action_form" model="ir.ui.view">
+            <field name="name">Shopify App</field>
+            <field name="model">shopify.shop.xero</field>
+            <field name="arch" type="xml">
+                <form string="Shopify">
+                    <sheet>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="discount_id"/>
+                        </group>
+                        <group>
+                            <field name="data" widget="discount_graph"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+         </record>
+
+
+        <menuitem name="Discount" id="menu_root_client_discount" sequence="310"
+                  parent="shopify_test_module.menu_root_client"/>
+        <menuitem name="Discount Bundle" id="menu_root_client_discount_bundle" sequence="310"
+                  action="shopify_test_module.menu_root_client_discount_action"
+                  parent="shopify_test_module.menu_root_client_discount"/>
+        <menuitem name="Discount Bundle Settings" id="menu_root_client_discount_settings" sequence="310"
+                  action="shopify_test_module.menu_root_client_discount_bundle_settings"
+                  parent="shopify_test_module.menu_root_client_discount"/>
+        <menuitem name="Discount Bundle Report" id="menu_root_client_discount_report" sequence="310"
+                  action="shopify_test_module.menu_root_client_discount_bundle_report"
+                  parent="shopify_test_module.menu_root_client_discount"/>
+    </data>
+</odoo>

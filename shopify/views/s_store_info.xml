@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="s_store_info_form_view" model="ir.ui.view">
+            <field name="name">s.store.info.form</field>
+            <field name="model">s.store.info</field>
+            <field name="arch" type="xml">
+                <form string="Store Info">
+                    <header>
+                        <button name="connect_xero" string="Connect Xero" type="object" class="btn-primary"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="shop_url" required="1"/>
+                                <field name="first_name"/>
+                                <field name="last_name"/>
+                            </group>
+                            <group>
+                                <field name="locale"/>
+                                <field name="email"/>
+                                <field name="sale_order_ids"/>
+                                <field name="combo_ids"/>
+                                <field name="access_token"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="s_store_info_tree_view" model="ir.ui.view">
+            <field name="name">s.store.info.tree</field>
+            <field name="model">s.store.info</field>
+            <field name="arch" type="xml">
+                <tree string="ModelTitle">
+                    <field name="shop_url"/>
+                    <field name="locale"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="s_store_info_act_window" model="ir.actions.act_window">
+            <field name="name">Shopify</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">s.store.info</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Shopify app" id="s_shopify_root" />
+        <menuitem name="Store" id="s_store_root" parent="s_shopify_root" action="s_store_info_act_window" sequence="1"/>
+
+    </data>
+</odoo>

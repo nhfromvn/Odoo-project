@@ -1,0 +1,212 @@
+* {
+    font-family: "Droid Serif", "DejaVu Serif", "STIX", serif;
+}
+
+tr, td {
+    text-align: center;
+}
+
+body {
+    /*text-align: center !important;*/
+}
+
+.register-webhook {
+    width: 500px !important;
+}
+
+.fetch-history {
+    width: 500px !important;
+
+}
+
+.fetch-history tr {
+    color: white;
+}
+
+.inputs-wrapper {
+    background-color: #080808;
+    padding: 30px 25px;
+    border-radius: 2px;
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.3);
+    margin-bottom: 50px;
+}
+
+.inputs-wrapper input,
+.inputs-wrapper button {
+    height: 50px;
+    background-color: #ffffff;
+    color: #080808;
+    font-weight: 500;
+    border-radius: 5px;
+}
+
+.value-fetch {
+    margin-top: 10px;
+    color: white;
+}
+
+input {
+    padding: 0 20px;
+    font-size: 14px;
+}
+
+.inputs-wrapper button {
+    width: 30%;
+}
+
+.button-action {
+    padding: 10px;
+    border-radius: 3px;
+    border: 0;
+    margin: 0 10px;
+    font-size: 15px;
+    color: white;
+}
+
+.button-action-register {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    background: green;
+
+}
+
+.button-action-delete {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    background: red;
+
+}
+
+.content-left {
+    width: 25vw;
+
+}
+
+.content-left table {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: pointer;
+    width: 25vw;
+}
+
+.content-mid {
+    width: 50vw;
+    margin-left: 10px;
+}
+
+.content {
+    right: 5vw;
+    margin-top: 20px;
+}
+
+.xero tr:hover {
+    background-color: #CCE7E7;
+}
+
+.td-active {
+    background-color: #74c7c7;
+}
+
+.container {
+    margin-top: 100px;
+    border-radius: 0.5rem;
+    height: 100vh !important;
+    max-width: 70vw !important;
+
+}
+
+.setting-promotion {
+    margin-top: 50px;
+    border: 1px #ccc solid;
+    border-radius: 0.5rem;
+    width: 100%;
+    background-color: rgba(217, 217, 217, 50%);
+}
+
+.setting-input-input {
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: 70%;
+    font-size: 20px;
+    height: 35px;
+}
+
+.setting-input {
+    display: grid;
+}
+
+.setting-content {
+    margin: 20px;
+}
+
+.action-setting {
+    float: right;
+    margin: 20px 30px 0px 30px;
+}
+
+.btn-save {
+    color: white !important;
+    background-color: #008060 !important;
+    border-color: #008060 !important;
+}
+
+.btn-discard {
+    color: white !important;
+    background-color: #5b5959 !important;
+    border-color: #5b5959 !important;
+}
+
+.btn-save:hover {
+    background: rgba(255, 255, 255, 50%) !important;
+    color: black !important;
+
+}
+
+.btn-discard:hover {
+    background: rgba(255, 255, 255) !important;
+    color: black !important;
+
+}
+.btn-xanh {
+    background: rgb(16, 89, 126) !important;
+    color: #ffffff !important;
+
+}
+.btn-do{
+    background: rgb(164, 11, 11) !important;
+    color: #ffffff !important;
+
+}
+
+
+.chartBox{
+    margin-top: 5%;
+    width: 50%;
+    border: 1px black solid;
+    float: right;
+}
+
+.title-setting{
+    font-size: 20px;
+}
+.bg-light{
+    position: fixed;
+    top: 0;
+    width: 100%;
+
+}

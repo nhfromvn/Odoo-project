@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="s_products_form_view" model="ir.ui.view">
+            <field name="name">s.products.form</field>
+            <field name="model">s.products</field>
+            <field name="arch" type="xml">
+                <form string="Shopify Product">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="product_id"/>
+                                <field name="name"/>
+                                <field name="store_id"/>
+                                <field name="price"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="s_products_tree_view" model="ir.ui.view">
+            <field name="name">s.products.tree</field>
+            <field name="model">s.products</field>
+            <field name="arch" type="xml">
+                <tree string="Shopify Product">
+                    <field name="product_id"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="s_products_act_window" model="ir.actions.act_window">
+            <field name="name">Shopify Product</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">s.products</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Shopify Product" id="s_shopify_product_root" parent="s_shopify_root" action="s_products_act_window"/>
+
+    </data>
+</odoo>

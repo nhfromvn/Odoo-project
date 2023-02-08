@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="s_combo_form_view" model="ir.ui.view">
+            <field name="name">s.combo.form</field>
+            <field name="model">s.combo</field>
+            <field name="arch" type="xml">
+                <form string="Shopify Combo">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="store_id"/>
+                                <field name="is_percent"/>
+                                <field name="type_apply"/>
+                                <field name="value"/>
+                                <field name="product_condition"/>
+                                <field name="quantity_condition"/>
+                                <field name="color" widget="int_color"/>
+                                <field name="position"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="s_combo_tree_view" model="ir.ui.view">
+            <field name="name">s.combo.tree</field>
+            <field name="model">s.combo</field>
+            <field name="arch" type="xml">
+                <tree string="Shopify Combo">
+                    <field name="name"/>
+                    <field name="store_id"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="s_combo_act_window" model="ir.actions.act_window">
+            <field name="name">Shopify Combo</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">s.combo</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Shopify Combo" id="s_shopify_Combo_root" parent="s_shopify_root" action="s_combo_act_window"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+        <template id="xero_main" name="Shopify Xero Settings Page">
+        <head>
+            <link rel="stylesheet" href="/web/static/lib/bootstrap/css/bootstrap.css"/>
+            <title>Xero Integration by AllFetch</title>
+        </head>
+        <body>
+            <div id="af_settings_container">
+            </div>
+            <script>
+                window.afAppConfig = {
+                 "shop_id": <t t-raw="shop_id"/>
+                }
+            </script>
+            <script type="text/javascript" src="/shopify_test_module/static/src/js/xero_front_end.js"></script>
+        </body>
+    </template>
+    </data>
+</odoo>
