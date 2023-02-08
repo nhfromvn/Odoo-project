@@ -31,7 +31,7 @@ class BtThucHanh2(http.Controller):
         print(kw)
         shop_url = kw['shop']
         state = kw['hmac']
-        callback = request.env['ir.config_parameter'].sudo().get_param('web.base.url') + '/shopify/oauth/callback1'
+        callback = request.env['ir.config_parameter'].sudo().get_param('web.base.url') + '/bt_shopify/oauth/callback1'
         url = f"https://{shop_url}/admin/oauth/authorize?client_id={'1754cae9ec7a77b1c13ebf973ebd0d9c'}&scope={SCOPES}&redirect_uri={callback}&state={state}&grant_options[]=per-user"
         return werkzeug.utils.redirect(url)
 
@@ -73,7 +73,7 @@ class BtThucHanh2(http.Controller):
                             # 'password': shop.password
                         })
                     # execute a graphQL call
-                    # shopify.GraphQL().execute("{ shop { name id } }")
+                    # bt_shopify.GraphQL().execute("{ shop { name id } }")
 
                 shopify.ShopifyResource.clear_session()
             except Exception as ex:
@@ -95,7 +95,7 @@ class BtThucHanh2(http.Controller):
                                     "webhook": {
                                         "topic": "products/create",
                                         "address": request.env['ir.config_parameter'].sudo().get_param(
-                                            'web.base.url') + "/shopify/webhook/products",
+                                            'web.base.url') + "/bt_shopify/webhook/products",
                                         "format": "json"
                                     }
                                 })
@@ -128,7 +128,7 @@ class BtThucHanh2(http.Controller):
                                     "webhook": {
                                         "topic": "products/update",
                                         "address": request.env['ir.config_parameter'].sudo().get_param(
-                                            'web.base.url') + "/shopify/webhook/products/update",
+                                            'web.base.url') + "/bt_shopify/webhook/products/update",
                                         "format": "json"
                                     }
                                 })
