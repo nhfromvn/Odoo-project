@@ -128,35 +128,34 @@
                     </div>
                     <div class="setting-input">
                         <lable> Sản phẩm</lable>
-                        <select class="setting-input-input" v-model="value.product_condition">
-
-                            <option v-for="product in products" v-bind:value="product.id">[[product.name]]</option>
+                        <select class="setting-input-input" v-model="value.product_name" v-on:change="test">
+                            <option v-for="product in products">[[product.name]]</option>
                         </select>
-
                         <lable> Số lượng</lable>
                         <input class="setting-input-input" type="number" v-bind:value="value.quantity_condition"
                                v-model="value.quantity_condition">
+                        <label>Discount</label>
+                        <input v-if="value.type_apply" class="setting-input-input" type="number" v-bind:value="value.discount_value"
+                               v-model="value.discount_value">
+                        <button @click="onAdd()">Add Product</button>
+                        <table v-if="value.product_lines.length >0" class="table table-striped table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th v-if="value.type_apply">Discount</th>
+                            </tr>
+
+                            <tr v-for="pro in value.product_lines">
+                                <td>[[pro.product.name]]</td>
+                                <td>[[pro.quantity]]</td>
+                                <td v-if="value.type_apply">[[pro.discount_value]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
-        <div>
-            <div>
-                <p class="title-setting">Cai Dat </p>
-                <lable>mau</lable>
-                <select class="setting-input-input" v-model="value.color">
-
-                    <option>mau xanh</option>
-                    <option>mau do</option>
-                </select>
-            </div>
-
-            <lable> vi tri</lable>
-            <select class="setting-input-input" v-model="value.position">
-
-                <option>phia tren</option>
-                <option>phia duoi</option>
-            </select>
         </div>
         <div class="chartBox">
             <canvas id="myChart" width="500" height="500" style="font-size: 30px"></canvas>

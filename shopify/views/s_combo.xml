@@ -10,6 +10,7 @@
                     <sheet>
                         <group>
                             <group>
+                                <field name="subtotal_price"/>
                                 <field name="name"/>
                                 <field name="store_id"/>
                                 <field name="is_percent"/>
@@ -19,6 +20,17 @@
                                 <field name="quantity_condition"/>
                                 <field name="color" widget="int_color"/>
                                 <field name="position"/>
+                                <field name="product_lines"
+                                       widget="section_and_note_one2many"
+                                       mode="tree,kanban">
+                                    <tree
+                                            editable="bottom">
+                                        <field name="product_id"/>
+                                        <field name="quantity"/>
+                                        <field name="price"/>
+                                        <field name="discount"/>
+                                    </tree>
+                                </field>
                             </group>
 
                         </group>

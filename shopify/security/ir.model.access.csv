@@ -5,3 +5,6 @@ access_s.item.lines,shopify.s_item_lines,model_s_item_lines,,1,1,1,1
 access_s.products,shopify.s_products,model_s_products,,1,1,1,1
 access_s.combo,shopify.s_combo,model_s_combo,,1,1,1,1
 access_s.combo.report,shopify.s_combo_report,model_s_combo_report,,1,1,1,1
+access_s.combo.products,shopify.s_combo_products,model_s_combo_products,,1,1,1,1
+access_s.combo.product_condition,shopify.s_products,model_s_products,,1,1,1,1
+

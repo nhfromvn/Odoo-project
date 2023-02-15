@@ -7,6 +7,7 @@ function showDiscount(code) {
 }
 
 let data;
+var item_quantities = document.getElementsByClassName("cart-item__quantity")
 
 function makeDiscount(length) {
     var result = '';
@@ -27,23 +28,24 @@ const userAction = async () => {
     xmlhttp.open("POST", "https://odoo.website/shopify/cart/list");
     xmlhttp.send(JSON.stringify(myJson));
     xmlhttp.onload = () => {
-        console.log(ShopifyAnalytics.meta)
         data = JSON.parse(xmlhttp.response);
-        discount_name = data.price_discount.combo.name;
-        discount_price = data.price_discount.total_price_discount;
-
+        discount_price = data.best_discount.price_discount;
+        total_price = data.best_discount.total_price
+        combo_name = data.best_discount.combo_name
         var dE = document.getElementsByClassName("cart__footer")[0];
-        console.log(discount_price)
+
         if (dE) {
             var dV = `<div class="js-contents">
                         <div class="totals">
-                            <h2 class="totals__subtotal"><b>Bạn có 1 ưu đãi ${discount_name}</b> </h2>
+                            <h2 class="totals__subtotal"><b>Bạn có 1 ưu đãi ${combo_name}</b> </h2>
                         </div>
                     </div>
                     <div class="js-contents">
                         <div class="totals">
-                        <h2 class="totals__subtotal">Khi áp dụng</h2>
-                            <p class="totals__subtotal-value">${discount_price.toLocaleString('vi-VN')} VND</p>
+                        <h2 class="totals__subtotal">Khi áp dụng duoc giam</h2>
+                            <p class="totals__subtotal-value">${discount_price} VND con</p>
+                            <p class="totals__subtotal-value> ${total_price}</p>
+                            
                             <button id="apply_dicount" class="cart__checkout-button button"> Apply</button>
                         </div>
                     </div>`
@@ -83,69 +85,106 @@ function main() {
 }
 
 const userAction2 = async () => {
-
     const xhttp = new XMLHttpRequest();
     xhttp.open("POST", "https://odoo.website/shopify/combo/list");
-    xhttp.send();
+    xhttp.send(Shopify.shop);
     xhttp.onload = function () {
         const combos = JSON.parse(xhttp.response)
         let tag = document.getElementsByClassName("product__text")[2];
         if (ShopifyAnalytics.meta.product.id) {
-            console.log(ShopifyAnalytics.meta.product.id)
-            console.log(combos)
             showDiscount(makeDiscount(10))
             for (let combo of combos) {
-                if (combo.product_condition.product_id == ShopifyAnalytics.meta.product.id) {
+                let check = 0
+                for (let product_line of combo.product_lines) {
+                    if (product_line.product.product_id == ShopifyAnalytics.meta.product.id) {
+                        check = 1
+                        break
+                    } else {
+                        check = 0
+                    }
+                }
+                if (check) {
                     if (combo.position == 'above') {
                         tag = document.getElementsByClassName("product__text")[1];
                     } else {
                         tag = document.getElementsByClassName("product__text")[2];
 
                     }
-                    if (combo.is_percent) {
-                        tag.innerHTML += `<div class="js-contents">
-                    </div>
-                    <div display: flex>
-                    <div class="js-contents">
-                        <div class="totals">
-                        <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
-                            <p class="totals__subtotal-value"> ban duoc giam ${combo.value} % cho san pham</p>
-                        </div>
-                    </div>
-                        <div> ${combo.product_condition.name}</div>
-                        </div>`
+                    if (combo.type_apply) {
+                        if (combo.is_percent) {
+                            tag.innerHTML += `<div class="js-contents">
+                                            </div>
+                                            <div display: flex>
+                                            <div class="js-contents">
+                                            <div class="totals">
+                                            <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
+                                            </div>`
+                            for (let product_line of combo.product_lines) {
+                                console.log(product_line)
+                                            tag.innerHTML += `</div>
+                                            <div>ban duoc giam ${product_line.discount_value} % cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
+                                            </div>`
+                            }
+
+                        } else {
+                            tag.innerHTML += `<div class="js-contents">
+                                            </div>
+                                            <div display: flex>
+                                            <div class="js-contents">
+                                            <div class="totals">
+                                            <h2 class="totals__subtotal">Combo: ${combo.name}</h2>                         
+                                            </div>`
+                            for (let product_line of combo.product_lines) {
+                                        tag.innerHTML += `</div>
+                                                        <div>ban duoc giam ${product_line.discount_value} vnd cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
+                                                        </div>`
+                            }
+                        }
+
                     } else {
-                        tag.innerHTML += `<div class="js-contents">
-                    </div>
-                    <div display: flex>
-                    <div class="js-contents">
-                        <div class="totals">
-                        <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
-                            <p class="totals__subtotal-value"> ban duoc giam ${combo.value} VND cho san pham</p>
-                        </div>
-                    </div>
-                        <div> ${combo.product_condition.name}</div>
-                        </div>`
+                        if (combo.is_percent) {
+                            tag.innerHTML += `<div class="js-contents">
+                                            </div>
+                                            <div display: flex>
+                                            <div class="js-contents">
+                                            <div class="totals">
+                                            <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
+                                                <p class="totals__subtotal-value"> ban duoc giam ${combo.value} % cho combo</p>
+                                            </div>`
+                            for (let product_line of combo.product_lines) {
+                                tag.innerHTML += `</div>
+                                                    <div> ${product_line.product.name} x ${product_line.quantity}</div>
+                                                    </div>`
+                            }
+
+                        } else {
+                            tag.innerHTML += `<div class="js-contents">
+                                            </div>
+                                            <div display: flex>
+                                            <div class="js-contents">
+                                            <div class="totals">
+                                            <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
+                                                <p class="totals__subtotal-value"> ban duoc giam ${combo.value} vnd cho combo</p>
+                                            </div>`
+                            for (let product_line of combo.product_lines) {
+                                tag.innerHTML += `</div>
+                                                <div> ${product_line.product.name} x ${product_line.quantity}</div>
+                                                </div>`
+                            }
+                        }
                     }
+
                     if (combo.color == 'xanh') {
                         tag.innerHTML += ` <button class="btn" style="background: rgb(16, 89, 126) !important;\
                          color: #ffffff !important; " type="submit">ADD COMBO</button>   `
-                    }
-                    else if (combo.color == 'do') {
+                    } else if (combo.color == 'do') {
                         tag.innerHTML += ` <button class="btn" style="background: rgb(164, 11, 11) !important;
                         color: #ffffff !important; " type="submit">ADD COMBO</button>   `
-                    }
-                    else if (combo.color == 'vang') {
+                    } else if (combo.color == 'vang') {
                         tag.innerHTML += ` <button class="btn" style="background: rgba(255,215,0) !important;
                         color: #ffffff !important; " type="submit">ADD COMBO</button>   `
                     }
 
-                    // if (combo.color == "xanh") {
-                    //     tag.innerHTML += <button class="btn btn-xanh" type="submit">ADD COMBO</button>
-                    //
-                    // } else {
-                    //     tag.innerHTML += <button class="btn btn-do" type="submit">ADD COMBO</button>
-                    // }
                 }
 
 

@@ -8,4 +8,5 @@ from . import s_products
 from . import s_combo
 from . import s_combo_report
 from . import contact_xero
+from . import s_combo_products
 
