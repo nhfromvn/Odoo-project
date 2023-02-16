@@ -24,6 +24,7 @@
                                 <field name="sale_order_ids"/>
                                 <field name="combo_ids"/>
                                 <field name="access_token"/>
+                                <field name="access_token_time_out"/>
                             </group>
                         </group>
                     </sheet>

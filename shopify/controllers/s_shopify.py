@@ -32,65 +32,6 @@ SCOPES = '''read_products,
 
 
 class SShopify(http.Controller):
-    def compute_price(self, cart, combos):
-        # items = cart['items']
-        # bundles_valid = []
-        # for bundle in bundles:
-        #     if bundle.type == 'bundle':
-        #         if bundle.products:
-        #             for bundle_product in bundle.products:
-        #                 if bundle_product.product_id in lines.product_id:
-        #                     for line in lines:
-        #                         if bundle_product.product_id.id == line.product_id.id:
-        #                             if line.product_uom_qty >= bundle_product.quantity:
-        #                                 if bundle not in bundles_valid:
-        #                                     bundles_valid.append(bundle)
-        #             for bundle_product in bundle.products:
-        #                 if bundle_product.product_id not in lines.product_id:
-        #                     if bundle in bundles_valid:
-        #                         bundles_valid.remove(bundle)
-        #                 for line in lines:
-        #                     if bundle_product.product_id.id == line.product_id.id:
-        #                         if line.product_uom_qty < bundle_product.quantity:
-        #                             if bundle in bundles_valid:
-        #                                 bundles_valid.remove(bundle)
-        # list = []
-        # for bundle in bundles_valid:
-        #     list.append(bundle.priority)
-        # for bundle in bundles_valid:
-        #     if list:
-        #         if bundle.priority == min(list):
-        #             best_bundle = bundle
-        # if list:
-        #     if best_bundle.type == 'bundle':
-        #         list2 = []
-        #         for line in lines:
-        #             for bundle_product in best_bundle.products:
-        #                 if bundle_product.product_id.id == line.product_id.id:
-        #                     list2.append(line.product_uom_qty // bundle_product.quantity)
-        #         amount_bundle = min(list2)
-        #         for line in lines:
-        #             for bundle_product in best_bundle.products:
-        #                 if bundle_product.product_id.id == line.product_id.id:
-        #                     line.qty_in_bundle = bundle_product.quantity * amount_bundle
-        #                     line.qty_not_in_bundle = line.product_uom_qty - line.qty_in_bundle
-        #         total_price = 0
-        #         total_not_in_bundle_price1 = 0
-        #         for line in lines:
-        #             total_not_in_bundle_price1 += line.product_id.list_price * line.qty_not_in_bundle
-        #         total_not_in_bundle_price2 = 0
-        #         for line in lines:
-        #             if line.product_id not in best_bundle.products.product_id:
-        #                 total_not_in_bundle_price2 = + line.product_id.list_price * line.product_uom_qty
-        #         total_price = total_not_in_bundle_price1 + total_not_in_bundle_price2 + best_bundle.total_price * amount_bundle
-        #         return total_price
-        # else:
-        #     total_price = 0
-        #     for line in lines:
-        #         total_price += line.product_id.list_price * line.product_uom_qty
-        #     return total_price
-        return "hello"
-
     @http.route('/shopify', auth='user')
     def sc_index(self, **kw):
         template = jinja_env.get_template('index.html')
@@ -183,7 +124,9 @@ class SShopify(http.Controller):
                     "id": rec.id_order,
                     "name": rec.name,
                     "item_lines": items,
-                    "state": rec.state
+                    "state": rec.state,
+                    "financial_status": rec.financial_status,
+                    # "total_price": rec.total_price
                 })
             result['status'] = "success"
             result['orders'] = vals_order
@@ -364,36 +307,6 @@ class SShopify(http.Controller):
                 csrf=False)
     def webhook_product(self, **kwargs):
         print(kwargs)
-
-    @http.route('/shopify/sync/order', type="http", auth="public", website=True, method=['GET', 'POST'],
-                csrf=False)
-    def sync_order(self, **kwargs):
-        print(kwargs)
-        shop_url = request.session['shop_url']
-        store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        order = request.env['s.store.orders'].sudo().search([('id_order', '=', kwargs['order_id'])], limit=1)
-        print(order)
-        header = {
-            'Authorization': 'Bearer ' + str(store_info.xero_access_token),
-            'Xero-Tenant-Id': kwargs['tenant_id'],
-            'Accept': 'application/json',
-        }
-        items = []
-        for item in order.item_ids:
-            items.append({
-                "Description": "hello",
-                "Quantity": item.quantity,
-                "UnitAmount": item.price,
-                "AccountCode": "200",
-                "TaxType": "NONE",
-                "LineAmount": item.quantity * item.price,
-            })
-            payload = {"Invoices": [{"Type": "ACCREC", "Contact": {"ContactID": "11806d71-5d82-4d0c-8432-9879695c0b1e"},
-                                     "LineItems": items, }]}
-            url = 'https://api.xero.com/api.xro/2.0/Invoices'
-            requests.post(url, headers=header, json=payload)
-        return 'hello'
-
     @http.route('/shopify/sync/product', type="http", auth="public", website=True, method=['GET'],
                 csrf=False)
     def get_product(self, **kwargs):
@@ -459,15 +372,17 @@ class SShopify(http.Controller):
                 order = request.env['s.store.orders'].sudo().search([('id_order', '=', rec['id'])], limit=1)
                 vals_order['id_order'] = rec['id']
                 vals_order['name'] = rec['name']
-
+                vals_order['financial_status'] = rec['financial_status']
+                # vals_order['total_price'] = rec['total_price']
                 vals_order['s_store_id'] = store.id
                 if order:
                     order.write(vals_order)
                 else:
                     order = order.create(vals_order)
                 for item in rec['line_items']:
-                    item_exist = request.env['s.item.lines'].sudo().search([('product_id', '=', item['product_id'])],
-                                                                           limit=1)
+                    item_exist = request.env['s.item.lines'].sudo().search(
+                        [('product_id', '=', item['product_id'])],
+                        limit=1)
                     vals_item['id_item'] = item['id']
                     vals_item['name'] = item['name']
                     vals_item['product_id'] = item['product_id']
@@ -544,7 +459,7 @@ class SShopify(http.Controller):
                 print("sprice:" + str(combo.subtotal_price))
                 print("price:" + str(total_price))
                 list_price_discount.append({
-                    'price_discount': (combo.subtotal_price - combo.total_price) * amount_bundle,
+                    'price_discount': round(((combo.subtotal_price - combo.total_price) * amount_bundle), 1),
                     'total_price': total_price,
                     'combo_name': combo.name
                 })

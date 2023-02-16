@@ -23,7 +23,6 @@ class SProducts(models.Model):
                                 'Position', default='below')
     total_price = fields.Float(compute="_compute_total")
     subtotal_price = fields.Float(compute="_compute_subtotal")
-
     @api.depends('product_lines.price', 'type_apply', 'is_percent')
     def _compute_total(self):
         for combo in self:

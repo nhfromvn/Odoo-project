@@ -91,7 +91,16 @@ input {
     width: 25vw;
 
 }
+.content_left select{
+     -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: pointer;
+    width: 25vw;
 
+}
 .content-left table {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

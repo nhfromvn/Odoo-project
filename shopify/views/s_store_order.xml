@@ -16,6 +16,8 @@
                                 <field name="name"/>
                                 <field name="s_store_id"/>
                                 <field name="item_ids"/>
+                                <field name="financial_status"/>
+<!--                                <field name="total_price"/>-->
                             </group>
 
                         </group>
@@ -43,7 +45,7 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem name="Shopify Order" id="s_shopify_order_root" parent="s_shopify_root" action="s_store_orders_act_window"/>
+        <menuitem name="Shopify Order" id="s_shopify_order_root" parent="s_shopify_root" action="s_store_orders_act_window" sequence="7"/>
 
     </data>
 </odoo>

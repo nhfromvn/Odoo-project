@@ -5,6 +5,8 @@ from xero import Xero
 from xero.constants import XeroScopes
 from odoo import fields, models, api
 import requests
+from datetime import datetime
+from urllib.parse import urlencode
 
 
 class SStoreInfo(models.Model):
@@ -24,6 +26,14 @@ class SStoreInfo(models.Model):
                              compute='_check_connect_xero')
     sale_order_ids = fields.One2many("s.store.orders", "s_store_id")
     combo_ids = fields.One2many("s.combo", "store_id")
+    access_token_time_out = fields.Datetime()
+
+    def _compute_time_out(self):
+        # print(self.access_token_time_out)
+        # print(datetime.now())
+        # print(type(self.access_token_time_out))
+        # print(type(datetime.now))
+        access_token_time_out = datetime.now()
 
     def _check_connect_xero(self):
         for rec in self:
@@ -55,6 +65,8 @@ class SStoreInfo(models.Model):
         }
 
     def refresh_access_xero(self):
+        self._compute_time_out()
+        print(self.access_token_time_out)
         client_id = self.env['ir.config_parameter'].sudo().get_param('xero.api_key')
         client_secret = self.env['ir.config_parameter'].sudo().get_param('xero.secret_key')
         refresh_token = self.xero_refresh_token
@@ -66,9 +78,12 @@ class SStoreInfo(models.Model):
         }
         data = {
             "grant_type": "refresh_token",
+            "client_id": self.env['ir.config_parameter'].sudo().get_param('xero.api_key'),
             "refresh_token": refresh_token,
         }
+        data = urlencode(data)
         response = requests.post(enpoint, headers=header, data=data)
+        print(response.content)
         if response.ok:
             vals = {}
             data = response.json()

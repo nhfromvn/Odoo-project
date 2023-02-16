@@ -30,22 +30,22 @@ const userAction = async () => {
     xmlhttp.onload = () => {
         data = JSON.parse(xmlhttp.response);
         discount_price = data.best_discount.price_discount;
-        total_price = data.best_discount.total_price
+        // total_price = data.best_discount.total_price
         combo_name = data.best_discount.combo_name
+        console.log(myJson.total_price / 100)
+        total_price = myJson.total_price / 100 - discount_price
         var dE = document.getElementsByClassName("cart__footer")[0];
 
         if (dE) {
             var dV = `<div class="js-contents">
                         <div class="totals">
-                            <h2 class="totals__subtotal"><b>Bạn có 1 ưu đãi ${combo_name}</b> </h2>
+                            <h2><b>Bạn có 1 ưu đãi ${combo_name}</b> </h2>
                         </div>
                     </div>
                     <div class="js-contents">
-                        <div class="totals">
-                        <h2 class="totals__subtotal">Khi áp dụng duoc giam</h2>
-                            <p class="totals__subtotal-value">${discount_price} VND con</p>
-                            <p class="totals__subtotal-value> ${total_price}</p>
-                            
+                        <div class="combo">
+                        <h2 class="combo_description">Khi áp dụng duoc giam</h2>
+                            <p class="combo_price">${discount_price} VND con ${total_price} VND</p>                            
                             <button id="apply_dicount" class="cart__checkout-button button"> Apply</button>
                         </div>
                     </div>`
@@ -121,7 +121,7 @@ const userAction2 = async () => {
                                             </div>`
                             for (let product_line of combo.product_lines) {
                                 console.log(product_line)
-                                            tag.innerHTML += `</div>
+                                tag.innerHTML += `</div>
                                             <div>ban duoc giam ${product_line.discount_value} % cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
                                             </div>`
                             }
@@ -135,7 +135,7 @@ const userAction2 = async () => {
                                             <h2 class="totals__subtotal">Combo: ${combo.name}</h2>                         
                                             </div>`
                             for (let product_line of combo.product_lines) {
-                                        tag.innerHTML += `</div>
+                                tag.innerHTML += `</div>
                                                         <div>ban duoc giam ${product_line.discount_value} vnd cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
                                                         </div>`
                             }

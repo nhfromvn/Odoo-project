@@ -64,12 +64,6 @@
                   action="shopify_test_module.menu_root_client_xero_action"
                   parent="shopify_test_module.menu_root_client"/>
 
-        <!--Discount-->
-        <record id='menu_root_client_discount_action' model='ir.actions.act_window'>
-            <field name="name">Shopify Action Window</field>
-            <field name="res_model">shopify.discount</field>
-            <field name="view_mode">tree,form</field>
-        </record>
 
         <record id="menu_root_client_xero_action_form" model="ir.ui.view">
             <field name="name">Shopify App</field>
@@ -95,49 +89,5 @@
                 </form>
             </field>
         </record>
-
-        <record id='menu_root_client_discount_bundle_settings' model='ir.actions.act_window'>
-            <field name="name">Shopify Action Window</field>
-            <field name="res_model">shopify.discount.settings</field>
-            <field name="view_mode">form</field>
-        </record>
-
-        <record id='menu_root_client_discount_bundle_report' model='ir.actions.act_window'>
-            <field name="name">Shopify Action Window</field>
-            <field name="res_model">shopify.discount.report</field>
-            <field name="view_mode">form</field>
-        </record>
-
-         <record id="menu_root_discount_report_action_form" model="ir.ui.view">
-            <field name="name">Shopify App</field>
-            <field name="model">shopify.shop.xero</field>
-            <field name="arch" type="xml">
-                <form string="Shopify">
-                    <sheet>
-                        <group>
-                            <field name="date_start"/>
-                            <field name="date_end"/>
-                            <field name="discount_id"/>
-                        </group>
-                        <group>
-                            <field name="data" widget="discount_graph"/>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-         </record>
-
-
-        <menuitem name="Discount" id="menu_root_client_discount" sequence="310"
-                  parent="shopify_test_module.menu_root_client"/>
-        <menuitem name="Discount Bundle" id="menu_root_client_discount_bundle" sequence="310"
-                  action="shopify_test_module.menu_root_client_discount_action"
-                  parent="shopify_test_module.menu_root_client_discount"/>
-        <menuitem name="Discount Bundle Settings" id="menu_root_client_discount_settings" sequence="310"
-                  action="shopify_test_module.menu_root_client_discount_bundle_settings"
-                  parent="shopify_test_module.menu_root_client_discount"/>
-        <menuitem name="Discount Bundle Report" id="menu_root_client_discount_report" sequence="310"
-                  action="shopify_test_module.menu_root_client_discount_bundle_report"
-                  parent="shopify_test_module.menu_root_client_discount"/>
     </data>
 </odoo>
