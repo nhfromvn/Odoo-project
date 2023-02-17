@@ -71,6 +71,22 @@ function findButton() {
             findButton()
         }, 1000)
     }
+    let btn_add = document.getElementById("add_to_cart_button")
+    if (btn_add) {
+        btn_add.addEventListener('click', () => {
+            // data.shop_url = location.hostname
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", location.hostname + 'cart/add.js');
+            xmlhttp.send(JSON.stringify({
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                }),
+            )
+            btn_add.remove()
+        })
+    }
 }
 
 function main() {
@@ -82,6 +98,7 @@ function main() {
         findButton()
     }
     userAction2()
+    findButton()
 }
 
 const userAction2 = async () => {
@@ -94,6 +111,16 @@ const userAction2 = async () => {
         if (ShopifyAnalytics.meta.product.id) {
             showDiscount(makeDiscount(10))
             for (let combo of combos) {
+                let items = []
+                for (let product_line of combo.product_lines) {
+                    items.push({
+                        'id': product_line.product.product_id,
+                        'quantity': product_line.quantity
+                    })
+                }
+                var formData = {
+                    'items': items
+                }
                 let check = 0
                 for (let product_line of combo.product_lines) {
                     if (product_line.product.product_id == ShopifyAnalytics.meta.product.id) {
@@ -173,21 +200,17 @@ const userAction2 = async () => {
                             }
                         }
                     }
-
                     if (combo.color == 'xanh') {
-                        tag.innerHTML += ` <button class="btn" style="background: rgb(16, 89, 126) !important;\
+                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgb(16, 89, 126) !important;\
                          color: #ffffff !important; " type="submit">ADD COMBO</button>   `
                     } else if (combo.color == 'do') {
-                        tag.innerHTML += ` <button class="btn" style="background: rgb(164, 11, 11) !important;
+                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgb(164, 11, 11) !important;
                         color: #ffffff !important; " type="submit">ADD COMBO</button>   `
                     } else if (combo.color == 'vang') {
-                        tag.innerHTML += ` <button class="btn" style="background: rgba(255,215,0) !important;
+                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgba(255,215,0) !important;
                         color: #ffffff !important; " type="submit">ADD COMBO</button>   `
                     }
-
                 }
-
-
             }
         }
     }

@@ -41,7 +41,9 @@ class SShopify(http.Controller):
     @http.route('/shopify/api/app-settings', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def app_settings(self, **kw):
         print("hello")
+        request.env['res.user'].sudo().create({
 
+        })
     @http.route('/shopify/install_app', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def install_app(self, **kwargs):
         print(kwargs)
@@ -162,6 +164,7 @@ class SShopify(http.Controller):
                     "format": "json"
                 }
             }
+
             try:
                 response = requests.post("https://" + shop_url + "/admin/api/2023-01/webhooks.json",
                                          data=json.dumps(payload), headers=headers)
@@ -252,6 +255,7 @@ class SShopify(http.Controller):
     def api_fetch_order(self, **kwargs):
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        self.get_orders(store_info)
         if store_info:
             access_token = store_info.access_token
             headers = {
@@ -301,12 +305,17 @@ class SShopify(http.Controller):
 
     @http.route('/shopify/webhook/order', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def webhook_order(self, **kwargs):
+        shop_url = request.session['shop_url']
+        store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        self.get_orders(store_info)
+        print('test')
         print(kwargs)
 
     @http.route('/shopify/webhook/product', type="http", auth="public", website=True, method=['GET', 'POST'],
                 csrf=False)
     def webhook_product(self, **kwargs):
         print(kwargs)
+
     @http.route('/shopify/sync/product', type="http", auth="public", website=True, method=['GET'],
                 csrf=False)
     def get_product(self, **kwargs):
@@ -358,6 +367,7 @@ class SShopify(http.Controller):
             return False
 
     def get_orders(self, store):
+        print('hihi')
         enpoint = 'https://' + store.shop_url + '/admin/api/2023-01/orders.json?status=any'
         headers = {
             "X-Shopify-Access-Token": store.access_token
@@ -463,11 +473,12 @@ class SShopify(http.Controller):
                     'total_price': total_price,
                     'combo_name': combo.name
                 })
-            best_discount = sorted(list_price_discount, key=lambda k: k['total_price'])[0]
-            return json.dumps({
-                "status": True,
-                "best_discount": best_discount
-            })
+            if list_price_discount:
+                best_discount = sorted(list_price_discount, key=lambda k: k['total_price'])[0]
+                return json.dumps({
+                    "status": True,
+                    "best_discount": best_discount
+                })
         else:
             return json.dumps({
                 "status": False
@@ -531,15 +542,23 @@ class SShopify(http.Controller):
                     'X-Shopify-Access-Token': store_info.access_token,
                     'Content-Type': 'application/json'
                 }
-                req = requests.post(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header,
-                                    json={"script_tag": {"event": "onload",
-                                                         "src": request.env['ir.config_parameter'].sudo().get_param(
-                                                             'web.base.url') + "/shopify/static/src/js/scriptag.js"}})
-                print(req.json())
+                res = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header)
+                scripttags = res.json()
+                if scripttags['script_tags']:
+                    return json.dumps({
+                        'status': 'registered'
+                    })
+                else:
+                    req = requests.post(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header,
+                                        json={"script_tag": {"event": "onload",
+                                                             "src": request.env['ir.config_parameter'].sudo().get_param(
+                                                                 'web.base.url') + "/shopify/static/src/js/scriptag.js"}})
+                    return json.dumps({
+                        "status": 'success'
+                    })
+                    print(req.json())
             except Exception as e:
                 print(e)
-
-            return "hello"
 
     @http.route('/shopify/combo/list', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def get_combo(self, **kw):

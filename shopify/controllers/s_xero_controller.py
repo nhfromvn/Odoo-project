@@ -236,8 +236,9 @@ class SXeroController(http.Controller):
                         if 'TokenExpired' in Invoices['Detail']:
                             store_info.refresh_access_xero()
                             self.sync_order()
-                        else:
                             print('error')
+                        else:
+                            print('not found')
             else:
                 print('error')
         else:
@@ -270,7 +271,7 @@ class SXeroController(http.Controller):
                         "Description": "hello",
                         "Quantity": item.quantity,
                         "UnitAmount": item.price,
-                        "AccountCode": "200",
+                        "Account": {"AccountID": kwargs["account_id"]},
                         "TaxType": "NONE",
                         "LineAmount": item.quantity * item.price,
                     })

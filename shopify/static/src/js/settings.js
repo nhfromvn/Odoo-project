@@ -1,25 +1,30 @@
-function main(){
+function main() {
     console.log("klasjflsaj")
 }
-main()
-// axios.get("/shopify/combo/list").then((res) => {
-//
-// })
-//
-// var settings = new Vue({
-//     el: '#content',
-//     data :{},
-//     method : {
-//           onSelect(id) {
-//             settings.combo.forEach((e) => {
-//                 if (e.id == id) {
-//
-//                     settings.select = e.id
-//                     settings.value.id = e.id
-//                     settings.value.name = e.name
-//                 }
-//             })
-//     },
 
-//
-// })
+main()
+var script_tags = new Vue({
+    el: '#script_tags-button',
+    delimiters: ['[[', ']]'],
+    data: {
+        registered: null,
+    },
+    methods:
+        {
+            register() {
+                axios.get('/shopify/register_script-tags').then(
+                    function (res) {
+                        if (res.data.status == 'success'){
+                            script_tags.registered = 1
+                        }
+                        else if(res.data.status == 'registered'){
+                            alert("khong the dang ki lai")
+                            script_tags.registered = 1
+                        }
+                            })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+        }
+});

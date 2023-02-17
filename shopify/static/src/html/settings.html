@@ -57,15 +57,11 @@
     </div>
 </nav>
 <div id="content">
-    <table class="table table-bordered xero" v-bind:hidden="combo.length == 0">
-        <tr v-for="rec in combo">
+    <div id="script_tags-button">
+          <input v-if="!registered" type="button" value="Register Scritpt Tag" v-on:click="register()">
+            <p v-if="registered">da dang ki</p>
+    </div>
 
-            <td v-if="select_id == rec.id" class="td-active" v-bind:data="rec.id" @click="onSelect(rec.id)">
-                [[rec.name]]
-            </td>
-            <td v-else v-bind:data="rec.id" @click="onSelect(rec.id)">[[rec.name]]</td>
-        </tr>
-    </table>
 </div>
 
 
