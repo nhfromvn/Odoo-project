@@ -32,7 +32,6 @@
         "views/s_products.xml",
         "views/s_combo.xml",
         "views/s_combo_reprot.xml",
-        # "views/xero_info.xml",
     ],
     # only loaded in demonstration mode
     'demo': [

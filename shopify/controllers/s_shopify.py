@@ -9,6 +9,7 @@ import os
 import jinja2
 from pytz import timezone
 from datetime import datetime
+import shopify, binascii, json, string, random
 
 path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../static/src/html'))
 loader = jinja2.FileSystemLoader(path)
@@ -38,13 +39,13 @@ class SShopify(http.Controller):
         res = template.render()
         return res
 
-    @http.route('/shopify/api/app-settings', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/api/app-settings', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def app_settings(self, **kw):
         print("hello")
-        request.env['res.user'].sudo().create({
+        current_company = request.env['res.company'].sudo().search([('name', '=', kw['shop'])], limit=1)
+        current_user = request.env['res.users'].sudo().search([('login', '=', kw['shop'])], limit=1)
 
-        })
-    @http.route('/shopify/install_app', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/install_app', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def install_app(self, **kwargs):
         print(kwargs)
         shop_url = kwargs['shop']
@@ -55,7 +56,7 @@ class SShopify(http.Controller):
         url = f"https://{shop_url}/admin/oauth/authorize?client_id={api_key}&scope={SCOPES}&redirect_uri={callback}&state={state}&grant_options[]=per-user"
         return werkzeug.utils.redirect(url)
 
-    @http.route('/shopify/oauth/callback', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/oauth/callback', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def callback(self, **kwargs):
         print(kwargs)
         if 'code' in kwargs:
@@ -98,14 +99,54 @@ class SShopify(http.Controller):
                     store_exist.write(vals)
                 else:
                     store_exist = request.env['s.store.info'].sudo().create(vals)
+                current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
+                current_user = request.env['res.users'].sudo().search([('login', '=', kwargs['shop'])], limit=1)
+                password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
+                print(password_generate)
+                if not current_company:
+                    current_company = request.env['res.company'].sudo().create({
+                        'logo': False,
+                        'currency_id': 2,
+                        'sequence': 10,
+                        'name': kwargs['shop'],
+                        'street': False,
+                        'street2': False,
+                        'city': False,
+                        'state_id': False,
+                        'zip': False,
+                        'country_id': False,
+                        'phone': False,
+                        'email': False,
+                        'website': False,
+                        'vat': False,
+                        'company_registry': False,
+                        'parent_id': False,
+                    })
 
+                if not current_user:
+                    current_user = request.env['res.users'].sudo().create({
+                        'company_ids': [[6, False, [current_company.id]]],
+                        'company_id': current_company.id,
+                        'active': True,
+                        'lang': 'en_US',
+                        'tz': 'Europe/Brussels',
+                        'image_1920': False,
+                        '__last_update': False,
+                        'name': kwargs['shop'],
+                        'email': data['associated_user']['email'],
+                        'login': kwargs['shop'],
+                        'password': password_generate,
+                        'action_id': False,
+                    })
+                print(current_user.password)
                 return werkzeug.utils.redirect(base_url + '/shopify')
+
                 # except Exception as e:
                 #     print(e)
         else:
             return json.dumps({"error": "No code in response"})
 
-    @http.route('/shopify/order/list', type="http", auth="public", method=['GET'], csrf=False)
+    @http.route('/shopify/order/list', type="http", auth="user", method=['GET'], csrf=False)
     def order_list(self):
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
@@ -138,7 +179,7 @@ class SShopify(http.Controller):
                 "error": "Not found store"
             })
 
-    @http.route('/shopify/register-webhook', type="json", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/register-webhook', type="json", auth="user", website=True, method=['GET'], csrf=False)
     def register_webhook(self, topic, **kwargs):
         try:
             shop_url = request.session['shop_url']
@@ -189,7 +230,7 @@ class SShopify(http.Controller):
     #              "LineAmount": 40}], "Date": "2019-03-11", "DueDate": "2018-12-10", "Reference": "Website Design",
     #                               "Status": "AUTHORISED"}]}
 
-    @http.route('/shopify/webhook/list', type="json", auth="public", website=True, method=['GET', 'POST'],
+    @http.route('/shopify/webhook/list', type="json", auth="user", website=True, method=['GET', 'POST'],
                 csrf=False)
     def webhook_list(self, **kwargs):
 
@@ -211,7 +252,7 @@ class SShopify(http.Controller):
         except Exception as e:
             print(e)
 
-    @http.route('/shopify/webhook/delete', type="http", auth="public", website=True, method=['GET'],
+    @http.route('/shopify/webhook/delete', type="http", auth="user", website=True, method=['GET'],
                 csrf=False)
     def webhook_delete(self, id_webhook, **kwargs):
         try:
@@ -237,7 +278,7 @@ class SShopify(http.Controller):
         except Exception as e:
             print(e)
 
-    @http.route('/shopify/price_rules/list', type="json", auth="public", website=True, method=['GET', 'POST'],
+    @http.route('/shopify/price_rules/list', type="json", auth="user", website=True, method=['GET', 'POST'],
                 csrf=False)
     def price_rules_list(self, **kwargs):
         shop_url = request.session['shop_url']
@@ -278,7 +319,7 @@ class SShopify(http.Controller):
                 if response.ok:
                     return json.dumps(response.json())
 
-    @http.route('/shopify/api/fetch-product', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/api/fetch-product', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def api_fetch_product(self, **kwargs):
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
@@ -303,7 +344,7 @@ class SShopify(http.Controller):
                 if response.ok:
                     return json.dumps(response.json())
 
-    @http.route('/shopify/webhook/order', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/webhook/order', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def webhook_order(self, **kwargs):
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
@@ -311,12 +352,12 @@ class SShopify(http.Controller):
         print('test')
         print(kwargs)
 
-    @http.route('/shopify/webhook/product', type="http", auth="public", website=True, method=['GET', 'POST'],
+    @http.route('/shopify/webhook/product', type="http", auth="user", website=True, method=['GET', 'POST'],
                 csrf=False)
     def webhook_product(self, **kwargs):
         print(kwargs)
 
-    @http.route('/shopify/sync/product', type="http", auth="public", website=True, method=['GET'],
+    @http.route('/shopify/sync/product', type="http", auth="user", website=True, method=['GET'],
                 csrf=False)
     def get_product(self, **kwargs):
         shop_url = request.session['shop_url']
@@ -404,7 +445,7 @@ class SShopify(http.Controller):
                     else:
                         item_exist.create(vals_item)
 
-    @http.route('/shopify/cart/list', type="http", auth="public", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/cart/list', type="http", auth="user", website=True, method=['POST'], csrf=False)
     def get_cart(self, **kw):
         if request.httprequest.data:
             data = json.loads(request.httprequest.data)
@@ -531,7 +572,7 @@ class SShopify(http.Controller):
     #             "status": False
     #         })
 
-    @http.route('/shopify/register_script-tags', type="http", auth="public", website=True, csrf=False)
+    @http.route('/shopify/register_script-tags', type="http", auth="user", website=True, csrf=False)
     def register_script_tags(self, **kw):
 
         shop_url = request.session['shop_url']
@@ -560,7 +601,7 @@ class SShopify(http.Controller):
             except Exception as e:
                 print(e)
 
-    @http.route('/shopify/combo/list', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/combo/list', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def get_combo(self, **kw):
         if request.httprequest.data:
             shop_url = request.httprequest.data.decode('ascii')
@@ -604,7 +645,7 @@ class SShopify(http.Controller):
                     result.append(vals)
                 return json.dumps(result)
 
-    @http.route('/shopify/combo/update', type="json", auth="public", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/combo/update', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def post_cart(self, **kw):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)
@@ -672,7 +713,7 @@ class SShopify(http.Controller):
     #             "status": True
     #         }
 
-    @http.route('/shopify/combo/unlink', type="json", auth="public", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/combo/unlink', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def unlink_combo(self):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)
@@ -687,7 +728,7 @@ class SShopify(http.Controller):
                     "status": False
                 }
 
-    @http.route('/shopify/combo/apply', type="http", auth="public", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/combo/apply', type="http", auth="user", website=True, method=['POST'], csrf=False)
     def apply_combo(self):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)
@@ -708,7 +749,7 @@ class SShopify(http.Controller):
                 "status": True
             })
 
-    @http.route('/shopify/combo/report', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/combo/report', type="http", auth="user", website=True, method=['GET'], csrf=False)
     def combo_report(self):
         shop = request.session['shop_url']
         store_exist = request.env['s.store.info'].sudo().search([('shop_url', '=', shop)], limit=1)

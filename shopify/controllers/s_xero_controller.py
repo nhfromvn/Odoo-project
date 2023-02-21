@@ -216,7 +216,7 @@ class SXeroController(http.Controller):
                         },
                         "LineItems": items,
                         "Date": "2019-03-11",
-                        "DueDate": "2018-12-10",
+                        "DueDate": datetime.today().strftime("%Y-%m-%d"),
                         "Reference": "Website Design",
                         "Status": "AUTHORISED"
                     })
@@ -271,8 +271,8 @@ class SXeroController(http.Controller):
                         "Description": "hello",
                         "Quantity": item.quantity,
                         "UnitAmount": item.price,
-                        "Account": {"AccountID": kwargs["account_id"]},
                         "TaxType": "NONE",
+                        "AccountCode": "200",
                         "LineAmount": item.quantity * item.price,
                     })
             else:
@@ -286,7 +286,7 @@ class SXeroController(http.Controller):
                          "ContactID": kwargs['contact_id']
                      }, "LineItems": items,
                      "Date": "2019-03-11",
-                     "DueDate": "2018-12-10",
+                     "DueDate": datetime.today().strftime("%Y-%m-%d"),
                      # "Reference": "Website Design",
                      "Status": "AUTHORISED"
                      }
@@ -295,6 +295,7 @@ class SXeroController(http.Controller):
             url = 'https://api.xero.com/api.xro/2.0/Invoices'
             response = requests.post(url, headers=header, json=payload)
             invoices = response.json()
+            print(invoices)
             if response.status_code != 404:
                 if response.ok:
                     print(invoices)
