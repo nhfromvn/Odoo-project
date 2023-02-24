@@ -17,12 +17,11 @@ function refreshData() {
     })
     axios.get("/shopify/combo/report").then((res) => {
         let data = res.data.report
-        console.log(data)
         data.forEach((rec) => {
             cart.label.push(rec.combo_name)
-            cart.data.push(rec.total_apply)
-            console.log(cart.data)
-            console.log(cart.label)
+            cart.total_apply.push(rec.total_apply)
+            cart.total_sale.push(rec.total_sale)
+            console.log(data)
         })
     })
 }
@@ -51,37 +50,59 @@ function chart() {
     ctx.canvas.width = 300;
     ctx.canvas.height = 300;
     const myChart = new Chart(ctx, {
-        type: 'bar',
+
         data: {
             labels: cart.label,
             datasets: [{
-
-                label: 'Combo',
-                data: cart.data,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
+                type: 'bar',
+                label: 'Total Apply',
+                data: cart.total_apply,
                 borderWidth: 5
-            }]
+            },
+                {
+                    type: 'bar',
+                    yAxisID: 'y1',
+                    label: 'Total Sale',
+                    data: cart.total_sale,
+                    borderWidth: 5
+                }
+            ],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
         },
         options: {
             scales: {
 
                 y: {
+                    title: {
+                        display: true,
+                        text: 'Total Apply',
+                    },
+
                     beginAtZero: true
+                },
+                y1: {
+                     title: {
+                        display: true,
+                        text: 'Total Sale',
+                    },
+                    beginAtZero: true,
+                    display: true,
+                    position: 'right',
                 }
             }
         }
@@ -101,7 +122,8 @@ var cart = new Vue({
     data: {
         style: null,
         combo: [],
-        data: [],
+        total_apply: [],
+        total_sale: [],
         label: [],
         value: {
             id: null,
