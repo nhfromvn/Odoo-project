@@ -13,6 +13,7 @@
                                 <field name="store_id"/>
                                 <field name="combo_id"/>
                                 <field name="applied"/>
+                                <field name="sale_total"/>
                             </group>
 
                         </group>

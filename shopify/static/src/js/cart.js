@@ -15,28 +15,38 @@ function refreshData() {
         })
         cart.combo = vals
     })
+    axios.get("/shopify/combo/report").then((res) => {
+        let data = res.data.report
+        console.log(data)
+        data.forEach((rec) => {
+            cart.label.push(rec.combo_name)
+            cart.data.push(rec.total_apply)
+            console.log(cart.data)
+            console.log(cart.label)
+        })
+    })
 }
 
-function findProductWithName(name) {
+function findProductWithId(id) {
     for (let product of cart.products) {
-        if (name == product.name) {
+        if (id == product.product_id) {
             return product
         }
     }
 }
 
-axios.get("/shopify/combo/report").then((res) => {
-    let data = res.data.report
+function findVariantWithId(id, product) {
+    console.log(product)
+    for (let variant of product.variants) {
+        if (id == variant.variant_id) {
+            return variant
+            break
+        }
+    }
+}
 
-    data.forEach((rec) => {
-        cart.label.push(rec.combo_name)
-        cart.data.push(rec.total_apply)
-    })
-})
 
 function chart() {
-
-
     const ctx = document.getElementById('myChart').getContext('2d');
     ctx.canvas.width = 300;
     ctx.canvas.height = 300;
@@ -96,12 +106,14 @@ var cart = new Vue({
         value: {
             id: null,
             name: null,
-            product_name: null,
+            product_id: null,
+            product: null,
             is_percent: null,
             type_apply: null,
             quantity_condition: null,
             product_lines: [],
-            discount_value : null
+            discount_value: null,
+            product_variant: null
         },
         products: null,
         select_id: 0
@@ -145,11 +157,14 @@ var cart = new Vue({
             cart.value = {
                 id: null,
                 name: null,
-                product_condition: null,
+                product_id: null,
+                product: null,
                 is_percent: null,
                 type_apply: null,
                 quantity_condition: null,
                 product_lines: [],
+                discount_value: null,
+                product_variant: null
             }
         },
         onCheck(value) {
@@ -179,20 +194,26 @@ var cart = new Vue({
             }
         },
         onAdd() {
-            line_product = {
-                product: findProductWithName(cart.value.product_name),
-                quantity: cart.value.quantity_condition,
-                discount_value: cart.value.discount_value
+            if (!cart.value.product_variant) {
+                alert("chua chon variant")
             }
-            console.log(line_product)
-            console.log(cart.value.product_lines)
+            let variant = findVariantWithId(cart.value.product_variant, cart.value.product)
+            cart.value.product.variant_id = variant.variant_id
+            line_product = {
+                product: cart.value.product,
+                quantity: cart.value.quantity_condition,
+                discount_value: cart.value.discount_value,
+                variant_id: variant.variant_id,
+                variant_name: variant.variant_name
+            }
             let check = 0
             for (let line of cart.value.product_lines) {
-                console.log(line)
-                if (line.product.product_id==line_product.product.product_id) {
+                if (line.variant_id == line_product.variant_id) {
                     check = 1
                     line.quantity = line_product.quantity
                     line.discount_value = line_product.discount_value
+                    // line.variant_id = line_product.variant_id
+                    // line.variant_name = line_product.variant_name
                     break
                 } else {
                     check = 0
@@ -200,15 +221,18 @@ var cart = new Vue({
             }
             if (!check) {
                 cart.value.product_lines.push(line_product)
-                console.log(cart.value)
-            }
-            else{
 
+            } else {
             }
-            // location.reload();
+            console.log(line_product)
+            console.log(cart.value.product_lines)
         },
-        test: function () {
-
+        selectProduct: function () {
+            console.log('haha')
+            cart.value.product = findProductWithId(cart.value.product_id)
+            if (cart.value.product.variants.length == 1) {
+                cart.value.product_variant = cart.value.product.variant_id
+            }
 
         }
     }

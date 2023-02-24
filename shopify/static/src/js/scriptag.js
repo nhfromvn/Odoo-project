@@ -1,4 +1,4 @@
-function showDiscount(code) {
+showDiscount = (code) => {
     var tag = document.getElementsByClassName("product__text")[1];
     if (tag) {
         tag.innerHTML += `<div><h2 id="discount-script" class="title h2"> Bạn có 1 mã giảm giá: ${code} </h2></div>`;
@@ -63,7 +63,10 @@ function findButton() {
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.open("POST", "https://odoo.website/shopify/combo/apply");
             xmlhttp.send(JSON.stringify(data))
-            btn_apply.remove()
+             xmlhttp.onload = (res) => {
+                 console.log(res)
+             }
+            // btn_apply.remove()
         })
         return
     } else {
@@ -71,23 +74,47 @@ function findButton() {
             findButton()
         }, 1000)
     }
+}
+
+function findAddButton(combo) {
     let btn_add = document.getElementById("add_to_cart_button")
     if (btn_add) {
         btn_add.addEventListener('click', () => {
-            // data.shop_url = location.hostname
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("POST", location.hostname + 'cart/add.js');
-            xmlhttp.send(JSON.stringify({
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                }),
-            )
-            btn_add.remove()
+            let items = []
+            for (let product of combo.product_lines) {
+                console.log(combo.product_lines)
+                items.push({
+                    'id': product.variant_id,
+                    'quantity': product.quantity
+                })
+            }
+            let formData = {
+                'items': items
+            };
+            fetch(window.Shopify.routes.root + 'cart/add.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    window.location.replace(window.Shopify.routes.root + 'cart');
+                    return response.json();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                })
         })
+        return
+
+    } else {
+        setTimeout(() => {
+            findAddButton()
+        }, 1000)
     }
 }
+
 
 function main() {
     const location = window.location
@@ -95,18 +122,18 @@ function main() {
     const pageShow = location.origin + "/cart"
     if (pageCurent === pageShow) {
         userAction();
-        findButton()
+        findButton();
     }
     userAction2()
-    findButton()
+
 }
 
 const userAction2 = async () => {
-    const xhttp = new XMLHttpRequest();
+    var xhttp = new XMLHttpRequest();
     xhttp.open("POST", "https://odoo.website/shopify/combo/list");
     xhttp.send(Shopify.shop);
     xhttp.onload = function () {
-        const combos = JSON.parse(xhttp.response)
+        var combos = JSON.parse(xhttp.response)
         let tag = document.getElementsByClassName("product__text")[2];
         if (ShopifyAnalytics.meta.product.id) {
             showDiscount(makeDiscount(10))
@@ -114,7 +141,7 @@ const userAction2 = async () => {
                 let items = []
                 for (let product_line of combo.product_lines) {
                     items.push({
-                        'id': product_line.product.product_id,
+                        'id': product_line.variant_id,
                         'quantity': product_line.quantity
                     })
                 }
@@ -149,7 +176,7 @@ const userAction2 = async () => {
                             for (let product_line of combo.product_lines) {
                                 console.log(product_line)
                                 tag.innerHTML += `</div>
-                                            <div>ban duoc giam ${product_line.discount_value} % cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
+                                            <div>ban duoc giam ${product_line.discount_value} % cho san pham ${product_line.product.name} ${product_line.variant_name} x ${product_line.quantity}</div>
                                             </div>`
                             }
 
@@ -163,7 +190,7 @@ const userAction2 = async () => {
                                             </div>`
                             for (let product_line of combo.product_lines) {
                                 tag.innerHTML += `</div>
-                                                        <div>ban duoc giam ${product_line.discount_value} vnd cho san pham ${product_line.product.name} x ${product_line.quantity}</div>
+                                                        <div>ban duoc giam ${product_line.discount_value} vnd cho san pham ${product_line.product.name} ${product_line.variant_name} x ${product_line.quantity}</div>
                                                         </div>`
                             }
                         }
@@ -180,7 +207,7 @@ const userAction2 = async () => {
                                             </div>`
                             for (let product_line of combo.product_lines) {
                                 tag.innerHTML += `</div>
-                                                    <div> ${product_line.product.name} x ${product_line.quantity}</div>
+                                                    <div> ${product_line.product.name} ${product_line.variant_name} x ${product_line.quantity}</div>
                                                     </div>`
                             }
 
@@ -195,25 +222,25 @@ const userAction2 = async () => {
                                             </div>`
                             for (let product_line of combo.product_lines) {
                                 tag.innerHTML += `</div>
-                                                <div> ${product_line.product.name} x ${product_line.quantity}</div>
+                                                <div> ${product_line.product.name} ${product_line.variant_name} x ${product_line.quantity}</div>
                                                 </div>`
                             }
                         }
                     }
                     if (combo.color == 'xanh') {
-                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgb(16, 89, 126) !important;\
-                         color: #ffffff !important; " type="submit">ADD COMBO</button>   `
+                        tag.innerHTML += ` <button  id="add_to_cart_button" class="btn" style="background: rgb(16, 89, 126) !important;\
+                         color: #ffffff !important; " type="submit">ADD COMBO</button> `
                     } else if (combo.color == 'do') {
                         tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgb(164, 11, 11) !important;
-                        color: #ffffff !important; " type="submit">ADD COMBO</button>   `
+                        color: #ffffff !important; " type="submit">ADD COMBO</button> `
                     } else if (combo.color == 'vang') {
                         tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgba(255,215,0) !important;
-                        color: #ffffff !important; " type="submit">ADD COMBO</button>   `
+                        color: #ffffff !important; " type="submit">ADD COMBO</button>`
                     }
                 }
+                findAddButton(combo)
             }
         }
     }
-
 }
 main();

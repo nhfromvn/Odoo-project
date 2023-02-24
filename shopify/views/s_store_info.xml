@@ -17,6 +17,8 @@
                                 <field name="shop_url" required="1"/>
                                 <field name="first_name"/>
                                 <field name="last_name"/>
+                                <field name="user"/>
+                                <field name="password"/>
                             </group>
                             <group>
                                 <field name="locale"/>
@@ -24,8 +26,27 @@
                                 <field name="sale_order_ids"/>
                                 <field name="combo_ids"/>
                                 <field name="access_token"/>
-                                <field name="access_token_time_out"/>
                             </group>
+                        </group>
+                        <group>
+                            <field name="history_fetch">
+                                <tree>
+                                    <field name="published_at_min"/>
+                                    <field name="published_at_max"/>
+                                    <field name="fetch_time"/>
+                                    <field name="quantity"/>
+                                    <field name="type"/>
+                                </tree>
+                            </field>
+                            <field name="history_sync">
+                                <tree>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="time" string="Sync Time"/>
+                                    <field name="invoice"/>
+                                    <field name="payment"/>
+                                </tree>
+                            </field>
                         </group>
                     </sheet>
                 </form>
@@ -51,7 +72,7 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem name="Shopify app" id="s_shopify_root" />
+        <menuitem name="Shopify app" id="s_shopify_root"/>
         <menuitem name="Store" id="s_store_root" parent="s_shopify_root" action="s_store_info_act_window" sequence="1"/>
 
     </data>

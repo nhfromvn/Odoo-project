@@ -65,7 +65,7 @@
             </table>
 
             <div v-if="isSelected">
-                 <label>List Contact</label>
+                <label>List Contact</label>
                 <select class="setting-input-input" v-model="contactId">
 
                     <option v-for="contact in listContacts" v-bind:value="contact.ContactID"
@@ -73,8 +73,8 @@
                     </option>
                 </select>
             </div>
-              <div v-if="isSelected">
-                 <label>List Accounts</label>
+            <div v-if="isSelected">
+                <label>List Accounts</label>
                 <select class="setting-input-input" v-model="accountId">
 
                     <option v-for="account in listAccounts" v-bind:value="account.AccountID"
@@ -88,14 +88,21 @@
 
     <div class="content-mid">
         <div class="inputs-wrapper">
-            <input type="date" placeholder="dd-mm-yyyy" v-model="timePicker.startTime">
-            <input type="date" placeholder="dd-mm-yyyy" v-model="timePicker.endTime">
+
             <!--                    <input type="button" value="Fetch" v-on:click="fetchProducts(timePicker.startTime, timePicker.endTime)">-->
             <!--                    <input type="button" value="Clear history" v-on:click="clearHistory()">-->
             <!--                    <div class="value-fetch">-->
             <!--                        <span>Quantity fetch: [[totalFetch]]</span>-->
             <!--                    </div>-->
             <div id="xero-orders">
+                <div style="display: flex">
+                    <h5 style="color: #ffffff">Start time: </h5>
+                    <input type="date" placeholder="dd-mm-yyyy"
+                           v-model="timePicker.startTime">
+                    <h5 style="color: #ffffff">End time: </h5>
+                    <input type="date" placeholder="dd-mm-yyyy"
+                           v-model="timePicker.endTime">
+                </div>
                 <table class="table table-striped table-bordered fetch-history">
                     <tbody>
                     <tr>
@@ -110,7 +117,7 @@
                     </tr>
                     </tbody>
                 </table>
-                  <button class="button-action button-action-register" v-on:click="syncAll()">Sync all order</button>
+                <button class="button-action button-action-register" v-on:click="syncAll()">Sync all order</button>
             </div>
         </div>
     </div>

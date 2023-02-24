@@ -7,4 +7,5 @@ class SComboReport(models.Model):
     _rec_name = 'combo_id'
     combo_id = fields.Many2one('s.combo')
     store_id = fields.Many2one('s.store.info')
+    sale_total = fields.Float()
     applied = fields.Float()

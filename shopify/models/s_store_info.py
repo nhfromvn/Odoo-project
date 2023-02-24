@@ -1,5 +1,6 @@
 from base64 import b64encode
-
+import json
+import os
 import werkzeug.utils
 from xero import Xero
 from xero.constants import XeroScopes
@@ -26,14 +27,12 @@ class SStoreInfo(models.Model):
                              compute='_check_connect_xero')
     sale_order_ids = fields.One2many("s.store.orders", "s_store_id")
     combo_ids = fields.One2many("s.combo", "store_id")
-    access_token_time_out = fields.Datetime()
 
-    def _compute_time_out(self):
-        # print(self.access_token_time_out)
-        # print(datetime.now())
-        # print(type(self.access_token_time_out))
-        # print(type(datetime.now))
-        access_token_time_out = datetime.now()
+    user = fields.Many2one('res.users')
+    password = fields.Char()
+    history_sync = fields.One2many("s.history.sync", "store_id")
+    history_fetch = fields.One2many("s.history.fetch", "store_id")
+
 
     def _check_connect_xero(self):
         for rec in self:
@@ -65,8 +64,6 @@ class SStoreInfo(models.Model):
         }
 
     def refresh_access_xero(self):
-        self._compute_time_out()
-        print(self.access_token_time_out)
         client_id = self.env['ir.config_parameter'].sudo().get_param('xero.api_key')
         client_secret = self.env['ir.config_parameter'].sudo().get_param('xero.secret_key')
         refresh_token = self.xero_refresh_token

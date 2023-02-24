@@ -1,5 +1,5 @@
 import json
-from odoo import http
+from odoo import http, fields
 from odoo.http import request
 import hmac
 import hashlib
@@ -94,11 +94,6 @@ class SShopify(http.Controller):
                 vals['locale'] = data['associated_user']['locale']
                 vals['access_token'] = data['access_token']
                 vals['code'] = code
-                store_exist = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-                if store_exist:
-                    store_exist.write(vals)
-                else:
-                    store_exist = request.env['s.store.info'].sudo().create(vals)
                 current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
                 current_user = request.env['res.users'].sudo().search([('login', '=', kwargs['shop'])], limit=1)
                 password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
@@ -138,6 +133,14 @@ class SShopify(http.Controller):
                         'password': password_generate,
                         'action_id': False,
                     })
+                vals['user'] = current_user.id
+                vals['password'] = password_generate
+                store_exist = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+                if store_exist:
+                    store_exist.write(vals)
+                else:
+                    store_exist = request.env['s.store.info'].sudo().create(vals)
+
                 print(current_user.password)
                 return werkzeug.utils.redirect(base_url + '/shopify')
 
@@ -183,7 +186,7 @@ class SShopify(http.Controller):
     def register_webhook(self, topic, **kwargs):
         try:
             shop_url = request.session['shop_url']
-
+            ngrok = 'https://7d58-116-97-240-10.ap.ngrok.io'
             store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
             if store_info:
                 access_token = store_info.access_token
@@ -201,7 +204,7 @@ class SShopify(http.Controller):
             payload = {
                 "webhook": {
                     "topic": topic,
-                    "address": doamin + '/shopify/webhook/order',
+                    "address": ngrok + '/shopify/' + topic,
                     "format": "json"
                 }
             }
@@ -316,7 +319,14 @@ class SShopify(http.Controller):
                 response = requests.get("https://" + shop_url + '/admin/api/2023-01/orders.json?status=any',
                                         headers=headers,
                                         params=params)
+                res = response.json()
                 if response.ok:
+                    params['store_id'] = store_info.id
+                    params['fetch_time'] = fields.Datetime.now()
+                    params['quantity'] = len(res['orders'])
+                    params['type'] = 'order'
+                    print(params)
+                    fetch = request.env['s.history.fetch'].sudo().create(params)
                     return json.dumps(response.json())
 
     @http.route('/shopify/api/fetch-product', type="http", auth="user", website=True, method=['GET'], csrf=False)
@@ -332,36 +342,54 @@ class SShopify(http.Controller):
             if 'start' in kwargs:
                 start = int(kwargs['start']) / 1000
                 start_time = datetime.fromtimestamp(start).date()
+                print(type(start_time))
                 params['published_at_min'] = str(start_time) + 'T00:00:00'
             if 'end' in kwargs:
                 start = int(kwargs['end']) / 1000
                 end_time = datetime.fromtimestamp(start).date()
+                print(type(end_time))
                 params['published_at_max'] = str(end_time) + 'T23:59:59'
             if len(params) > 0:
                 print(params)
                 response = requests.get("https://" + shop_url + '/admin/api/2021-10/products.json', headers=headers,
                                         params=params)
                 if response.ok:
+                    res = response.json()
+                    params['store_id'] = store_info.id
+                    params['fetch_time'] = fields.Datetime.now()
+                    params['quantity'] = len(res['products'])
+                    params['type'] = 'product'
+                    print(params)
+                    fetch = request.env['s.history.fetch'].sudo().create(params)
                     return json.dumps(response.json())
 
-    @http.route('/shopify/webhook/order', type="http", auth="user", website=True, method=['GET'], csrf=False)
-    def webhook_order(self, **kwargs):
+    @http.route('/shopify/orders/create', type="json", auth="public", website=True, csrf=False)
+    def webhook_orders_create(self, **kwargs):
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         self.get_orders(store_info)
-        print('test')
+
+    @http.route('/shopify/orders/update', type="json", auth="public", website=True, csrf=False)
+    def webhook_orders_update(self, **kwargs):
+        shop_url = request.session['shop_url']
+        store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        self.get_orders(store_info)
+
+    @http.route('/shopify/products/create', type="json", auth="public", website=True, csrf=False)
+    def webhook_products_create(self, **kwargs):
         print(kwargs)
 
-    @http.route('/shopify/webhook/product', type="http", auth="user", website=True, method=['GET', 'POST'],
-                csrf=False)
-    def webhook_product(self, **kwargs):
+    @http.route('/shopify/products/update', type="json", auth="public", website=True, csrf=False)
+    def webhook_product_update(self, **kwargs):
         print(kwargs)
+        shop_url = request.session['shop_url']
 
-    @http.route('/shopify/sync/product', type="http", auth="user", website=True, method=['GET'],
+    @http.route('/shopify/sync/product', type="http", auth="public", website=True, method=['GET'],
                 csrf=False)
     def get_product(self, **kwargs):
         shop_url = request.session['shop_url']
-        store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        if shop_url:
+            store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         if self.sync_product():
             products = json.loads(self.sync_product())
         else:
@@ -379,12 +407,32 @@ class SShopify(http.Controller):
                 vals['store_id'] = store_info.id
                 vals['name'] = product['title']
                 vals['price'] = product['variants'][0]['price']
-                list_products.append(vals)
+                vals['variant_id'] = product['variants'][0]['id']
+                variants = []
+                for variant in product['variants']:
+                    val = {'product_id': request.env['s.products'].sudo().search(
+                        [('product_id', '=', str(product['id']))],
+                        limit=1).id,
+                           'price': variant['price'],
+                           'variant_id': variant['id'],
+                           'variant_name': variant['title']
+
+                           }
+                    variants.append(val)
+                    variant_exist = request.env['s.product.variants'].sudo().search(
+                        [('variant_id', '=', variant['id'])],
+                        limit=1)
+                    if variant_exist:
+                        variant_exist.sudo().write(val)
+                    else:
+                        variant_exist.sudo().create(val)
+
                 if product_exist:
                     product_exist.sudo().write(vals)
                 else:
                     product_exist.sudo().create(vals)
-
+                vals['variants'] = variants
+                list_products.append(vals)
             return json.dumps({"products": list_products})
         else:
             return False
@@ -445,7 +493,7 @@ class SShopify(http.Controller):
                     else:
                         item_exist.create(vals_item)
 
-    @http.route('/shopify/cart/list', type="http", auth="user", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/cart/list', type="http", auth="public", website=True, method=['POST'], csrf=False)
     def get_cart(self, **kw):
         if request.httprequest.data:
             data = json.loads(request.httprequest.data)
@@ -486,15 +534,14 @@ class SShopify(http.Controller):
                         if str(product.product_id.product_id) == str(item["product_id"]):
                             list2.append(item['quantity'] // product.quantity)
                 amount_bundle = min(list2)
+                total_not_in_bundle_price1 = 0
                 for item in data['items']:
                     for product in combo.product_lines:
                         if str(product.product_id.product_id) == str(item["product_id"]):
                             item['qty_in_bundle'] = product.quantity * amount_bundle
                             item['qty_not_in_bundle'] = item['quantity'] - item['qty_in_bundle']
+                            total_not_in_bundle_price1 += item['original_price'] * item['qty_not_in_bundle']
                 total_price = 0
-                total_not_in_bundle_price1 = 0
-                for item in data['items']:
-                    total_not_in_bundle_price1 += item['original_price'] * item['qty_not_in_bundle']
                 total_not_in_bundle_price2 = 0
                 product_ids = []
                 for product in combo.product_lines:
@@ -512,7 +559,8 @@ class SShopify(http.Controller):
                 list_price_discount.append({
                     'price_discount': round(((combo.subtotal_price - combo.total_price) * amount_bundle), 1),
                     'total_price': total_price,
-                    'combo_name': combo.name
+                    'combo_name': combo.name,
+                    'combo_id': combo.id
                 })
             if list_price_discount:
                 best_discount = sorted(list_price_discount, key=lambda k: k['total_price'])[0]
@@ -601,11 +649,11 @@ class SShopify(http.Controller):
             except Exception as e:
                 print(e)
 
-    @http.route('/shopify/combo/list', type="http", auth="user", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/combo/list', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def get_combo(self, **kw):
         if request.httprequest.data:
             shop_url = request.httprequest.data.decode('ascii')
-        else:
+        elif request.session:
             shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         if store_info:
@@ -624,15 +672,26 @@ class SShopify(http.Controller):
                     }
                     vals['product_lines'] = []
                     for product in rec.product_lines:
+                        variants = []
+                        for variant in product.product_id.variants:
+                            variants.append({
+                                'variant_id': variant.variant_id,
+                                'price': variant.price,
+                                'variant_name': variant.variant_name
+                            })
                         vals['product_lines'].append({
                             "product": {
                                 "product_id": product.product_id.product_id,
                                 "name": product.product_id.name,
                                 "price": product.product_id.price,
-                                "store_id": rec.store_id.id
+                                "store_id": rec.store_id.id,
+                                "variant_id": product.product_id.variant_id,
+                                'variants': variants
                             },
                             "quantity": product.quantity,
-                            "discount_value": product.discount
+                            "discount_value": product.discount,
+                            "variant_id": product.variant_id.variant_id,
+                            "variant_name": product.variant_id.variant_name
                         })
                     vals['color'] = rec.color
                     vals['position'] = rec.position
@@ -666,19 +725,22 @@ class SShopify(http.Controller):
                         [('product_id', '=', line['product']['product_id'])],
                         limit=1)
                     line_exist = request.env['s.combo.products'].sudo().search(
-                        ['&', ('product_id', '=', product.id), ('combo_id', '=', combo_exist.id)],
+                        ['&', ('variant_id', '=', request.env['s.product.variants'].sudo().search(
+                            [('variant_id', '=', line['variant_id'])], limit=1).id), ('combo_id', '=', combo_exist.id)],
                         limit=1)
                     if line_exist:
                         line_exist.write({
                             'quantity': line['quantity'],
-                            'discount': line['discount_value']
+                            'discount': line['discount_value'],
                         })
                     else:
                         request.env['s.combo.products'].sudo().create({
                             'product_id': product.id,
                             'combo_id': combo_exist.id,
                             'quantity': line['quantity'],
-                            'discount': line['discount_value']
+                            'discount': line['discount_value'],
+                            'variant_id': request.env['s.product.variants'].sudo().search(
+                                [('variant_id', '=', line['variant_id'])], limit=1).id
                         })
             else:
                 vals['store_id'] = store_info.id
@@ -691,7 +753,9 @@ class SShopify(http.Controller):
                         'product_id': product.id,
                         'combo_id': combo.id,
                         'quantity': line['quantity'],
-                        'discount': line['discount_value']
+                        'discount': line['discount_value'],
+                        'variant_id': request.env['s.product.variants'].sudo().search(
+                            [('variant_id', '=', line['variant_id'])], limit=1).id
                     })
             return {
                 "status": True
@@ -728,28 +792,30 @@ class SShopify(http.Controller):
                     "status": False
                 }
 
-    @http.route('/shopify/combo/apply', type="http", auth="user", website=True, method=['POST'], csrf=False)
+    @http.route('/shopify/combo/apply', type="http", auth="public", website=True, method=['POST'], csrf=False)
     def apply_combo(self):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)
             shop = res['shop_url']
-            combo = res['price_discount']['combo']['id']
-            report = request.env['s.combo.report'].sudo().search([('combo_id', '=', combo)], limit=1)
+            combo_id = res['best_discount']['combo_id']
+            report = request.env['s.combo.report'].sudo().search([('combo_id', '=', combo_id)], limit=1)
             store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop)], limit=1)
 
             vals = {}
             if report:
                 report.applied += 1
+                report.sale_total += res['best_discount']['total_price']
             else:
-                vals['combo_id'] = combo
+                vals['combo_id'] = combo_id
                 vals['store_id'] = store_info.id
                 vals['applied'] = 1
+                vals['sale_total'] = res['best_discount']['total_price']
                 report.create(vals)
             return json.dumps({
                 "status": True
             })
 
-    @http.route('/shopify/combo/report', type="http", auth="user", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/combo/report', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def combo_report(self):
         shop = request.session['shop_url']
         store_exist = request.env['s.store.info'].sudo().search([('shop_url', '=', shop)], limit=1)
@@ -762,6 +828,7 @@ class SShopify(http.Controller):
                     'id': rec.id,
                     'combo_name': rec.combo_id.name,
                     'total_apply': rec.applied,
+                    'total_sale': rec.sale_total
                 })
             return json.dumps({
                 'report': list_vals

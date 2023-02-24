@@ -128,13 +128,19 @@
                     </div>
                     <div class="setting-input">
                         <lable> Sản phẩm</lable>
-                        <select class="setting-input-input" v-model="value.product_name" v-on:change="test">
-                            <option v-for="product in products">[[product.name]]</option>
+                        <select class="setting-input-input" v-model="value.product_id" @change="selectProduct()">
+                            <option v-for="product in products" v-bind:value="product.product_id">[[product.name]]</option>
                         </select>
+                            <div v-if="value.product">
+                                <label>Variant</label>
+                            <select class="setting-input-input" v-model="value.product_variant">
+                                <option v-for="variant in value.product.variants" v-bind:value = "variant.variant_id">[[variant.variant_name]]</option>
+                            </select>
+                                </div>
                         <lable> Số lượng</lable>
                         <input class="setting-input-input" type="number" v-bind:value="value.quantity_condition"
                                v-model="value.quantity_condition">
-                        <label>Discount</label>
+                        <label  v-if="value.type_apply">Discount</label>
                         <input v-if="value.type_apply" class="setting-input-input" type="number" v-bind:value="value.discount_value"
                                v-model="value.discount_value">
                         <button @click="onAdd()">Add Product</button>
@@ -143,12 +149,14 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Quantity</th>
+                                <th>Variant</th>
                                 <th v-if="value.type_apply">Discount</th>
                             </tr>
 
                             <tr v-for="pro in value.product_lines">
                                 <td>[[pro.product.name]]</td>
                                 <td>[[pro.quantity]]</td>
+                                <td>[[pro.variant_name]]</td>
                                 <td v-if="value.type_apply">[[pro.discount_value]]</td>
                             </tr>
                             </tbody>

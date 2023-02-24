@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_bt_thuc_hanh2_bt_thuc_hanh2,bt_thuc_hanh2,model_sp_shop,base.group_user,1,1,1,1
-access_bt_thuc_hanh2_bt_thuc_hanh,bt_thuc_hanh2,bt_thuc_hanh2.model_sp_app,base.group_user,1,1,1,1

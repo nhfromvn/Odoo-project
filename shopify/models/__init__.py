@@ -8,5 +8,8 @@ from . import s_products
 from . import s_combo
 from . import s_combo_report
 from . import s_combo_products
-from . import xero_info
+from . import s_history_fetch
+from . import s_history_sync
+from . import s_product_variants
+
 

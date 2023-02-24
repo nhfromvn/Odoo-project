@@ -28,7 +28,9 @@
                                         <field name="product_id"/>
                                         <field name="quantity"/>
                                         <field name="price"/>
-                                        <field name="discount"/>
+                                        <field name="discount" attrs="{'invisible':[('parent.type_apply','=',False)]}"/>
+                                        <field name="variant_id" invisible="1"/>
+                                        <field name="variant_name"/>
                                     </tree>
                                 </field>
                             </group>

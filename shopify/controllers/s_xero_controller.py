@@ -1,6 +1,6 @@
 import json
 import werkzeug.utils
-from odoo import http
+from odoo import http, fields
 from odoo.http import request
 from base64 import b64encode
 import requests
@@ -193,14 +193,13 @@ class SXeroController(http.Controller):
             'Accept': 'application/json',
         }
         invoices = []
+        list_invoices = []
         payments = []
         for order in orders:
             if order.state == 'yet_sync':
                 items = []
-                total_price = 0
                 if order.item_ids:
                     for item in order.item_ids:
-                        total_price += item.quantity * item.price
                         items.append({
                             "Description": "hello",
                             "Quantity": item.quantity,
@@ -215,12 +214,19 @@ class SXeroController(http.Controller):
                             "ContactID": kwargs['contact_id']
                         },
                         "LineItems": items,
-                        "Date": "2019-03-11",
-                        "DueDate": datetime.today().strftime("%Y-%m-%d"),
-                        "Reference": "Website Design",
+                        "Date": kwargs["start_time"],
+                        "DueDate": kwargs["end_time"],
+                        "Reference": order.id,
                         "Status": "AUTHORISED"
                     })
                     order.state = 'synced'
+        history = {
+            'store_id': store_info.id,
+            'date_from': kwargs['start_time'],
+            'date_to': kwargs['end_time'],
+            'time': fields.Datetime.now(),
+
+        }
         if invoices:
             payload = {
                 "Invoices": invoices
@@ -230,6 +236,7 @@ class SXeroController(http.Controller):
             Invoices = response.json()
             if response.status_code != 404:
                 if response.ok:
+                    history['invoice'] = len(Invoices['Invoices'])
                     print(Invoices)
                 else:
                     if 'Detail' in Invoices:
@@ -241,6 +248,44 @@ class SXeroController(http.Controller):
                             print('not found')
             else:
                 print('error')
+            for invoice in Invoices['Invoices']:
+                order = request.env['s.store.orders'].sudo().search([('id', '=', invoice['Reference'])])
+                if order.financial_status == 'paid':
+                    items = []
+                    if order.item_ids:
+                        total_price = 0
+                        for item in order.item_ids:
+                            total_price += item.quantity * item.price
+                            items.append({
+                                "Description": "hello",
+                                "Quantity": item.quantity,
+                                "UnitAmount": item.price,
+                                "AccountCode": "200",
+                                "TaxType": "NONE",
+                                "LineAmount": item.quantity * item.price,
+                            })
+                        payments.append({
+                            "Invoice": {"InvoiceID": invoice['InvoiceID'],
+                                        "LineItems": items},
+                            "Account": {"AccountID": kwargs["account_id"]},
+                            "Date": datetime.today().strftime("%Y-%m-%d"),
+                            "Amount": total_price
+                        })
+            url = 'https://api.xero.com/api.xro/2.0/Payments'
+            response = requests.put(url, headers=header, json={'Payments': payments})
+            if response.ok:
+                history['payment'] = len(response.json()['Payments'])
+                his = request.env['s.history.sync'].sudo().create(history)
+                return json.dumps({
+                    "status": "success"
+                })
+            else:
+                history['payment'] = 0
+                his = request.env['s.history.sync'].sudo().create(history)
+                return json.dumps({
+                    "status": "payments error",
+                    "result": response.json()
+                })
         else:
             return json.dumps({
                 'status': "synced"
@@ -249,7 +294,6 @@ class SXeroController(http.Controller):
     @http.route('/shopify/sync/order', type="http", auth="public", website=True, method=['GET', 'POST'],
                 csrf=False)
     def sync_order(self, **kwargs):
-
         print(kwargs)
         shop_url = request.session['shop_url']
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
@@ -285,12 +329,19 @@ class SXeroController(http.Controller):
                      "Contact": {
                          "ContactID": kwargs['contact_id']
                      }, "LineItems": items,
-                     "Date": "2019-03-11",
-                     "DueDate": datetime.today().strftime("%Y-%m-%d"),
+                     "Date": kwargs["start_time"],
+                     "DueDate": kwargs["end_time"],
                      # "Reference": "Website Design",
                      "Status": "AUTHORISED"
                      }
                 ]
+            }
+            history = {
+                'store_id': store_info.id,
+                'date_from': kwargs['start_time'],
+                'date_to': kwargs['end_time'],
+                'time': fields.Datetime.now(),
+
             }
             url = 'https://api.xero.com/api.xro/2.0/Invoices'
             response = requests.post(url, headers=header, json=payload)
@@ -299,6 +350,8 @@ class SXeroController(http.Controller):
             if response.status_code != 404:
                 if response.ok:
                     print(invoices)
+                    history['invoice'] = len(invoices['Invoices'])
+
                 else:
                     if 'Detail' in invoices:
                         if 'TokenExpired' in invoices['Detail']:
@@ -319,17 +372,20 @@ class SXeroController(http.Controller):
                 }
                 url = 'https://api.xero.com/api.xro/2.0/Payments'
                 payments = requests.put(url, headers=header, json=payload2)
-                print(payments.content)
                 if payments.ok:
-                    print('haha')
+                    history['payment'] = len(payments.json()['Payments'])
+                    his = request.env['s.history.sync'].sudo().create(history)
                     return json.dumps({
                         "status": "success"
                     })
                 else:
+                    history['payment'] = 0
+                    his = request.env['s.history.sync'].sudo().create(history)
                     return json.dumps({
                         "status": "payments error",
                         "result": payments.json()
                     })
+
             else:
                 return json.dumps({
                     "status": "order error"

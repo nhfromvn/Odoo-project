@@ -7,4 +7,10 @@ access_s.combo,shopify.s_combo,model_s_combo,,1,1,1,1
 access_s.combo.report,shopify.s_combo_report,model_s_combo_report,,1,1,1,1
 access_s.combo.products,shopify.s_combo_products,model_s_combo_products,,1,1,1,1
 access_s.combo.product_condition,shopify.s_products,model_s_products,,1,1,1,1
+access_s.history_fetch,shopify.s_history_fetch,model_s_history_fetch,,1,1,1,1
+access_s.history_sync,shopify.s_history_sync,model_s_history_sync,,1,1,1,1
+access_s.product_variants,shopify.s_product_variants,model_s_product_variants,,1,1,1,1
+
+
+
 
