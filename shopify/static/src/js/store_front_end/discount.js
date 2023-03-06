@@ -1,7 +1,12 @@
 // code show chuong trinh giam gia va logic giam gia tai day
 
+<<<<<<< HEAD
 // call ajax get cart giam gia phu hop voi current product page
 // get settings cho cart
+=======
+// call ajax get combo giam gia phu hop voi current product page
+// get settings cho combo
+>>>>>>> origin/bt_thuc_hanh_shopify
 // get product data qua product.js api
 // Ve giao dien bang html, css
 // Bat su kien change variant

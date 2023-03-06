@@ -12,7 +12,6 @@ class SComboProducts(models.Model):
     qty_not_in_bundle = fields.Integer()
     variant_id = fields.Many2one('s.product.variants')
     variant_name = fields.Char(compute='compute_name')
-
     @api.depends('variant_id.variant_name')
     def compute_name(self):
         for line in self:

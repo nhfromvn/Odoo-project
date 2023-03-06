@@ -454,8 +454,8 @@ class SShopify(http.Controller):
                 return False
         else:
             return False
-
     def get_orders(self, store):
+        print('hihi')
         enpoint = 'https://' + store.shop_url + '/admin/api/2023-01/orders.json?status=any'
         headers = {
             "X-Shopify-Access-Token": store.access_token
@@ -503,6 +503,8 @@ class SShopify(http.Controller):
             for item in data['items']:
                 item_ids.append(str(item['product_id']))
             # find valid cart
+            print(item_ids)
+            # find valid combo
             for combo in store_info.combo_ids:
                 if combo.product_lines:
                     for product in combo.product_lines:
@@ -522,6 +524,7 @@ class SShopify(http.Controller):
                                     if item['quantity'] < product.quantity:
                                         if combo in combos_valid:
                                             combos_valid.remove(combo)
+            # compute price
             for combo in combos_valid:
                 original_total_price = data['original_total_price'] / 100
                 list2 = []
@@ -547,6 +550,21 @@ class SShopify(http.Controller):
                         total_not_in_bundle_price2 += item['original_price'] / 100 * item['quantity']
                 total_price = total_not_in_bundle_price1 + total_not_in_bundle_price2 + combo.total_price * \
                               amount_bundle
+                total_price = 0
+                total_not_in_bundle_price2 = 0
+                product_ids = []
+                for product in combo.product_lines:
+                    product_ids.append(product.product_id.product_id)
+                for item in data['items']:
+                    if str(item['product_id']) not in product_ids:
+                        print(combo.product_lines.product_id)
+                        total_not_in_bundle_price2 = + item['original_price'] * item['quantity']
+                total_price = total_not_in_bundle_price1 + total_not_in_bundle_price2 + combo.total_price * \
+                              amount_bundle
+
+                print("combo: " + str(combo.total_price))
+                print("sprice:" + str(combo.subtotal_price))
+                print("price:" + str(total_price))
                 list_price_discount.append({
                     'price_discount': round(((combo.subtotal_price - combo.total_price) * amount_bundle), 1),
                     'total_price': total_price,
@@ -556,6 +574,8 @@ class SShopify(http.Controller):
                 print(list_price_discount)
             if list_price_discount:
                 best_discount = sorted(list_price_discount, key=lambda k: k['price_discount'])[-1]
+            if list_price_discount:
+                best_discount = sorted(list_price_discount, key=lambda k: k['total_price'])[0]
                 return json.dumps({
                     "status": True,
                     "best_discount": best_discount
@@ -564,6 +584,54 @@ class SShopify(http.Controller):
             return json.dumps({
                 "status": False
             })
+
+    # def get_cart(self, **kw):
+    #     print(request.httprequest.data)
+    #     if request.httprequest.data:
+    #         data = json.loads(request.httprequest.data)
+    #         shop_url = data['shop_url']
+    #         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+    #         list_price_discount = []
+    #         for combo in store_info.combo_ids:
+    #             original_total_price = data['original_total_price'] / 100
+    #             for item in data['items']:
+    #                 price_discount = 0
+    #                 if str(item['product_id']) == combo.product_condition.product_id:
+    #                     if item['quantity'] >= combo.quantity_condition:
+    #                         if combo.is_percent:
+    #                             item_price = (item['price'] * item['quantity']) / 100
+    #                             price_discount = combo.value * item_price / 100
+    #
+    #                         else:
+    #                             if combo.type_apply:
+    #                                 item_price = (item['price'] * item['quantity']) / 100
+    #                                 price_discount = item_price - combo.value
+    #                                 if price_discount <= 0:
+    #                                     price_discount = item_price
+    #                             else:
+    #                                 price_discount = combo.value
+    #                 original_total_price -= price_discount
+    #             if original_total_price < 0:
+    #                 original_total_price = 0
+    #
+    #             list_price_discount.append({
+    #                 "combo": {
+    #                     "id": combo.id,
+    #                     "name": combo.name
+    #                 },
+    #                 "total_price_discount": original_total_price
+    #             })
+    #             print(list_price_discount)
+    #         best_discount = sorted(list_price_discount, key=lambda k: k['total_price_discount'])[0]
+    #         return json.dumps({
+    #             "status": True,
+    #             "price_discount": best_discount
+    #         })
+    #     else:
+    #         return json.dumps({
+    #             "status": False
+    #         })
+
     @http.route('/shopify/register_script-tags', type="http", auth="user", website=True, csrf=False)
     def register_script_tags(self, **kw):
 
@@ -638,6 +706,7 @@ class SShopify(http.Controller):
                             "variant_name": product.variant_id.variant_name
                         })
                     vals['color'] = rec.color_
+                    vals['color'] = rec.color
                     vals['position'] = rec.position
                     if rec.is_percent:
                         vals['is_percent'] = True
@@ -704,6 +773,22 @@ class SShopify(http.Controller):
             return {
                 "status": True
             }
+    # @http.route('/shopify/combo/update_line', type="json", auth="public", website=True, method=['POST'], csrf=False)
+    # def post_line(self, **kw):
+    #     if request.httprequest.data:
+    #         res = json.loads(request.httprequest.data)
+    #         shop_url = request.session['shop_url']
+    #         line_exist = request.env['s.combo.products'].sudo().search([('product_id', '=', data['id'])], limit=1)
+    #         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+    #         if combo_exist:
+    #             combo_exist.write(vals)
+    #         else:
+    #             vals['store_id'] = store_info.id
+    #             combo = combo_exist.create(vals)
+    #         return {
+    #             "status": True
+    #         }
+
     @http.route('/shopify/combo/unlink', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def unlink_combo(self):
         if request.httprequest.data:

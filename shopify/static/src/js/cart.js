@@ -26,8 +26,11 @@ function refreshData() {
     })
 }
 
+<<<<<<< HEAD
 refreshData()
 
+=======
+>>>>>>> origin/bt_thuc_hanh_shopify
 function findProductWithId(id) {
     for (let product of cart.products) {
         if (id == product.product_id) {
@@ -52,6 +55,10 @@ function chart() {
     ctx.canvas.width = 300;
     ctx.canvas.height = 300;
     const myChart = new Chart(ctx, {
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/bt_thuc_hanh_shopify
         data: {
             labels: cart.label,
             datasets: [{
@@ -97,7 +104,11 @@ function chart() {
                     beginAtZero: true
                 },
                 y1: {
+<<<<<<< HEAD
                     title: {
+=======
+                     title: {
+>>>>>>> origin/bt_thuc_hanh_shopify
                         display: true,
                         text: 'Total Sale',
                     },
@@ -111,6 +122,7 @@ function chart() {
     });
 }
 
+<<<<<<< HEAD
 //
 axios.get("/shopify/sync/product").then((res) => {
     cart.products = res.data.products
@@ -118,6 +130,14 @@ axios.get("/shopify/sync/product").then((res) => {
 })
 //
 //
+=======
+refreshData();
+axios.get("/shopify/sync/product").then((res) => {
+    cart.products = res.data.products
+})
+
+
+>>>>>>> origin/bt_thuc_hanh_shopify
 var cart = new Vue({
     el: '#cart-bubble',
     delimiters: ['[[', ']]'],
@@ -262,6 +282,10 @@ var cart = new Vue({
     }
 
 })
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/bt_thuc_hanh_shopify
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         chart();

@@ -19,6 +19,7 @@
                                 <field name="product_condition"/>
                                 <field name="quantity_condition"/>
                                 <field name="color_" widget="color"/>
+                                <field name="color" widget="int_color"/>
                                 <field name="position"/>
                                 <field name="product_lines"
                                        widget="section_and_note_one2many"

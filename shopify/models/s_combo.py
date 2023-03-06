@@ -15,6 +15,10 @@ class SProducts(models.Model):
     product_lines = fields.One2many("s.combo.products", 'combo_id')
     quantity_condition = fields.Integer()
     color_ = fields.Char()
+    color = fields.Selection([('xanh', 'xanh'),
+                              ('do', 'do'),
+                              ('vang', 'vang')],
+                             "Color", default='vang')
     position = fields.Selection([('below', 'below cart'),
                                  ('above', 'above cart')],
                                 'Position', default='below')

@@ -30,8 +30,15 @@ const userAction = async () => {
     xmlhttp.onload = () => {
         data = JSON.parse(xmlhttp.response);
         discount_price = data.best_discount.price_discount;
+<<<<<<< HEAD
         combo_name = data.best_discount.combo_name
         total_price = data.best_discount.total_price
+=======
+        // total_price = data.best_discount.total_price
+        combo_name = data.best_discount.combo_name
+        console.log(myJson.total_price / 100)
+        total_price = myJson.total_price / 100 - discount_price
+>>>>>>> origin/bt_thuc_hanh_shopify
         var dE = document.getElementsByClassName("cart__footer")[0];
 
         if (dE) {
@@ -61,10 +68,17 @@ function findButton() {
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.open("POST", "https://odoo.website/shopify/combo/apply");
             xmlhttp.send(JSON.stringify(data))
+<<<<<<< HEAD
             xmlhttp.onload = (res) => {
                 console.log(res)
             }
             btn_apply.remove()
+=======
+             xmlhttp.onload = (res) => {
+                 console.log(res)
+             }
+            // btn_apply.remove()
+>>>>>>> origin/bt_thuc_hanh_shopify
         })
         return
     } else {
@@ -74,6 +88,7 @@ function findButton() {
     }
 }
 
+<<<<<<< HEAD
 function findAddButton(combos) {
     let btns = document.getElementsByClassName('btn_add')
     if (btns) {
@@ -114,12 +129,49 @@ function findAddButton(combos) {
 
             }
         }
+=======
+function findAddButton(combo) {
+    let btn_add = document.getElementById("add_to_cart_button")
+    if (btn_add) {
+        btn_add.addEventListener('click', () => {
+            let items = []
+            for (let product of combo.product_lines) {
+                console.log(combo.product_lines)
+                items.push({
+                    'id': product.variant_id,
+                    'quantity': product.quantity
+                })
+            }
+            let formData = {
+                'items': items
+            };
+            fetch(window.Shopify.routes.root + 'cart/add.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    window.location.replace(window.Shopify.routes.root + 'cart');
+                    return response.json();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                })
+        })
+        return
+
+>>>>>>> origin/bt_thuc_hanh_shopify
     } else {
         setTimeout(() => {
             findAddButton()
         }, 1000)
     }
+<<<<<<< HEAD
     return
+=======
+>>>>>>> origin/bt_thuc_hanh_shopify
 }
 
 
@@ -181,6 +233,10 @@ const userAction2 = async () => {
                                             <h2 class="totals__subtotal">Combo: ${combo.name}</h2>
                                             </div>`
                             for (let product_line of combo.product_lines) {
+<<<<<<< HEAD
+=======
+                                console.log(product_line)
+>>>>>>> origin/bt_thuc_hanh_shopify
                                 tag.innerHTML += `</div>
                                             <div>ban duoc giam ${product_line.discount_value} % cho san pham ${product_line.product.name} ${product_line.variant_name} x ${product_line.quantity}</div>
                                             </div>`
@@ -233,6 +289,7 @@ const userAction2 = async () => {
                             }
                         }
                     }
+<<<<<<< HEAD
                     if (combo.color) {
                         tag.innerHTML += ` <button  id="add_combo" combo_id =${combo.id} class="btn btn_add" style="background: ${combo.color} !important;\
                          color: #ffffff !important; " type="submit">ADD COMBO</button> `
@@ -241,6 +298,21 @@ const userAction2 = async () => {
                 console.log(combo)
             }
             findAddButton(combos)
+=======
+                    if (combo.color == 'xanh') {
+                        tag.innerHTML += ` <button  id="add_to_cart_button" class="btn" style="background: rgb(16, 89, 126) !important;\
+                         color: #ffffff !important; " type="submit">ADD COMBO</button> `
+                    } else if (combo.color == 'do') {
+                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgb(164, 11, 11) !important;
+                        color: #ffffff !important; " type="submit">ADD COMBO</button> `
+                    } else if (combo.color == 'vang') {
+                        tag.innerHTML += ` <button id="add_to_cart_button" class="btn" style="background: rgba(255,215,0) !important;
+                        color: #ffffff !important; " type="submit">ADD COMBO</button>`
+                    }
+                }
+                findAddButton(combo)
+            }
+>>>>>>> origin/bt_thuc_hanh_shopify
         }
     }
 }
