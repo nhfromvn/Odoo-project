@@ -94,6 +94,7 @@ class SShopify(http.Controller):
                 vals['locale'] = data['associated_user']['locale']
                 vals['access_token'] = data['access_token']
                 vals['code'] = code
+                vals['api_version'] = data['api_version']
                 current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
                 current_user = request.env['res.users'].sudo().search([('login', '=', kwargs['shop'])], limit=1)
                 password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
@@ -454,6 +455,7 @@ class SShopify(http.Controller):
                 return False
         else:
             return False
+
     def get_orders(self, store):
         print('hihi')
         enpoint = 'https://' + store.shop_url + '/admin/api/2023-01/orders.json?status=any'
@@ -491,6 +493,7 @@ class SShopify(http.Controller):
                         item_exist.write(vals_item)
                     else:
                         item_exist.create(vals_item)
+
     @http.route('/shopify/cart/list', type="http", auth="public", website=True, method=['POST'], csrf=False)
     def get_cart(self, **kw):
         if request.httprequest.data:
@@ -706,7 +709,6 @@ class SShopify(http.Controller):
                             "variant_name": product.variant_id.variant_name
                         })
                     vals['color'] = rec.color_
-                    vals['color'] = rec.color
                     vals['position'] = rec.position
                     if rec.is_percent:
                         vals['is_percent'] = True
@@ -773,6 +775,7 @@ class SShopify(http.Controller):
             return {
                 "status": True
             }
+
     # @http.route('/shopify/combo/update_line', type="json", auth="public", website=True, method=['POST'], csrf=False)
     # def post_line(self, **kw):
     #     if request.httprequest.data:
@@ -812,7 +815,10 @@ class SShopify(http.Controller):
             combo_id = res['best_discount']['combo_id']
             report = request.env['s.combo.report'].sudo().search([('combo_id', '=', combo_id)], limit=1)
             store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop)], limit=1)
-
+            # session = shopify.Session(shop,' 2023-01', store_info.access_token)
+            # shopify.ShopifyResource.activate_session(session)
+            # url = shopify.Shop()
+            # print(url)
             vals = {}
             if report:
                 report.applied += 1
