@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+        <data>
+
+        <record id="xero_info_form_view" model="ir.ui.view">
+            <field name="name">xero.info.form</field>
+            <field name="model">xero.info</field>
+            <field name="arch" type="xml">
+                <form string="Xero Info">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="payment_account_code"/>
+
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="xero_info_view" model="ir.ui.view">
+            <field name="name">xero.info.tree</field>
+            <field name="model">xero.info</field>
+            <field name="arch" type="xml">
+                <tree string="ModelTitle">
+                    <field name="payment_account_code"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="xero_info_act_window" model="ir.actions.act_window">
+            <field name="name">Xero</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">xero.info</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Xero Info" id="s_shopify_order_root" parent="s_shopify_root" action="xero_info_act_window"
+         sequence ="300"/>
+
+    </data>
+</odoo>

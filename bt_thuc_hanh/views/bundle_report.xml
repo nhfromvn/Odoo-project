@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='bundle_report_action' model='ir.actions.act_window'>
+        <field name="name">Bundle Report</field>
+        <field name="res_model">product.bundle.reports</field>
+        <field name="view_mode">tree</field>
+        <field name="limit">25</field>
+    </record>
+    <record id="bundle_report_view_tree" model="ir.ui.view">
+        <field name="name">Bundle Report List</field>
+        <field name="model">product.bundle.reports</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="bundle_id"/>
+                <field name="product_id"/>
+                <field name="total_save" sum="Total Save"/>
+                <field name="total_sale" sum="Total Sale"/>
+
+            </tree>
+        </field>
+    </record>
+    <menuitem name="Bundle Report" id="bundle_report_menu" action="bundle_report_action" parent="bundle_base_menu"/>
+
+</odoo>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopify</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+    <link rel="stylesheet" href="/shopify/static/src/libs/fontawesome1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css"
+          integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/shopify/static/src/css/index.css">
+
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/shopify">Nam</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/shopify">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/xero">Xero</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " aria-current="page" href="/shopify/fetch-product">Fetch Product</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shopify/webhook-register">Webhook Register</a>
+                </li>
+            </ul>
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+        <div id="index-info">
+            <span v-if="status_xero">Connected Xero</span>
+            <span v-else>Disconnected Xero</span>
+        </div>
+
+    </div>
+</nav>
+
+
+<div class="container" id="cart-bubble">
+
+    <nav class="action-setting">
+        <button class="btn btn-discard" type="submit">Discard</button>
+        <button class="btn btn-discard" type="submit" v-bind:hidden="!value.id" @click="onDelete()">Delete</button>
+        <button class="btn btn-save" type="submit" @click="onSave()">Save</button>
+        <button class="btn btn-save" type="submit" @click="onCreate()">Create</button>
+    </nav>
+    <div class="content">
+        <div class="content-left">
+            <div>
+                <table class="table table-bordered xero" v-bind:hidden="combo.length == 0">
+                    <tr v-for="rec in combo">
+
+                        <td v-if="select_id == rec.id" class="td-active" v-bind:data="rec.id" @click="onSelect(rec.id)">
+                            [[rec.name]]
+                        </td>
+                        <td v-else v-bind:data="rec.id" @click="onSelect(rec.id)">[[rec.name]]</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="setting" style="display: inline-block; width: 48%;">
+            <div class="setting-promotion">
+                <div class="setting-content">
+                    <div class="setting-label">
+                        <p class="title-setting">Tên Combo</p>
+                    </div>
+                    <div class="setting-input">
+                        <input class="setting-input-input" v-bind:value="value.name" v-model="value.name">
+                    </div>
+                </div>
+            </div>
+            <div class="setting-promotion">
+                <div class="setting-content">
+                    <div class="setting-label">
+                        <p class="title-setting">Giá trị</p>
+                    </div>
+                    <form action="" v-model="value.is_percent">
+                        <input type="radio" id="percent" name="value_discount" value="percent"
+                               v-bind:checked="value.is_percent == true" @click="onCheck('percent')">
+                        <label for="percent">Phần trăm</label>
+
+                        <input type="radio" id="amount" name="value_discount" value="amount"
+                               v-bind:checked="value.is_percent == false" @click="onCheck('amount')">
+                        <label for="amount">Số tiền</label></br></br>
+
+                        <input type="radio" id="only_product" name="type_apply" value="only_product"
+                               v-bind:checked="value.type_apply === true" @click="onCheck('only_product')">
+                        <label for="only_product">Giảm trên từng sản phẩm</label></br>
+
+                        <input type="radio" id="all_product" name="type_apply" value="all_product"
+                               v-bind:checked="value.type_apply === false" @click="onCheck('all_product')">
+                        <label for="all_product">Giảm trên tổng giá trị đơn hàng </label>
+
+                        <input class="setting-input-input" type="number" v-bind:value="value.value"
+                               v-model="value.value">
+                        <span v-if="value.is_percent">%</span>
+                        <span v-else>đ</span>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="setting-promotion">
+                <div class="setting-content">
+                    <div class="setting-label">
+                        <p class="title-setting">Điều kiện </p>
+                    </div>
+                    <div class="setting-input">
+                        <lable> Sản phẩm</lable>
+                        <select class="setting-input-input" v-model="value.product_id" @change="selectProduct()">
+                            <option v-for="product in products" v-bind:value="product.product_id">[[product.name]]</option>
+                        </select>
+                            <div v-if="value.product">
+                                <label>Variant</label>
+                            <select class="setting-input-input" v-model="value.product_variant">
+                                <option v-for="variant in value.product.variants" v-bind:value = "variant.variant_id">[[variant.variant_name]]</option>
+                            </select>
+                                </div>
+                        <lable> Số lượng</lable>
+                        <input class="setting-input-input" type="number" v-bind:value="value.quantity_condition"
+                               v-model="value.quantity_condition">
+                        <label  v-if="value.type_apply">Discount</label>
+                        <input v-if="value.type_apply" class="setting-input-input" type="number" v-bind:value="value.discount_value"
+                               v-model="value.discount_value">
+                        <button @click="onAdd()">Add Product</button>
+                        <table v-if="value.product_lines.length >0" class="table table-striped table-bordered">
+                            <tbody>
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Variant</th>
+                                <th v-if="value.type_apply">Discount</th>
+                            </tr>
+
+                            <tr v-for="pro in value.product_lines">
+                                <td>[[pro.product.name]]</td>
+                                <td>[[pro.quantity]]</td>
+                                <td>[[pro.variant_name]]</td>
+                                <td v-if="value.type_apply">[[pro.discount_value]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chartBox">
+            <canvas id="myChart" width="500" height="500" style="font-size: 30px"></canvas>
+
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript" src="/shopify/static/src/js/load_info.js"></script>
+<script type="text/javascript" src="/shopify/static/src/js/cart.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='product_bundle_action' model='ir.actions.act_window'>
+        <field name="name">Product Bundle</field>
+        <field name="res_model">product.bundle</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+    <menuitem name="Product Bundle" id="bundle_base_menu"/>
+    <menuitem name="Product Bundle" id="product_bundle_menu" action="product_bundle_action" parent="bundle_base_menu"/>
+    <record id="product_bundle_view_form" model="ir.ui.view">
+        <field name="name">Product Bundle Form</field>
+        <field name="model">product.bundle</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            General Settings
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="id"/>
+                            <field name="discount_type"/>
+                            <field name="is_active"/>
+                            <field name="start_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
+                            <field name="end_time" attrs="{'invisible':[('indefinite_bundle','=',True)]}"/>
+                        </group>
+                        <group>
+                            <field name="priority"/>
+                        </group>
+                    </group>
+                    <div class="oe_title">
+                        <h1>
+                            Discount Settings
+                        </h1>
+                    </div>
+                    <group>
+                        <field
+                                name="product2"
+                                attrs="{'invisible':[('type','!=','tier')]}"/>
+
+                        <field name="discount_rule" attrs="{'invisible':[('type','=','tier')]}"/>
+                        <field name="indefinite_bundle"/>
+                        <field name="type"/>
+                        <field name="discount_value"
+                               attrs="{'invisible':['|',('type','=','tier'),('discount_rule','=','product')]}"/>
+                        <!--                        <field name="discount_value_percent"-->
+                        <!--                               attrs="{'invisible':['|',('type','=','tier'),('discount_rule','=','product')]}"/>-->
+                    </group>
+
+                    <p>
+                        Choose products which are applied in this bundle
+                        <br/>
+                        <b>Note:</b>
+                        Choose the variant if you want to set your bundle at variant level. With products with out
+                        product variants, the product variant color will be blank.
+                    </p>
+                    <field name="tier_quantity"
+                           widget="section_and_note_one2many"
+                           mode="tree,kanban"
+                           attrs="{'invisible':[('type','!=','tier')]}"
+
+                    >
+                        <tree>
+                            <field name="is_add_range"/>
+                            <field name="qty_start" string="Quantity"/>
+                            <field name="qty_end" string=" " attrs="{'invisible':[('is_add_range','=',False)]}"/>
+                            <field name="discount_value"/>
+                        </tree>
+                    </field>
+
+                    <button title="Add product" class="o_field_x2many_list_row_add btn btn-primary o_form_button_edit">
+                        Add Product
+                    </button>
+
+                    <field
+                            name="products"
+                            widget="section_and_note_one2many"
+                            mode="tree,kanban"
+                            attrs="{'invisible':[('type','=','tier')]}"
+                    >
+                        <tree
+                                string="Products Lines"
+                                editable="bottom"
+                        >
+                            <field name="image_128"
+                                   widget="image" string=" "/>
+                            <field name="product_id"/>
+                            <field name="quantity" attrs="{'column_invisible':[('parent.type','=','tier')]}"/>
+                            <field name="product_vendor"/>
+                            <field name="product_template_attribute_value_ids" string="Variant" widget="many2many_tags"
+                            />
+                            <field name="discount" attrs="{'column_invisible':['|',('parent.discount_rule','=','bundle'),
+                                                                                           ('parent.type','=','tier')]}"/>
+                        </tree>
+                        <form>
+                            <field name="name"/>
+                            <field name="product_id"/>
+                        </form>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="product_bundle_view_tree" model="ir.ui.view">
+        <field name="name">Product Bundle List</field>
+        <field name="model">product.bundle</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id"/>
+                <field name="priority" widget="badge" decoration-info="priority != False"/>
+                <field name="name"/>
+                <field name="discount_type"/>
+                <field name="discount_value"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

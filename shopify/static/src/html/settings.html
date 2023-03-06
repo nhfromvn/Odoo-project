@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopify</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+    <link rel="stylesheet" href="/shopify/static/src/libs/fontawesome1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css"
+          integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="/shopify/static/src/css/index.css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/shopify  ">Nam</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/shopify">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/xero">Xero</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " aria-current="page" href="/shopify/fetch-product">Fetch Product</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " aria-current="page" href="/shopify/fetch-order">Fetch Order</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shopify/webhook-register">Webhook Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shopify/app-settings">App Setting</a>
+                </li>
+            </ul>
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+        <div id="index-info">
+            <span v-if="status_xero">Connected Xero</span>
+            <span v-else>Disconnected Xero</span>
+        </div>
+
+    </div>
+</nav>
+<div id="content">
+    <div id="script_tags-button">
+        <p v-if="registered">da dang ki</p>
+        <input v-if="!registered" type="button" value="Register Scritpt Tag" v-on:click="register()">
+
+    </div>
+
+</div>
+
+
+<script type="text/javascript" src="/shopify/static/src/js/load_info.js"></script>
+<script type="text/javascript" src="/shopify/static/src/js/settings.js"></script>
+
+
+</body>
+</html>
