@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sales_order_advanced_sale,sale_order.advanced_sale,model_sale_order,group_advanced_sale,1,1,0,0

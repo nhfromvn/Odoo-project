@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_s.store.info,shopify.s_store_info,model_s_store_info,,1,1,1,1
+access_s.store.orders,shopify.s_store_orders,model_s_store_orders,,1,1,1,1
+access_s.item.lines,shopify.s_item_lines,model_s_item_lines,,1,1,1,1
+access_s.products,shopify.s_products,model_s_products,,1,1,1,1
+access_s.combo,shopify.s_combo,model_s_combo,,1,1,1,1
+access_s.combo.report,shopify.s_combo_report,model_s_combo_report,,1,1,1,1
+access_s.combo.products,shopify.s_combo_products,model_s_combo_products,,1,1,1,1
+access_s.combo.product_condition,shopify.s_products,model_s_products,,1,1,1,1
+access_s.history_fetch,shopify.s_history_fetch,model_s_history_fetch,,1,1,1,1
+access_s.history_sync,shopify.s_history_sync,model_s_history_sync,,1,1,1,1
+access_s.product_variants,shopify.s_product_variants,model_s_product_variants,,1,1,1,1
+
+
+
+

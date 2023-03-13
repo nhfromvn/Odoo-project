@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+ <record id='bundle_settings_action' model='ir.actions.act_window'>
+        <field name="name">Bundle Settings</field>
+        <field name="res_model">product.bundle.settings</field>
+        <field name="view_mode">tree</field>
+         <field name="limit">25</field>
+    </record>
+    <record id="bundle_settings_view_tree" model="ir.ui.view">
+        <field name="name">Bundle Report List</field>
+        <field name="model">product.bundle.settings</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="bundle_position"/>
+                <field name="bundle_number"/>
+                <field name="bundle_title_color" />
+                <field name="button_label" />
+
+            </tree>
+        </field>
+    </record>
+    <record id="product_bundle_settings_view_form" model="ir.ui.view">
+        <field name="name">Product Bundle Form</field>
+        <field name="model">product.bundle.settings</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="bundle_position"/>
+            </form>
+        </field>
+    </record>
+
+    <menuitem name="Bundle Settings" id="bundle_settings_menu" action="bundle_settings_action" parent="bundle_base_menu"/>
+
+</odoo>

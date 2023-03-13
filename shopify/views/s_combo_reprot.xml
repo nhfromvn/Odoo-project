@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="s_combo_report_form_view" model="ir.ui.view">
+            <field name="name">s.combo.report.form</field>
+            <field name="model">s.combo.report</field>
+            <field name="arch" type="xml">
+                <form string="Shopify Combo Report">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="store_id"/>
+                                <field name="combo_id"/>
+                                <field name="applied"/>
+                                <field name="sale_total"/>
+                            </group>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="s_combo_report_tree_view" model="ir.ui.view">
+            <field name="name">s.combo.report.tree</field>
+            <field name="model">s.combo.report</field>
+            <field name="arch" type="xml">
+                <tree string="Shopify Combo">
+                    <field name="combo_id"/>
+                    <field name="store_id"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="s_combo_report_act_window" model="ir.actions.act_window">
+            <field name="name">Shopify Combo Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">s.combo.report</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Shopify Combo Report" id="s_shopify_Combo_report_root" parent="s_shopify_root"
+                  action="s_combo_report_act_window"/>
+
+    </data>
+</odoo>

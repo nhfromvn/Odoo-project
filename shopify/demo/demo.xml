@@ -1,0 +1,19 @@
+<odoo>
+    <data>
+        <record id="shopify_app_group" model="res.groups">
+            <field name="name">##Shopify app group</field>
+            <field name="category_id" ref="s_base.group_s_base"/>
+            <field name="implied_ids" eval="[(4, ref('s_base.shopify_base_group'))]"/>
+        </record>
+        <record id="shopify_xero_settings_rule" model="ir.rule">
+             <field name="name">Shopify Xero User Access Rule</field>
+             <field name="perm_write" eval="1"/>
+             <field name="perm_read" eval="1"/>
+             <field name="perm_create" eval="1"/>
+             <field name="perm_unlink" eval="0"/>
+             <field name="groups" eval="[(4, ref('shopify_test_module.shopify_app_group'))]"/>
+             <field name="model_id" ref="shopify_test_module.model_shopify_shop_xero"/>
+             <field name="domain_force">[('sp_shop_id','=',user.sp_shop_id.id)]</field>
+         </record>
+    </data>
+</odoo>

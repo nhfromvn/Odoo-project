@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <template id="bought_together">
+            <head>
+                <script></script>
+                <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
+            </head>
+            <body>
+                <div id="app"/>
+                <script src="bought_together/static/js/index.js"/>
+            </body>
+        </template>
+    </data>
+</odoo>

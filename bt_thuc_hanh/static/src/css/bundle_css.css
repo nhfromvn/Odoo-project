@@ -1,0 +1,59 @@
+
+#tier-container {
+    display: grid;
+    grid-template-areas:
+    'description'
+    'discount_value'
+    'footer';
+    border: 2px #1a1b1f solid;
+}
+
+#tier-description {
+    color: #CED4DA;
+    grid-area: description;
+    background-color: #1e7e34;
+    border-bottom: 4px #1a2a41 solid;
+    text-align: center;
+    display: block;
+    width: 100%;
+
+}
+
+#tier-discount_value {
+    grid-area: discount_value;
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+}
+
+.grid-bundle {
+    display: grid;
+    grid-template-areas:
+    'image title title title title'
+    'image discount discount discount discount'
+    'image footer footer footer footer';
+    gap: 10px;
+    padding: 10px;
+}
+
+.bundle-image {
+    grid-area: image;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+}
+
+.bundle-title {
+    grid-area: title;
+}
+
+.bundle-discount {
+    grid-area: discount;
+}
+
+.bundle-footer {
+    grid-area: footer;
+}
