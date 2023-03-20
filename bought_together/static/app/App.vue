@@ -1,47 +1,47 @@
 <template>
-  <SlideBar/>
   <NavBar/>
-
+  <div style="display: flex;">
+    <SlideBar/>
+    <Content/>
+  </div>
 </template>
 
 <script>
 
 import SlideBar from "./components/SlideBar.vue";
 import NavBar from "./components/NavBar.vue";
+import Content from "./components/Content.vue";
 
 export default {
-    name: "App",
-    components:{
-      NavBar,
-      SlideBar
-
-
-    },
-    data() {
-          return {
-
-
-
-          }
-      },
-  methods:{
-
+  name: "App",
+  components: {
+    Content,
+    NavBar,
+    SlideBar
   },
-    mounted() {
-      console.log("Hello shopify")
+  data() {
+    return {}
+  },
+  methods: {},
+  mounted() {
+    console.log("Hello shopify")
 
-    }
+  }
 
 }
 
 </script>
 <style>
-#app{
+#app {
 
 
 }
 
-body{
+SlideBar {
+  z-index: 1;
+}
 
+Content {
+  z-index: 2;
 }
 </style>

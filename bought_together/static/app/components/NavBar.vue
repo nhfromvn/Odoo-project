@@ -1,5 +1,12 @@
 <template>
   <div id="container">
+    <div style="display: flex" id="frame_427318695">
+      <div class="elip" id="elip_103">
+      </div>
+      <div id="nest_scale">
+        NestScale
+      </div>
+    </div>
     <div id="frame_50">
       <div id="question-mark_major">
         <img id="primary_fill" src="/bought_together/static/app/img/img_1.png">
@@ -10,8 +17,6 @@
         <img id="icon" src="/bought_together/static/app/img/img.png">
       </div>
       <img id="elip_101" src="/bought_together/static/app/img/img_2.png">
-
-
     </div>
   </div>
 </template>
@@ -27,12 +32,15 @@ export default {
   height: 83px;
   width: 100%;
   background: #EFEFEF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 20px;
 }
 
 #frame_50 {
   height: 34px;
   width: 133px;
-  left: 1282px;
   border-radius: 0px;
   display: flex;
   flex-direction: row;
@@ -40,10 +48,47 @@ export default {
   align-items: center;
   padding: 0px;
   gap: 26px;
-  position: relative;
-  right: 25px;
-  top: calc(50% - 34px / 2 - 0.5px);
+}
 
+#frame_427318695 {
+  /* Auto layout */
+  height: 46px;
+  width: 181px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+#elip_103 {
+  width: 46px;
+  height: 46px;
+  background: #000000;
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+#nest_scale {
+  width: 123px;
+  height: 24px;
+  left: 58px;
+  top: 11px;
+  font-family: 'Open Sans', sans-serif, 'Kanit';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 24px;
+  /* identical to box height, or 89% */
+  color: #17181A;
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
 #question-mark_major {
@@ -69,33 +114,27 @@ export default {
 #bell_01 {
   height: 24px;
   width: 24px;
-  left: 49px;
-  top: 5px;
   border-radius: 0px;
   /* Inside auto layout */
   flex: none;
   order: 1;
   flex-grow: 0;
+  position: relative;
 }
 
 #elip_102 {
   height: 6px;
   width: 6px;
-  left: 15px;
-  top: 2px;
+  right: 5px;
   background: #DB3737;
   border-radius: 50%;
-  position: relative;
-
+  position: absolute;
 }
 
 #icon {
   height: 20px;
   width: 17.478065490722656px;
   left: 3.2607421875px;
-  top: 2px;
-  position: relative;
-
 }
 
 #elip_101 {
