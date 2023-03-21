@@ -2,6 +2,8 @@
     <data>
         <template id="bought_together">
             <head>
+                <link rel="icon" sizes="32x32" href="/bought_together/static/app/img/nest_scale.jpeg"/>
+                <title>Bought Together</title>
                 <script></script>
                 <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
                 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>

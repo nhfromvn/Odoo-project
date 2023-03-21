@@ -14,7 +14,7 @@ class SProducts(models.Model):
     product_condition = fields.Many2one("s.products")
     product_lines = fields.One2many("s.combo.products", 'combo_id')
     quantity_condition = fields.Integer()
-    color_ = fields.Char()
+    color_ = fields.Char(default= "#DF1111")
     position = fields.Selection([('below', 'below cart'),
                                  ('above', 'above cart')],
                                 'Position', default='below')

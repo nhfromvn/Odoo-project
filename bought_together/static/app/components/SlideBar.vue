@@ -1,24 +1,54 @@
 <template>
   <div id="container">
-    <div id="frame_427318741">
+    <div id="dashboard" style="display: flex;
+                                     gap:5px">
       <div class="elip" id="elip_28">
       </div>
+      <div class="frame_427318741 is_select">
+        Dashboard
+      </div>
     </div>
-    <div id="frame_427318741">
-      <div class="elip" id="elip_28"/>
+
+    <div id="add_product" style="display: flex;
+                                     gap:5px">
+      <div class="elip" id="elip_28">
+      </div>
+      <div class="frame_427318741">
+        Add Product
+      </div>
     </div>
-    <div id="frame_427318741">
-      <div class="elip" id="elip_28"/>
+
+    <div id="customization" style="display: flex;
+                                     gap:5px">
+      <div class="elip" id="elip_28">
+      </div>
+      <div class="frame_427318741">
+        Customization
+      </div>
+    </div>
+    <div id="installation" style="display: flex;
+                                     gap:5px">
+      <div class="elip" id="elip_28">
+      </div>
+      <div class="frame_427318741">
+        Installation
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "SlideBar"
+  name: "SlideBar",
+  data() {
+    return {
+      is_selected:'',
+      test: 'hello'
+    }
+  }
+
 }
 </script>
-
 <style scoped>
 #container {
   height: 1024px;
@@ -31,13 +61,10 @@ export default {
   background: #EFEFEF;
 }
 
-#frame_427318741 {
+.frame_427318741 {
   height: 32px;
-  width: 236px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
+  width: 180px;
+  text-align: center;
   background: #FFFFFF;
   /* Inside auto layout */
   flex: none;

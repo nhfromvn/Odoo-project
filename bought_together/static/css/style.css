@@ -4,3 +4,6 @@
 .button_switch{
       border-radius: 50%;
 }
+.is_select {
+    background-color: #a8b6b4!important;
+}

@@ -1,8 +1,7 @@
 <template>
   <div id="container">
     <div style="display: flex" id="frame_427318695">
-      <div class="elip" id="elip_103">
-      </div>
+      <img class="elip" id="elip_103" src="/bought_together/static/app/img/nest_scale.jpeg">
       <div id="nest_scale">
         NestScale
       </div>

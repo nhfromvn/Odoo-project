@@ -66,8 +66,8 @@
     <div class="content">
         <div class="content-left">
             <div>
-                <table class="table table-bordered xero" v-bind:hidden="cart.length == 0">
-                    <tr v-for="rec in cart">
+                <table class="table table-bordered xero" v-bind:hidden="combo.length == 0">
+                    <tr v-for="rec in combo">
 
                         <td v-if="select_id == rec.id" class="td-active" v-bind:data="rec.id" @click="onSelect(rec.id)">
                             [[rec.name]]
