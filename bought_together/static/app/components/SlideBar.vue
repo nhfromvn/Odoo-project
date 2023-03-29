@@ -88,14 +88,16 @@ export default {
 </script>
 <style scoped>
 #container {
-  height: 1024px;
-  width: 276px;
+  height: 100%;
+  width: auto;
+  position: fixed;
   padding: 24px 20px 0px 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 32px;
   background: #EFEFEF;
+  top:83px;
 }
 
 .frame_427318741 {

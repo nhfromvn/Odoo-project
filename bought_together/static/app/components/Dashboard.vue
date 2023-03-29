@@ -1,6 +1,6 @@
 <template>
-  <div id="container">
-    <div id="text_welcome">Welcome Hoang Nam</div>
+  <div class="container" id="container">
+    <div id="text_welcome">Welcome, Hoang Nam!</div>
     <div>
       <table class="table table-responsive table-bordered" id="table_1">
         <tr>
@@ -19,9 +19,9 @@
           <th>
             Total Price
           </th>
-          <td>
+          <th>
             Status
-          </td>
+          </th>
         </tr>
         <tr>
           <td>
@@ -40,27 +40,40 @@
             $100.05
           </td>
           <td>
-            <div id="switch">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                <label class="form-check-label" for="flexSwitchCheckDefault"></label>
-              </div>
+            <div class="align-items-center">
+              <a-switch v-model:checked="checked1" checked-children="ON" un-checked-children="OFF"/>
             </div>
           </td>
         </tr>
       </table>
     </div>
   </div>
+  <div id="test"></div>
 </template>
 
 <script>
+import {reactive, toRefs} from 'vue';
+
 export default {
-  name: "Dashboard"
+  name: "Dashboard",
+  setup() {
+    const state = reactive({
+      checked1: true
+    });
+    return {
+      ...toRefs(state),
+    };
+  },
 }
 </script>
 
 <style scoped>
-#container {
+#test {
+  height: 1000px;
+  background-color: #000000;
+}
+
+.container {
   padding: 57px;
   width: 100%;
 }
@@ -101,6 +114,6 @@ export default {
   flex: none;
   order: 0;
   flex-grow: 0;
-
 }
+
 </style>

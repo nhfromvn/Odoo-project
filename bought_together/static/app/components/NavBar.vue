@@ -28,6 +28,7 @@ export default {
 
 <style scoped>
 #container {
+  position: fixed;
   height: 83px;
   width: 100%;
   background: #EFEFEF;
@@ -35,6 +36,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 0px 20px;
+  z-index: 100;
 }
 
 #frame_50 {
