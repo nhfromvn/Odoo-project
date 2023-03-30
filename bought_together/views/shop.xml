@@ -1,0 +1,46 @@
+<odoo>
+    <data>
+        <record id='shop_action' model='ir.actions.act_window'>
+            <field name="name">Shop</field>
+            <field name="res_model">shop</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+        <record id="shop_view_form" model="ir.ui.view">
+            <field name="name">shop</field>
+            <field name="model">shop</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="shop_url" required="1"/>
+                                <field name="first_name"/>
+                                <field name="last_name"/>
+                                <field name="user"/>
+                                <field name="password"/>
+                            </group>
+                            <group>
+                                <field name="locale"/>
+                                <field name="email"/>
+                                <field name="access_token"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="shop_view_tree" model="ir.ui.view">
+            <field name="name">shop</field>
+            <field name="model">shop</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="shop_url"/>
+                    <field name="first_name"/>
+                    <field name="last_name"/>
+                </tree>
+            </field>
+        </record>
+
+        <menuitem name="shop" id="shop_menu" action="shop_action" parent="bought_base_menu"/>
+    </data>
+</odoo>

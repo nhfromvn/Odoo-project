@@ -44,7 +44,7 @@
               {{ product.name }}
             </p>
             <font-awesome-icon :icon="['fas', 'circle-xmark']" size="sm"
-                               @click="handleClickRecommendProduct(product.id)"
+                               @click="handleClickRecommendProduct(product.product_id)"
                                style="height: 15px; margin-right: 10px; color: red; margin-top: 5px; width: 15px; margin-bottom: 5px"/>
           </div>
         </div>
@@ -70,11 +70,12 @@
                 <input type="checkbox" v-model="product.check_recommend">
               </div>
             </td>
-            <td>{{ product.id }}</td>
+            <td><img style="height: 40px;
+                      width: 40px" :src="product.image_url"></td>
             <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.compare_at_price }}</td>
+            <td>{{ product.qty_in_stock }}</td>
           </tr>
           </tbody>
         </table>
@@ -92,7 +93,7 @@
               {{ product.name }}
             </p>
             <font-awesome-icon :icon="['fas', 'circle-xmark']" size="sm"
-                               @click="handleClickExcludeProduct(product.id)"
+                               @click="handleClickExcludeProduct(product.product_id)"
                                style="height: 15px; margin-right: 10px; color: red; margin-top: 5px; width: 15px; margin-bottom: 5px"/>
           </div>
         </div>
@@ -117,11 +118,12 @@
               <div>
                 <input type="checkbox" v-model="product.check_exclude"></div>
             </td>
-            <td>{{ product.id }}</td>
+            <td><img style="height: 40px;
+                      width: 40px" :src="product.image_url"></td>
             <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.name }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.compare_at_price }}</td>
+            <td>{{ product.qty_in_stock }}</td>
           </tr>
           </tbody>
         </table>
@@ -137,6 +139,7 @@ import {CloseCircleFilled} from '@ant-design/icons-vue'
 
 export default {
   name: "AddProduct",
+  props: {list_products: Array},
   watch: {
     list_recommend_product: function () {
       this.check_all_recommend = this.list_recommend_product.length == this.filteredRowsRecommend.length
@@ -152,20 +155,20 @@ export default {
     //    }
     //  },
     list_recommend_product: function () {
-      return this.list_product.filter(product => product.check_recommend == true)
+      return this.list_products.filter(product => product.check_recommend == true)
     },
     list_exclude_product: function () {
-      return this.list_product.filter(product => product.check_exclude == true)
+      return this.list_products.filter(product => product.check_exclude == true)
     },
     filteredRowsRecommend: function () {
       var self = this;
-      return this.list_product.filter(function (product) {
+      return this.list_products.filter(function (product) {
         return String(product.name).toLowerCase().indexOf(self.search_recommendation.toLowerCase()) > -1
       })
     },
     filteredRowsExclude: function () {
       var self = this;
-      return this.list_product.filter(function (product) {
+      return this.list_products.filter(function (product) {
         return String(product.name).toLowerCase().indexOf(self.search_exclude.toLowerCase()) > -1
       })
     }
@@ -193,24 +196,24 @@ export default {
   methods: {
     handleCheckAllRecommend() {
       if (this.check_all_recommend) {
-        this.list_product.filter(product => product.check_recommend = true)
+        this.list_products.filter(product => product.check_recommend = true)
       } else {
-        this.list_product.filter(product => product.check_recommend = false)
+        this.list_products.filter(product => product.check_recommend = false)
       }
     },
     handleCheckAllExclude() {
       if (this.check_all_exclude) {
-        this.list_product.filter(product => product.check_exclude = true)
+        this.list_products.filter(product => product.check_exclude = true)
       } else {
-        this.list_product.filter(product => product.check_exclude = false)
+        this.list_products.filter(product => product.check_exclude = false)
 
       }
     },
     handleClickRecommendProduct(id) {
-      this.list_product.find(product => product.id == id).check_recommend = false
+        this.list_products.find(product => product.product_id == id).check_recommend = false
     },
     handleClickExcludeProduct(id) {
-      this.list_product.find(product => product.id == id).check_exclude = false
+      this.list_products.find(product => product.product_id == id).check_exclude = false
     },
     show_toast: function (type, message, description, duration) {
       notification[type]({
@@ -224,7 +227,7 @@ export default {
       })
     },
     save() {
-      if (this.list_recommend_product.length > 5||this.list_exclude_product.length > 5) {
+      if (this.list_recommend_product.length > 5 || this.list_exclude_product.length > 5) {
         this.show_toast(
             'open',
             'You have reach the product limitation.',
@@ -236,45 +239,6 @@ export default {
   },
   data() {
     return {
-      list_product: [{
-        check_recommend: false,
-        check_exclude: false,
-        id: 0,
-        name: 'giay',
-
-      }, {
-        check_recommend: false,
-        check_exclude: false,
-        id: 1,
-        name: 'quan',
-
-      }, {
-        check_recommend: false,
-        check_exclude: false,
-        id: 2,
-        name: 'ao',
-
-      }, {
-        check_recommend: false,
-        check_exclude: false,
-        id: 3,
-        name: 'mu',
-
-      }, {
-        check_recommend: false,
-        check_exclude: false,
-        id: 4,
-        name: 'kinh',
-
-      },
-        {
-          check_recommend: false,
-          check_exclude: false,
-          id: 5,
-          name: 'dong_ho',
-
-        }
-      ],
       search_recommendation: '',
       check_all_recommend: false,
       search_exclude: '',
@@ -284,7 +248,7 @@ export default {
 
 }
 // axios.get("/shopify/sync/product").then((res) => {
-//     this.list_product = res.data.products
+//     this.list_products = res.data.products
 // })
 </script>
 
@@ -428,12 +392,12 @@ export default {
   padding: 10px;
 }
 
-#table_recommend {
-
+#table_recommend td {
+  justify-content: center;
 }
 
-#table_exclude {
-
+#table_exclude td {
+  justify-content: center;
 }
 
 #search_recommend_bar {
@@ -458,6 +422,8 @@ export default {
 
 .show_product {
   display: flex;
+  gap: 26px;
+  flex-wrap: wrap;
 
 }
 
@@ -468,7 +434,7 @@ export default {
   background: #FFFFFF;
   border: 1px solid #E2E2E2;
   border-radius: 6px;
-  gap: 5px;
+  gap: 8px;
 }
 
 .product path {

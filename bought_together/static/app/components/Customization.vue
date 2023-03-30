@@ -17,7 +17,7 @@
         </button>
       </div>
     </div>
-    <div style="display: flex">
+    <div style="display: flex; gap:100px">
       <div id="content_left">
         <div id="text_settings" class="d-flex align-items-center">
           <p>Settings</p>

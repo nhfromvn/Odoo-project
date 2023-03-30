@@ -11,6 +11,7 @@
         <field name="arch" type="xml">
             <form>
                 <field name="name"/>
+                <field name="compare_at_price"/>
             </form>
         </field>
     </record>
