@@ -127,9 +127,9 @@
         <div id="content_right"></div>
 
       </div>
-      <div id="content_right">
+      <div id="content_right" class="d-flex align-items-center">
         <div id="text_preview">
-          <div></div>
+           <font-awesome-icon :icon="['fas', 'circle-question']"/>
           <p>Preview</p>
         </div>
         <div id="rectangle_preview">
@@ -641,5 +641,15 @@ export default {
   cursor: pointer;
   margin-top: -15px;
   margin-left: -15px
+}
+#text_preview{
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 10px;
+width: 501px;
+height: 45px;
+
+
 }
 </style>
