@@ -3,17 +3,17 @@
     <div class="d-flex justify-content-center">
       <div id="frame_427319039">
         <button class="head_btn" id="add_product">Add Product</button>
-        <button class="head_btn" id="customization">Customization</button>
-        <button class="head_btn" id="installation">Installation</button>
+        <button class="head_btn" id="customization" @click="go('customization')">Customization</button>
+        <button class="head_btn" id="installation" @click="go('installation')">Installation</button>
       </div>
     </div>
     <div class="d-flex justify-content-end">
       <div class="right_top_btns" style="display: flex; gap: 19px">
-        <button id="btn_cancel">
+        <button id="btn_cancel" @click="cancel()">
           Cancel
         </button>
         <button id="btn_save" @click="save()">
-          SAVE
+          Next
         </button>
       </div>
     </div>
@@ -74,7 +74,8 @@
                       width: 40px" :src="product.image_url"></td>
             <td>{{ product.name }}</td>
             <td>{{ product.price }}</td>
-            <td>{{ product.compare_at_price }}</td>
+            <td v-if="product.compare_at_price">{{ product.compare_at_price }}</td>
+            <td v-else>{{ product.price }}</td>
             <td>{{ product.qty_in_stock }}</td>
           </tr>
           </tbody>
@@ -133,6 +134,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import {ref, reactive, toRefs, h} from 'vue';
 import {notification} from 'ant-design-vue';
 import {CloseCircleFilled} from '@ant-design/icons-vue'
@@ -149,11 +151,6 @@ export default {
     }
   },
   computed: {
-    // notification(){
-    //    if(this.list_recommend_product>5){
-    //      return this.openNotification()
-    //    }
-    //  },
     list_recommend_product: function () {
       return this.list_products.filter(product => product.check_recommend == true)
     },
@@ -194,6 +191,9 @@ export default {
     };
   },
   methods: {
+    go(id){
+      this.$emit('goTo',id)
+    },
     handleCheckAllRecommend() {
       if (this.check_all_recommend) {
         this.list_products.filter(product => product.check_recommend = true)
@@ -210,7 +210,7 @@ export default {
       }
     },
     handleClickRecommendProduct(id) {
-        this.list_products.find(product => product.product_id == id).check_recommend = false
+      this.list_products.find(product => product.product_id == id).check_recommend = false
     },
     handleClickExcludeProduct(id) {
       this.list_products.find(product => product.product_id == id).check_exclude = false
@@ -234,6 +234,20 @@ export default {
             'Please untick any products from the list to continue selecting.',
             3
         )
+      } else {
+        let list = {
+          list_recommend: this.list_recommend_product,
+          list_exlcude: this.list_exclude_product,
+          check: this.checked1
+
+        }
+        this.$emit('send_lists', list);
+      }
+    },
+    cancel() {
+      for (let product of this.list_products) {
+        product.check_exclude = 0
+        product.check_recommend = 0
       }
     }
   },
@@ -278,7 +292,6 @@ export default {
 }
 
 .right_top_btns {
-  width: 200px;
   margin-bottom: 0px;
 }
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='bought_action' model='ir.actions.act_window'>
+        <field name="name">Bought Together</field>
+        <field name="res_model">shopify.product</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+    <record id="bought_view_form" model="ir.ui.view">
+        <field name="name">bought product form</field>
+        <field name="model">shopify.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="compare_at_price"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="bought_view_tree" model="ir.ui.view">
+        <field name="name">bought product tree</field>
+        <field name="model">shopify.product</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <menuitem name="Bought Together" id="bought_base_menu"/>
+    <menuitem name="Bought Together" id="bought_menu" action="bought_action" parent="bought_base_menu"/>
+</odoo>

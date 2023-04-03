@@ -28,16 +28,13 @@
             1
           </td>
           <td>
-            You May Also Like...
-          </td>
+            {{widget_title}}  </td>
           <td>
-            Good deals only for you!
-          </td>
+            {{ widget_description}}     </td>
           <td>
-            3
-          </td>
+            {{product_included}}    </td>
           <td>
-            $100.05
+            ${{ total_price }}
           </td>
           <td>
             <div class="align-items-center">
@@ -56,6 +53,13 @@ import {reactive, toRefs} from 'vue';
 
 export default {
   name: "Dashboard",
+  props:{
+    widget_title: String,
+    widget_description: String,
+    product_included: Number,
+    check: Boolean,
+    total_price: Number
+  },
   setup() {
     const state = reactive({
       checked1: true

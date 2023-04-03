@@ -26,8 +26,10 @@
     'data': [
         'security/ir.model.access.csv',
         'views/templates.xml',
-        'views/bought.xml',
+        'views/shopify_product.xml',
+        'views/bought_widget.xml',
         'views/shop.xml'
+
     ],
     # only loaded in demonstration mode
     'demo': [

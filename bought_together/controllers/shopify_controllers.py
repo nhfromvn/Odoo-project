@@ -150,7 +150,7 @@ class ShopifyController(http.Controller):
             for product in products['products']:
                 vals = {}
 
-                product_exist = request.env['bought'].sudo().search([('product_id', '=', str(product['id']))],
+                product_exist = request.env['shopify.product'].sudo().search([('product_id', '=', str(product['id']))],
                                                                         limit=1)
                 vals['product_id'] = product['id']
                 vals['store_id'] = store_info.id
@@ -187,3 +187,9 @@ class ShopifyController(http.Controller):
                 return False
         else:
             return False
+
+    @http.route('/bought-together/save/product', type="http", auth="user", website=True, method=['GET'],
+                csrf=False)
+    def save_product(self, **kwargs):
+        print('haha')
+

@@ -2,18 +2,18 @@
   <div class="container" id="container">
     <div class="d-flex justify-content-center">
       <div id="frame_427319039">
-        <button class="head_btn" id="add_product">Add Product</button>
-        <button class="head_btn" id="customization">Customization</button>
+        <button class="head_btn" id="add_product" @click="go('add_product')">Add Product</button>
+        <button class="head_btn" id="customization" @click="go('customization')">Customization</button>
         <button class="head_btn" id="installation">Installation</button>
       </div>
     </div>
     <div class="d-flex justify-content-end">
       <div class="right_top_btns" style="display: flex; gap: 19px">
-        <button id="btn_home">
+        <button id="btn_home" @click="go('dashboard')">
           Home
         </button>
-        <button id="btn_go_to_customize">
-          Go To Customization
+        <button id="btn_go_to_customize" @click="goToThemeCustomization">
+          Go To Theme Customization
         </button>
       </div>
     </div>
@@ -34,8 +34,8 @@
     </div>
     <div class="d-flex justify-content-center">
       <div class="d-flex justify-content-center align-items-center" id="rectangle_34624157">
-         <video controls height="85%" width="85%">
-            <source src="/bought_together/static/app/video/cuu-non-120739.mp4" type="video/mp4">
+        <video controls height="85%" width="85%">
+          <source src="/bought_together/static/app/video/cuu-non-120739.mp4" type="video/mp4">
         </video>
       </div>
     </div>
@@ -44,7 +44,17 @@
 
 <script>
 export default {
-  name: "Installation"
+  name: "Installation",
+  props: {shop_url: String},
+  methods: {
+    goToThemeCustomization() {
+      window.open('https://'+this.shop_url + '/admin/themes/current/editor', '_blank')
+      console.log(this.shop_url)
+    },
+    go(id) {
+      this.$emit('goTo', id)
+    }
+  }
 }
 </script>
 

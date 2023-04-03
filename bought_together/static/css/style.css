@@ -64,7 +64,6 @@ p {
 }
 
 .right_top_btns {
-    width: 250px;
     margin: 10px 10px 100px 100px;
 }
 
@@ -73,6 +72,7 @@ p {
     width: 100%;
     margin-top: 83px;
     margin-left: 300px;
+    margin-bottom: 100px;
 }
 
 .is_loading {
