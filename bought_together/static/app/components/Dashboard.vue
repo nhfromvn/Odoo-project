@@ -28,13 +28,13 @@
             1
           </td>
           <td>
-            {{widget_title}}  </td>
+            {{proptemp.widget_title}}  </td>
           <td>
-            {{ widget_description}}     </td>
+            {{ proptemp.widget_description}}     </td>
           <td>
-            {{product_included}}    </td>
+            {{ proptemp.product_included}}    </td>
           <td>
-            ${{ total_price }}
+            ${{  proptemp.total_price }}
           </td>
           <td>
             <div class="align-items-center">
@@ -54,11 +54,7 @@ import {reactive, toRefs} from 'vue';
 export default {
   name: "Dashboard",
   props:{
-    widget_title: String,
-    widget_description: String,
-    product_included: Number,
-    check: Boolean,
-    total_price: Number
+    proptemp: Object
   },
   setup() {
     const state = reactive({

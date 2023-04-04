@@ -29,26 +29,26 @@
         </div>
         <div id="widget_title">
           <p>Widget Title</p>
-          <input type="text" v-model="widget_title">
+          <input type="text" v-model="temp.widget_title">
         </div>
         <div id="title_color_and_font-size">
           <div id="title_color">
             <p>Title Color</p>
             <div class="d-flex align-items-center">
               <div class="color_input">
-                <input type="color" v-model="title_color">
+                <input type="color" v-model="temp.title_color">
               </div>
-              <input type="text" v-model="title_color">
+              <input type="text" v-model="temp.title_color">
             </div>
           </div>
           <div id="title_font_size"><p>Title Font Size</p>
-            <select v-model="title_font_size">
-              <option class="option_style" v-for="option in font_sizes" :value="option">{{ option.name }}</option>
+            <select v-model="temp.title_font_size">
+              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{ option.name }}</option>
             </select></div>
         </div>
         <div id="widget_description">
           <p>Widget Description</p>
-          <input type="text" v-model="widget_description">
+          <input type="text" v-model="temp.widget_description">
         </div>
         <div id="description_color_and_font-size" style="display: flex">
           <div id="description_color">
@@ -56,16 +56,16 @@
             <div class="d-flex">
               <div class="d-flex align-items-center">
                 <div class="color_input">
-                  <input type="color" v-model="description_color">
+                  <input type="color" v-model="temp.description_color">
                 </div>
-                <input type="text" v-model="description_color">
+                <input type="text" v-model="temp.description_color">
               </div>
             </div>
           </div>
           <div id="description_font_size">
             <p>Description Font Size</p>
-            <select v-model="description_font_size">
-              <option class="option_style" v-for="option in font_sizes" :value="option">{{ option.name }}</option>
+            <select v-model="temp.description_font_size">
+              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{ option.name }}</option>
             </select></div>
         </div>
         <div id="layout_and_number" style="display: flex">
@@ -75,7 +75,7 @@
           </div>
           <div id="number_of_product">
             <p>Number of products to show</p>
-            <input v-model="numbers_product" type="number" min="1" max="5">
+            <input v-model="temp.numbers_product" type="number" min="1" max="5">
           </div>
         </div>
         <div id="text_button_configuration" class="d-flex align-items-center">
@@ -86,7 +86,7 @@
           <p>
             Button Text
           </p>
-          <input type="text" v-model="button_text">
+          <input type="text" v-model="temp.button_text">
         </div>
         <div id="button_text_color">
           <p>
@@ -94,9 +94,9 @@
           </p>
           <div class="d-flex align-items-center">
             <div class="color_input">
-              <input type="color" v-model="btn_text_color">
+              <input type="color" v-model="temp.btn_text_color">
             </div>
-            <input type="text" v-model="btn_text_color">
+            <input type="text" v-model="temp.btn_text_color">
           </div>
 
         </div>
@@ -107,9 +107,9 @@
             </p>
             <div class="d-flex align-items-center">
               <div class="color_input">
-                <input type="color" v-model="btn_bg_color">
+                <input type="color" v-model="temp.btn_bg_color">
               </div>
-              <input type="text" v-model="btn_bg_color">
+              <input type="text" v-model="temp.btn_bg_color">
             </div>
           </div>
           <div id="button_border_color">
@@ -118,9 +118,9 @@
             </p>
             <div class="d-flex align-items-center">
               <div class="color_input">
-                <input type="color" v-model="btn_border_color">
+                <input type="color" v-model="temp.btn_border_color">
               </div>
-              <input type="text" v-model="btn_border_color">
+              <input type="text" v-model="temp.btn_border_color">
             </div>
           </div>
         </div>
@@ -132,25 +132,27 @@
         </div>
         <div id="rectangle_preview" style="justify-content: center">
           <div id="show_widget_title" :style="{
-            color: title_color,
-            fontSize: title_font_size.value}">{{ widget_title }}
+            color: temp.title_color,
+            fontSize: temp.title_font_size.value
+            }">{{ temp.widget_title }}
           </div>
           <div id="show_widget_description" :style="{
-            color: description_color,
-            fontSize: description_font_size.value}">{{ widget_description }}
+            color: temp.description_color,
+            fontSize : temp.description_font_size.value
+            }">{{ temp.widget_description }}
           </div>
           <div style="display: flex;
                       justify-content: space-around">
             <div id="images">
-              <div v-for="product in list_recommend_product">
-                <div style="display: flex" v-if="list_recommend_product.indexOf(product)<numbers_product">
-                <img style="width: 65px;
+              <div v-for="product in temp.list_recommend_product">
+                <div style="display: flex" v-if="temp.list_recommend_product.indexOf(product)<temp.numbers_product">
+                  <img style="width: 65px;
                         height: 61px;" :src="product.image_url"/>
-                <div style="padding: 9px"
-                     v-if="list_recommend_product.indexOf(product)!=numbers_product-1"
-                     class="d-flex align-items-center">
-                  <font-awesome-icon :icon="['fas', 'plus']"/>
-                </div>
+                  <div style="padding: 9px"
+                       v-if="temp.list_recommend_product.indexOf(product)!=temp.numbers_product-1"
+                       class="d-flex align-items-center">
+                    <font-awesome-icon :icon="['fas', 'plus']"/>
+                  </div>
                 </div>
               </div>
             </div>
@@ -159,28 +161,28 @@
                 <p>Total: </p>
                 <p id="show_total_price">${{ total_price }}</p>
               </div>
-              <button id="show_button" :style=" {color: btn_text_color,
-                                                 backgroundColor: btn_bg_color,
-                                                 borderColor:btn_border_color}">
-                {{ button_text }}
+              <button id="show_button" :style=" {color: temp.btn_text_color,
+                                                 backgroundColor: temp.btn_bg_color,
+                                                 borderColor:temp.btn_border_color}">
+                {{ temp.button_text }}
               </button>
             </div>
           </div>
 
-          <div v-for="product in list_recommend_product" >
-            <div class="products"  v-if="list_recommend_product.indexOf(product)<numbers_product">
-            <div  style="display: flex;
+          <div v-for="product in temp.list_recommend_product">
+            <div class="products" v-if="temp.list_recommend_product.indexOf(product)<temp.numbers_product">
+              <div style="display: flex;
                         gap:14px">
-              <input type="checkbox">
-              <p>{{ product.name }}</p>
-            </div>
-            <div class="product_price">
-              <div style="display: flex
-                     ;gap: 18px">
-                <div v-if="product.compare_at_price">${{ product.compare_at_price }}</div>
-                <div v-else>${{ product.price }}</div>
+                <input type="checkbox">
+                <p>{{ product.name }}</p>
               </div>
-            </div>
+              <div class="product_price">
+                <div style="display: flex
+                     ;gap: 18px">
+                  <div v-if="product.compare_at_price">${{ product.compare_at_price }}</div>
+                  <div v-else>${{ product.price }}</div>
+                </div>
+              </div>
             </div>
           </div>
           <div>
@@ -205,68 +207,70 @@
 export default {
   name: "Customization",
   props: {
-    list_recommend_product: Array,
-    list_exclude_product: Array
+    proptemp: Object
   },
   data() {
     return {
-      btn_text_color: '#FFFFFF',
-      btn_bg_color: '#0000FF',
-      btn_border_color: '#b0a161',
-      description_color: '#000000',
-      title_color: '#000000',
-      widget_title: 'YOU MAY ALSO LIKE...',
-      widget_description: 'Good deals only for you!',
-      button_text: 'Add to cart',
-      numbers_product: 3,
-      title_font_size: {
-        name: 'Medium', value: 18
+      temp: {
+        list_recommend_product: this.proptemp.list_recommend_product,
+        widget_title: this.proptemp.widget_title,
+        title_color: this.proptemp.widget_title_color,
+        title_font_size: this.proptemp.font_sizes.find(font => font.name.toLowerCase() == this.proptemp.widget_title_font_size),
+        widget_description: this.proptemp.widget_description,
+        description_color: this.proptemp.widget_description_color,
+        description_font_size: this.proptemp.font_sizes.find(font => font.name.toLowerCase() == this.proptemp.widget_description_font_size),
+        button_text: this.proptemp.widget_button_text,
+        btn_text_color: this.proptemp.widget_button_text_color,
+        btn_bg_color: this.proptemp.widget_button_bg_color,
+        btn_border_color: this.proptemp.widget_button_border_color,
+        numbers_product: this.proptemp.product_included
       },
-      description_font_size: {
-        name: 'Small', value: 16
-      },
-      font_sizes: [{
-        name: 'Extra Small', value: 12
-      }, {
-        name: 'Small', value: 16
-      }, {
-        name: 'Medium', value: 18
-      }, {
-        name: 'Large', value: 20
-      }, {
-        name: 'Extra Large', value: 25
-      }],
     }
-  },
+  }
+  ,
   methods: {
-    goTo(id){
-      this.$emit("goTo",id)
-    },
+    goTo(id) {
+      this.$emit("goTo", id)
+    }
+    ,
     save() {
       let params = {
-        widget_title: this.widget_title,
-        widget_description: this.widget_description,
-        product_included:  this.numbers_product,
-        total_price:this.total_price
+        widget_title: this.temp.widget_title,
+        widget_title_color: this.temp.title_color,
+        widget_title_font_size: this.temp.title_font_size.name.toLowerCase(),
+        widget_description: this.temp.widget_description,
+        widget_description_color: this.temp.description_color,
+        widget_description_font_size: this.temp.description_font_size.name.toLowerCase(),
+        widget_button_text: this.temp.button_text,
+        widget_button_text_color: this.temp.btn_text_color,
+        widget_button_bg_color: this.temp.btn_bg_color,
+        widget_button_border_color: this.temp.btn_border_color,
+        product_included: this.temp.numbers_product,
+        total_price: this.temp.total_price
       }
-      this.$emit('saveCustomization',params)
-      console.log(params)
-    },
-    cancel() {
-
+      this.$emit('saveCustomization', params)
+      console.log(this.proptemp)
+      console.log(this.temp)
+      console.log(this.font_sizes.find(font => font.name.toLowerCase() == 'small'))
     }
-  },
+    ,
+    cancel() {
+      window.location.reload()
+    }
+  }
+  ,
   computed: {
     total_price: function () {
       let price = 0
-      for (let product of this.list_recommend_product) {
+      for (let product of this.temp.list_recommend_product) {
         price += Number(product.price)
       }
       return price
-    },
+    }
+    ,
     sub_total_price: function () {
       let price = 0
-      for (let product of this.list_recommend_product) {
+      for (let product of this.temp.list_recommend_product) {
         if (product.compare_at_price) {
           price += Number(product.compare_at_price)
         } else {

@@ -245,10 +245,9 @@ export default {
       }
     },
     cancel() {
-      for (let product of this.list_products) {
-        product.check_exclude = 0
-        product.check_recommend = 0
-      }
+
+        window.location.reload()
+
     }
   },
   data() {

@@ -14,4 +14,5 @@ class ShopifyProduct(models.Model):
     _description = 'Products'
     _rec_name = 'name'
     variant_id = fields.Char()
-    widget =fields.Many2one('bought.widget')
+    widget_recommend = fields.Many2one('bought.widget')
+    widget_exclude = fields.Many2one('bought.widget')

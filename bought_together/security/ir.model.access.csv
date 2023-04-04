@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_customaddons/bought_together_customaddons/bought_together,customaddons/bought_together.customaddons/bought_together,model_shopify_product,,1,1,1,1
+access_customaddons/bought_together_product,customaddons/bought_together.customaddons/product,model_shopify_product,,1,1,1,1
 access_customaddons/bought_together_customaddons/bought_together,customaddons/bought_together.customaddons/bought_together,model_shop,,1,1,1,1
+access_customaddons/bought_together_bought_widget,customaddons/bought_together.bought_widget,model_bought_widget,,1,1,1,1

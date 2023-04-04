@@ -151,7 +151,7 @@ class ShopifyController(http.Controller):
                 vals = {}
 
                 product_exist = request.env['shopify.product'].sudo().search([('product_id', '=', str(product['id']))],
-                                                                        limit=1)
+                                                                             limit=1)
                 vals['product_id'] = product['id']
                 vals['store_id'] = store_info.id
                 vals['name'] = product['title']
@@ -188,8 +188,78 @@ class ShopifyController(http.Controller):
         else:
             return False
 
-    @http.route('/bought-together/save/product', type="http", auth="user", website=True, method=['GET'],
-                csrf=False)
+    @http.route('/bought-together/save/product', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def save_product(self, **kwargs):
-        print('haha')
+        if request.httprequest.data:
+            res = json.loads(request.httprequest.data)
+            print(res)
+            shop_url = res['shop_url']
+            print(shop_url)
+            vals = {}
+            store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+            widget_exist = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
+                                                                      limit=1)
+            print(widget_exist)
+            vals['title'] = res['widget_title']
+            vals['title_color'] = res['widget_title_color']
+            vals['title_font_size'] = res['widget_title_font_size']
+            vals['description'] = res['widget_description']
+            vals['description_color'] = res['widget_description_color']
+            vals['description_font_size'] = res['widget_description_font_size']
+            vals['button_text'] = res['widget_button_text']
+            vals['button_text_color'] = res['widget_button_text_color']
+            vals['button_bg_color'] = res['widget_button_bg_color']
+            vals['button_border_color'] = res['widget_button_border_color']
+            vals['product_included'] = res['product_included']
+            vals['total_price'] = res['total_price']
+            if widget_exist:
+                widget_exist.write(vals)
+            else:
+                vals['store_id'] = store_info.id
+                widget_exist = request.env['bought.widget'].sudo().create(vals)
+            for product in res['list_recommend_product']:
+                shop_product = request.env['shopify.product'].sudo().search(
+                    [('product_id', '=', str(product['product_id']))],
+                    limit=1)
+                shop_product.write({'widget_recommend': widget_exist.id})
+                if shop_product not in widget_exist.product_recommend:
+                    widget_exist.write({'product_recommend': [(4, shop_product.id)]})
+            for product in res['list_exclude_product']:
+                shop_product = request.env['shopify.product'].sudo().search(
+                    [('product_id', '=', str(product['product_id']))],
+                    limit=1)
+                shop_product.write({'widget_exclude': widget_exist.id})
+                if shop_product not in widget_exist.product_exclude:
+                    widget_exist.write({'product_exclude': [(4, shop_product.id)]})
+            return {
+                "status": True
+            }
 
+    @http.route('/bought-together/get/widget', type="http", auth="user", website=True, method=['GET'],
+                csrf=False)
+    def get_widget(self):
+        shop_url = request.session['shop_url']
+        if shop_url:
+            store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
+                                                            limit=1)
+        vals = {}
+        vals['widget_title'] = widget.title
+        vals['widget_title_color'] = widget.title_color
+        vals['widget_title_font_size'] = widget.title_font_size
+        vals['widget_description'] = widget.description
+        vals['widget_description_color'] = widget.description_color
+        vals['widget_description_font_size'] = widget.description_font_size
+        vals['widget_button_text'] = widget.button_text
+        vals['widget_button_text_color'] = widget.button_text_color
+        vals['widget_button_bg_color'] = widget.button_bg_color
+        vals['widget_button_border_color'] = widget.button_border_color
+        vals['product_included'] = widget.product_included
+        vals['total_price'] = widget.total_price
+        vals['list_recommend_product'] = []
+        vals['list_exclude_product'] = []
+        for product in widget.product_recommend:
+            vals['list_recommend_product'].append(str(product.product_id))
+        for product in widget.product_exclude:
+            vals['list_exclude_product'].append(str(product.product_id))
+        return json.dumps(vals)
