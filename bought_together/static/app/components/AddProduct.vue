@@ -36,7 +36,6 @@
           <p>Choose recommendation product(s)</p>
         </div>
         <a-input id="search_recommend_bar" v-model:value="search_recommendation" placeholder="Search product by name"
-                 onkeyup="showSuggestion()"
                  :suffix="this.list_recommend_product.length + ' selected'"/>
         <div class="show_product" v-if="this.list_recommend_product.length > 0">
           <div class="product" v-for="product in this.list_recommend_product" :key="product">
@@ -148,7 +147,13 @@ export default {
     },
     list_exclude_product: function () {
       this.check_all_exclude = this.list_exclude_product.length == this.filteredRowsExclude.length
-    }
+    },
+    search_recommendation: function () {
+      this.check_all_recommend = this.list_recommend_product.length >= this.filteredRowsRecommend.length
+    },
+    search_exclude: function () {
+      this.check_all_exclude = this.list_exclude_product.length >= this.filteredRowsExclude.length
+    },
   },
   computed: {
     list_recommend_product: function () {
@@ -191,21 +196,21 @@ export default {
     };
   },
   methods: {
-    go(id){
-      this.$emit('goTo',id)
+    go(id) {
+      this.$emit('goTo', id)
     },
     handleCheckAllRecommend() {
       if (this.check_all_recommend) {
-        this.list_products.filter(product => product.check_recommend = true)
+        this.filteredRowsRecommend.filter(product => product.check_recommend = true)
       } else {
-        this.list_products.filter(product => product.check_recommend = false)
+        this.filteredRowsRecommend.filter(product => product.check_recommend = false)
       }
     },
     handleCheckAllExclude() {
       if (this.check_all_exclude) {
-        this.list_products.filter(product => product.check_exclude = true)
+        this.filteredRowsExclude.filter(product => product.check_exclude = true)
       } else {
-        this.list_products.filter(product => product.check_exclude = false)
+        this.filteredRowsExclude.filter(product => product.check_exclude = false)
 
       }
     },
@@ -245,8 +250,7 @@ export default {
       }
     },
     cancel() {
-
-        window.location.reload()
+      window.location.reload()
 
     }
   },
@@ -260,9 +264,6 @@ export default {
   },
 
 }
-// axios.get("/shopify/sync/product").then((res) => {
-//     this.list_products = res.data.products
-// })
 </script>
 
 <style scoped>

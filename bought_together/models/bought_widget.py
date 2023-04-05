@@ -25,6 +25,12 @@ class BoughtWidget(models.Model):
     button_bg_color = fields.Char()
     button_border_color = fields.Char()
     total_price = fields.Char()
-    product_included = fields.Float()
+    product_included = fields.Integer(compute='_compute_product')
+    numbers_product = fields.Integer(default=3)
     product_recommend = fields.One2many('shopify.product', 'widget_recommend')
     product_exclude = fields.One2many('shopify.product', 'widget_exclude')
+
+    @api.depends('product_recommend')
+    def _compute_product(self):
+        for widget in self:
+            widget.product_included = len(widget.product_recommend)

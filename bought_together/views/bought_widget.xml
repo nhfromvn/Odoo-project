@@ -18,6 +18,8 @@
                             <field name="store_id"/>
                             <field name="product_recommend"/>
                             <field name="product_exclude"/>
+                            <field name="product_included"/>
+                            <field name="numbers_product"/>
                         </group>
                     </sheet>
                 </form>
@@ -33,6 +35,6 @@
                 </tree>
             </field>
         </record>
-        <menuitem name="bought_widget" id="widget_menu" action="widget_action" parent="bought_base_menu"/>
+        <menuitem name="Widget" id="widget_menu" action="widget_action" parent="bought_base_menu"/>
     </data>
 </odoo>

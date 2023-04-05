@@ -223,7 +223,7 @@ export default {
         btn_text_color: this.proptemp.widget_button_text_color,
         btn_bg_color: this.proptemp.widget_button_bg_color,
         btn_border_color: this.proptemp.widget_button_border_color,
-        numbers_product: this.proptemp.product_included
+        numbers_product: this.proptemp.numbers_product
       },
     }
   }
@@ -245,13 +245,13 @@ export default {
         widget_button_text_color: this.temp.btn_text_color,
         widget_button_bg_color: this.temp.btn_bg_color,
         widget_button_border_color: this.temp.btn_border_color,
-        product_included: this.temp.numbers_product,
-        total_price: this.temp.total_price
+        total_price: this.total_price,
+        numbers_product: this.temp.numbers_product
       }
       this.$emit('saveCustomization', params)
-      console.log(this.proptemp)
       console.log(this.temp)
-      console.log(this.font_sizes.find(font => font.name.toLowerCase() == 'small'))
+      console.log(this.proptemp)
+      console.log(params)
     }
     ,
     cancel() {

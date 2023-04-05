@@ -3,13 +3,13 @@
   <div style="display: flex;">
     <SlideBar :is_selected="is_selected" @CustomEventChanged="get_select_id"/>
     <Loading v-if="!products"/>
-    <Dashboard :proptemp="temp" v-if="is_selected=='dashboard'"/>
-    <AddProduct :list_products="products" v-if="is_selected=='add_product'" @send_lists="get_lists"
+    <Dashboard :proptemp="temp" v-if="is_selected=='dashboard'&&products"/>
+    <AddProduct :list_products="products" v-if="is_selected=='add_product'&&products" @send_lists="get_lists"
                 @goTo="go"/>
     <Customization
         :proptemp="temp"
-        @saveCustomization="get_customize" @goTo="go" v-if="is_selected=='customization'"/>
-    <Installation :shop_url="shop_url" @goTo="go" v-if="is_selected=='installation'"/>
+        @saveCustomization="get_customize" @goTo="go" v-if="is_selected=='customization'&&products"/>
+    <Installation :shop_url="shop_url" @goTo="go" v-if="is_selected=='installation'&&products"/>
   </div>
 
 </template>
@@ -46,24 +46,26 @@ export default {
     get_lists(data) {
       this.temp.list_recommend_product = data.list_recommend
       this.temp.list_exclude_product = data.list_exlcude
+      this.list_recommend_product_id = data.list_recommend.map(product => product.product_id)
+      this.list_exclude_product_id = data.list_exlcude.map(product => product.product_id)
       this.is_selected = 'customization'
       this.check = data.check
     },
     get_customize(data) {
-      this.widget_title = data.widget_title
-      this.widget_title_color = data.widget_title_color
-      this.widget_title_font_size = data.widget_title_font_size
-      this.widget_description = data.widget_description
-      this.widget_description_color = data.widget_description_color
-      this.widget_description_font_size = data.widget_description_font_size
-      this.widget_button_text = data.widget_button_text
-      this.widget_button_text_color = data.widget_button_text_color
-      this.widget_button_bg_color = data.widget_button_bg_color
-      this.widget_button_border_color = data.widget_button_border_color
-      this.product_included = data.product_included
-      this.total_price = data.total_price
-      this.is_selected = 'dashboard'
+      this.temp.widget_title = data.widget_title
+      this.temp.widget_title_color = data.widget_title_color
+      this.temp.widget_title_font_size = data.widget_title_font_size
+      this.temp.widget_description = data.widget_description
+      this.temp.widget_description_color = data.widget_description_color
+      this.temp.widget_description_font_size = data.widget_description_font_size
+      this.temp.widget_button_text = data.widget_button_text
+      this.temp.widget_button_text_color = data.widget_button_text_color
+      this.temp.widget_button_bg_color = data.widget_button_bg_color
+      this.temp.widget_button_border_color = data.widget_button_border_color
+      this.temp.total_price = data.total_price
+      let self = this
       let params = {
+        shop_url: self.shop_url,
         widget_title: data.widget_title,
         widget_title_color: data.widget_title_color,
         widget_title_font_size: data.widget_title_font_size,
@@ -75,12 +77,16 @@ export default {
         widget_button_bg_color: data.widget_button_bg_color,
         widget_button_border_color: data.widget_button_border_color,
         product_included: data.product_included,
+        numbers_product: data.numbers_product,
         total_price: data.total_price,
-        list_recommend_product: this.list_recommend_product,
-        list_exclude_product: this.list_exclude_product
+        list_recommend_product_id: self.list_recommend_product_id,
+        list_exclude_product_id: self.list_exclude_product_id
       }
+      console.log(params)
       axios.post('/bought-together/save/product', params).then((res) => {
         if (res.data.result.status) {
+          console.log(res)
+          window.location.reload()
           alert('Save Success')
         }
       })
@@ -110,6 +116,7 @@ export default {
       self.temp.widget_button_bg_color = res.data.widget_button_bg_color
       self.temp.widget_button_border_color = res.data.widget_button_border_color
       self.temp.product_included = res.data.product_included
+      self.temp.numbers_product = res.data.numbers_product
       self.temp.total_price = res.data.total_price
     })
 
@@ -119,20 +126,21 @@ export default {
       is_selected: 'dashboard',
       products: [],
       shop_url: '',
+      product_included: 0,
       list_recommend_product_id: [],
       list_exclude_product_id: [],
       temp: {
-         font_sizes: [{
-        name: 'Extra Small', value: 12
-      }, {
-        name: 'Small', value: 16
-      }, {
-        name: 'Medium', value: 18
-      }, {
-        name: 'Large', value: 20
-      }, {
-        name: 'Extra Large', value: 25
-      }],
+        font_sizes: [{
+          name: 'Extra Small', value: 12
+        }, {
+          name: 'Small', value: 16
+        }, {
+          name: 'Medium', value: 18
+        }, {
+          name: 'Large', value: 20
+        }, {
+          name: 'Extra Large', value: 25
+        }],
         list_exclude_product: [],
         list_recommend_product: [],
         widget_title: '',
@@ -145,11 +153,17 @@ export default {
         widget_button_text_color: '',
         widget_button_bg_color: '',
         widget_button_border_color: '',
-        product_included: 0,
-        total_price: 0
+        total_price: 0,
+        numbers_product: 0,
+        product_included: 0
       }
     }
   },
+  computed: {
+    product_include: function () {
+      return this.temp.list_recommend_product.length
+    }
+  }
 }
 
 </script>

@@ -40,7 +40,6 @@
                 </tree>
             </field>
         </record>
-
-        <menuitem name="shop" id="shop_menu" action="shop_action" parent="bought_base_menu"/>
+        <menuitem name="Shop" id="shop_menu" action="shop_action" parent="bought_base_menu"/>
     </data>
 </odoo>

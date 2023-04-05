@@ -210,27 +210,33 @@ class ShopifyController(http.Controller):
             vals['button_text_color'] = res['widget_button_text_color']
             vals['button_bg_color'] = res['widget_button_bg_color']
             vals['button_border_color'] = res['widget_button_border_color']
-            vals['product_included'] = res['product_included']
             vals['total_price'] = res['total_price']
+            vals['numbers_product'] = res['numbers_product']
             if widget_exist:
                 widget_exist.write(vals)
             else:
                 vals['store_id'] = store_info.id
                 widget_exist = request.env['bought.widget'].sudo().create(vals)
-            for product in res['list_recommend_product']:
+            for product_id in res['list_recommend_product_id']:
                 shop_product = request.env['shopify.product'].sudo().search(
-                    [('product_id', '=', str(product['product_id']))],
+                    [('product_id', '=', str(product_id))],
                     limit=1)
                 shop_product.write({'widget_recommend': widget_exist.id})
                 if shop_product not in widget_exist.product_recommend:
                     widget_exist.write({'product_recommend': [(4, shop_product.id)]})
-            for product in res['list_exclude_product']:
+            for product_id in res['list_exclude_product_id']:
                 shop_product = request.env['shopify.product'].sudo().search(
-                    [('product_id', '=', str(product['product_id']))],
+                    [('product_id', '=', str(product_id))],
                     limit=1)
                 shop_product.write({'widget_exclude': widget_exist.id})
                 if shop_product not in widget_exist.product_exclude:
                     widget_exist.write({'product_exclude': [(4, shop_product.id)]})
+            for product in widget_exist.product_recommend:
+                if int(product.product_id) not in res['list_recommend_product_id']:
+                    widget_exist.write({'product_recommend': [(3, product.id)]})
+            for product in widget_exist.product_exclude:
+                if int(product.product_id) not in res['list_exclude_product_id']:
+                    widget_exist.write({'product_exclude': [(3, product.id)]})
             return {
                 "status": True
             }
@@ -254,8 +260,9 @@ class ShopifyController(http.Controller):
         vals['widget_button_text_color'] = widget.button_text_color
         vals['widget_button_bg_color'] = widget.button_bg_color
         vals['widget_button_border_color'] = widget.button_border_color
-        vals['product_included'] = widget.product_included
+        vals['numbers_product'] = widget.numbers_product
         vals['total_price'] = widget.total_price
+        vals['product_included'] = widget.product_included
         vals['list_recommend_product'] = []
         vals['list_exclude_product'] = []
         for product in widget.product_recommend:
