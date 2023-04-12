@@ -69,6 +69,7 @@ export default {
       self.shop = res.data.shop
       console.log(self.status)
     })
+    console.log(this.proptemp)
   },
   data() {
     return {

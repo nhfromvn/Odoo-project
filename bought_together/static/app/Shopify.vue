@@ -1,64 +1,64 @@
 <template>
   <div v-if="!check_exclude">
-  <div id="content_right">
-    <div id="rectangle_widget" style="justify-content: center">
-      <div id="show_widget_title"
-           :style="{
+    <div id="content_right">
+      <div id="rectangle_widget" style="justify-content: center">
+        <div id="show_widget_title"
+             :style="{
                     color: widget_title_color,
                 fontSize: widget_title_font_size.value+'px'
                     }"
-      >{{ widget_title }}
-      </div>
-      <div id="show_widget_description"
-           :style="{
+        >{{ widget_title }}
+        </div>
+        <div id="show_widget_description"
+             :style="{
                     color: widget_description_color,
                     fontSize : widget_description_font_size.value+'px'
                     }">{{ widget_description }}
-      </div>
-      <div style="display: flex;
+        </div>
+        <div style="display: flex;
                       justify-content: space-around">
-        <div id="images">
-          <div v-for="product in list_recommend_product">
-            <div style="display: flex" v-if="list_recommend_product.indexOf(product)<numbers_product">
-              <img style="width: 65px;
+          <div id="images">
+            <div v-for="product in list_recommend_product">
+              <div style="display: flex" v-if="list_recommend_product.indexOf(product)<numbers_product">
+                <img style="width: 65px;
                         height: 61px;" :src="product.image_url"/>
-              <div style="padding: 9px"
-                   v-if="list_recommend_product.indexOf(product)!=numbers_product-1&&list_recommend_product.indexOf(product)!=list_recommend_product.length-1"
-                   class="d-flex align-items-center">
-                <font-awesome-icon :icon="['fas', 'plus']"/>
+                <div style="padding: 9px"
+                     v-if="list_recommend_product.indexOf(product)!=numbers_product-1&&list_recommend_product.indexOf(product)!=list_recommend_product.length-1"
+                     class="d-flex align-items-center">
+                  <font-awesome-icon :icon="['fas', 'plus']"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div id="total_price">
+              <p>Total: </p>
+              <p id="show_total_price">${{ total_price }}</p>
+            </div>
+            <button @click="add_to_cart" id="show_button" :style="{color: widget_button_text_color,
+                                                backgroundColor:  widget_button_bg_color,
+                                                borderColor: widget_button_border_color}">
+              {{ widget_button_text }}
+            </button>
+          </div>
+        </div>
+        <div v-for="product in list_recommend_product">
+          <div class="products" v-if="list_recommend_product.indexOf(product)<numbers_product">
+            <div style="display: flex;
+                        gap:14px">
+              <input type="checkbox" v-model="product.check_box">
+              <p>{{ product.name }}</p>
+            </div>
+            <div class="product_price">
+              <div style="display: flex
+                     ;gap: 18px">
+                <div v-if="product.compare_at_price">${{ product.compare_at_price }}</div>
+                <div v-else>${{ product.price }}</div>
               </div>
             </div>
           </div>
         </div>
-        <div>
-          <div id="total_price">
-            <p>Total: </p>
-            <p id="show_total_price">${{ total_price }}</p>
-          </div>
-          <button @click="add_to_cart" id="show_button" :style="{color: widget_button_text_color,
-                                                backgroundColor:  widget_button_bg_color,
-                                                borderColor: widget_button_border_color}">
-            {{ widget_button_text }}
-          </button>
-        </div>
-      </div>
-      <div v-for="product in list_recommend_product">
-        <div class="products" v-if="list_recommend_product.indexOf(product)<numbers_product">
-          <div style="display: flex;
-                        gap:14px">
-            <input type="checkbox" v-model="product.check_box">
-            <p>{{ product.name }}</p>
-          </div>
-          <div class="product_price">
-            <div style="display: flex
-                     ;gap: 18px">
-              <div v-if="product.compare_at_price">${{ product.compare_at_price }}</div>
-              <div v-else>${{ product.price }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p style="font-family: 'Inter';
+        <p style="font-family: 'Inter';
                   font-style: normal;
                   font-weight: 600;
                   font-size: 12px;
@@ -66,11 +66,11 @@
                   text-decoration-line: line-through;
                   display: flex;
                   justify-content: right">
-        ${{ sub_total_price }}
-      </p>
+          ${{ sub_total_price }}
+        </p>
+      </div>
     </div>
   </div>
-    </div>
 </template>
 
 <script>
@@ -84,14 +84,12 @@ export default {
         let formData = {
           'items': this.items
         }
-        console.log(this.items)
         axios.post(`${window.Shopify.routes.root}cart/add.js`, formData, {
           headers: {
             'Content-Type': 'application/json'
           }
         })
             .then(response => {
-              console.log(response.data);
               window.location.replace(window.Shopify.routes.root + 'cart');
             })
             .catch(error => {
@@ -173,9 +171,7 @@ export default {
   },
   mounted() {
     let self = this
-    console.log(window.location)
     axios.post("/apps/bought-together/bought-together/show/widget", {shop_url: window.location.host}).then((res) => {
-      console.log(res)
       let widget = res.data.result
       self.widget_title = widget.widget_title
       self.widget_title_color = widget.widget_title_color
@@ -191,13 +187,12 @@ export default {
       self.product_included = widget.product_included
       self.list_recommend_product = widget.list_recommend_product
       self.list_exclude_product_id = widget.list_exclude_product_id
-      console.log(self.list_exclude_product_id)
       for (let product of self.list_recommend_product) {
         product.check_box = false
       }
-      self.check_exclude = self.list_exclude_product_id.includes(String(ShopifyAnalytics.meta.product.id))
-          console.log(ShopifyAnalytics.meta.product.id)
-    console.log(self.check_exclude)
+      if (ShopifyAnalytics.meta.product.id) {
+        self.check_exclude = self.list_exclude_product_id.includes(String(ShopifyAnalytics.meta.product.id))
+      }
     })
   },
 

@@ -123,6 +123,10 @@ class ShopifyController(http.Controller):
                     store_exist.write(vals)
                 else:
                     store_exist = request.env['shop'].sudo().create(vals)
+                widget_exits = request.env['bought.widget'].sudo().search([('store_id', '=', store_exist.id)], limit=1)
+                if not widget_exits:
+                    widget_exits = request.env['bought.widget'].sudo().create({'store_id': store_exist.id})
+
                 try:
                     header = {
                         'X-Shopify-Access-Token': store_exist.access_token,
@@ -219,7 +223,7 @@ class ShopifyController(http.Controller):
             "status": True
         }
 
-    @http.route('/bought-together/save/product', type="json", auth="user", website=True, method=['POST'], csrf=False)
+    @http.route('/bought-together/save/widget', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def save_product(self, **kwargs):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)

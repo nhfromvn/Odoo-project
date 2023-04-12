@@ -1,17 +1,19 @@
 <template>
+
   <NavBar/>
   <div style="display: flex;">
     <SlideBar :is_selected="is_selected" @CustomEventChanged="get_select_id"/>
-    <Loading v-if="!products"/>
+    <Loading v-if="!products||!temp.status&&is_selected!='dashboard'"/>
     <Dashboard :proptemp="temp" v-if="is_selected=='dashboard'&&products" @sendStatus="change_status"/>
-    <AddProduct :list_products="products" v-if="is_selected=='add_product'&&products" @send_lists="get_lists"
+    <AddProduct :list_products="products" v-if="is_selected=='add_product'&&products&&temp.status"
+                @send_lists="get_lists"
                 @goTo="go"/>
     <Customization
         :proptemp="temp"
-        @saveCustomization="get_customize" @goTo="go" v-if="is_selected=='customization'&&products"/>
-    <Installation :shop_url="shop_url" @goTo="go" v-if="is_selected=='installation'&&products"/>
-  </div>
+        @saveCustomization="get_customize" @goTo="go" v-if="is_selected=='customization'&&products&&temp.status"/>
+    <Installation :shop_url="shop_url" @goTo="go" v-if="is_selected=='installation'&&products&&temp.status"/>
 
+  </div>
 </template>
 
 <script>
@@ -89,7 +91,7 @@ export default {
         status: self.temp.status
       }
       console.log(params)
-      axios.post('/bought-together/save/product', params).then((res) => {
+      axios.post('/bought-together/save/widget', params).then((res) => {
         if (res.data.result.status) {
           console.log(res)
           window.location.reload()
@@ -103,6 +105,7 @@ export default {
     axios.get("/bought-together/sync/product").then((res) => {
       self.products = res.data.products
       self.shop_url = res.data.shop_url
+      self.temp.shop = res.data.shop_url
       for (let product of self.products) {
         product.check_recommend = self.list_recommend_product_id.includes(String(product.product_id));
         product.check_exclude = self.list_exclude_product_id.includes(String(product.product_id));
@@ -138,8 +141,8 @@ export default {
       list_recommend_product_id: [],
       list_exclude_product_id: [],
       temp: {
-        shop: this.shop_url,
-        status: 0,
+        shop: '',
+        status: true,
         font_sizes: [{
           name: 'Extra Small', value: 12
         }, {
@@ -164,7 +167,7 @@ export default {
         widget_button_bg_color: '',
         widget_button_border_color: '',
         total_price: 0,
-        numbers_product: 0,
+        numbers_product: 3,
         product_included: 0,
       }
     }
