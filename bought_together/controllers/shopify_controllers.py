@@ -206,6 +206,19 @@ class ShopifyController(http.Controller):
         else:
             return False
 
+    @http.route('/bought-together/save/status', type="json", auth="user", website=True, method=['POST'], csrf=False)
+    def save_status(self, **kwargs):
+        if request.httprequest.data:
+            res = json.loads(request.httprequest.data)
+            shop_url = res['shop_url']
+            store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+            widget_exist = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)], limit=1)
+            if widget_exist:
+                widget_exist.write({'status': res['status']})
+        return {
+            "status": True
+        }
+
     @http.route('/bought-together/save/product', type="json", auth="user", website=True, method=['POST'], csrf=False)
     def save_product(self, **kwargs):
         if request.httprequest.data:
@@ -228,6 +241,7 @@ class ShopifyController(http.Controller):
             vals['button_border_color'] = res['widget_button_border_color']
             vals['total_price'] = res['total_price']
             vals['numbers_product'] = res['numbers_product']
+            vals['status'] = res['status']
             if widget_exist:
                 widget_exist.write(vals)
             else:
@@ -269,6 +283,7 @@ class ShopifyController(http.Controller):
             widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
                                                                 limit=1)
             vals = {}
+            vals['shop'] = shop_url
             vals['widget_title'] = widget.title
             vals['widget_title_color'] = widget.title_color
             vals['widget_title_font_size'] = widget.title_font_size
@@ -282,6 +297,7 @@ class ShopifyController(http.Controller):
             vals['numbers_product'] = widget.numbers_product
             vals['total_price'] = widget.total_price
             vals['product_included'] = widget.product_included
+            vals['status'] = widget.status
             vals['list_recommend_product'] = []
             vals['list_exclude_product'] = []
             for product in widget.product_recommend:
@@ -317,7 +333,7 @@ class ShopifyController(http.Controller):
             vals['total_price'] = widget.total_price
             vals['product_included'] = widget.product_included
             vals['list_recommend_product'] = []
-            vals['list_exclude_product'] = []
+            vals['list_exclude_product_id'] = []
             for product in widget.product_recommend:
                 vals['list_recommend_product'].append({'product_id': str(product.product_id),
                                                        'name': product.name,
@@ -327,13 +343,7 @@ class ShopifyController(http.Controller):
                                                        'compare_at_price': product.compare_at_price,
                                                        })
             for product in widget.product_exclude:
-                vals['list_exclude_product'].append({'product_id': str(product.product_id),
-                                                     'name': product.name,
-                                                     'variant_id': product.variant_id,
-                                                     'image_url': product.image_url,
-                                                     'price': product.price,
-                                                     'compare_at_price': product.compare_at_price,
-                                                     })
+                vals['list_exclude_product_id'].append(product.product_id)
             return vals
         except Exception as e:
             print(e)

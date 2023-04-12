@@ -29,7 +29,7 @@ class BoughtWidget(models.Model):
     numbers_product = fields.Integer(default=3)
     product_recommend = fields.One2many('shopify.product', 'widget_recommend')
     product_exclude = fields.One2many('shopify.product', 'widget_exclude')
-
+    status = fields.Boolean()
     @api.depends('product_recommend')
     def _compute_product(self):
         for widget in self:

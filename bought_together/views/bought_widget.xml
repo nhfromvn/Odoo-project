@@ -20,6 +20,7 @@
                             <field name="product_exclude"/>
                             <field name="product_included"/>
                             <field name="numbers_product"/>
+                            <field name="status"/>
                         </group>
                     </sheet>
                 </form>

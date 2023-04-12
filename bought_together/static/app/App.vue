@@ -3,7 +3,7 @@
   <div style="display: flex;">
     <SlideBar :is_selected="is_selected" @CustomEventChanged="get_select_id"/>
     <Loading v-if="!products"/>
-    <Dashboard :proptemp="temp" v-if="is_selected=='dashboard'&&products"/>
+    <Dashboard :proptemp="temp" v-if="is_selected=='dashboard'&&products" @sendStatus="change_status"/>
     <AddProduct :list_products="products" v-if="is_selected=='add_product'&&products" @send_lists="get_lists"
                 @goTo="go"/>
     <Customization
@@ -37,6 +37,11 @@ export default {
   },
 
   methods: {
+    change_status(check) {
+      this.temp.status = check
+      console.log(this.temp.status)
+      return check
+    },
     go(data) {
       this.is_selected = data;
     },
@@ -80,7 +85,8 @@ export default {
         numbers_product: data.numbers_product,
         total_price: data.total_price,
         list_recommend_product_id: self.list_recommend_product_id,
-        list_exclude_product_id: self.list_exclude_product_id
+        list_exclude_product_id: self.list_exclude_product_id,
+        status: self.temp.status
       }
       console.log(params)
       axios.post('/bought-together/save/product', params).then((res) => {
@@ -118,6 +124,8 @@ export default {
       self.temp.product_included = res.data.product_included
       self.temp.numbers_product = res.data.numbers_product
       self.temp.total_price = res.data.total_price
+      self.temp.status = res.data.status
+      console.log(self.temp.status)
     })
 
   },
@@ -130,9 +138,11 @@ export default {
       list_recommend_product_id: [],
       list_exclude_product_id: [],
       temp: {
+        shop: this.shop_url,
+        status: 0,
         font_sizes: [{
-            name: 'Extra Small', value: 12
-          }, {
+          name: 'Extra Small', value: 12
+        }, {
           name: 'Small', value: 16
         }, {
           name: 'Medium', value: 18
@@ -155,7 +165,7 @@ export default {
         widget_button_border_color: '',
         total_price: 0,
         numbers_product: 0,
-        product_included: 0
+        product_included: 0,
       }
     }
   },

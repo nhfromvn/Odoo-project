@@ -28,17 +28,21 @@
             1
           </td>
           <td>
-            {{proptemp.widget_title}}  </td>
+            {{ proptemp.widget_title }}
+          </td>
           <td>
-            {{ proptemp.widget_description}}     </td>
+            {{ proptemp.widget_description }}
+          </td>
           <td>
-            {{ proptemp.product_included}}    </td>
+            {{ proptemp.product_included }}
+          </td>
           <td>
-            ${{  proptemp.total_price }}
+            ${{ proptemp.total_price }}
           </td>
           <td>
             <div class="align-items-center">
-              <a-switch v-model:checked="checked1" checked-children="ON" un-checked-children="OFF"/>
+              <a-switch @change="changeStatus" v-model:checked="this.status" checked-children="ON"
+                        un-checked-children="OFF"/>
             </div>
           </td>
         </tr>
@@ -50,18 +54,58 @@
 
 <script>
 import {reactive, toRefs} from 'vue';
+import axios from "axios";
 
 export default {
+  emits: ['sendStatus'],
   name: "Dashboard",
-  props:{
+  props: {
     proptemp: Object
+  },
+  mounted() {
+    let self = this
+    axios.get("/bought-together/get/widget").then((res) => {
+      self.status = res.data.status
+      self.shop = res.data.shop
+      console.log(self.status)
+    })
+  },
+  data() {
+    return {
+      shop:'',
+      status: false
+    }
+  },
+  methods: {
+    changeStatus() {
+      let self = this
+      axios.post('/bought-together/save/status', {
+        shop_url: self.shop
+        , status: self.status
+      }).then((res) => {
+        if (res.data.result.status) {
+          console.log(res)
+          window.location.reload()
+          alert('Save Success')
+        }
+      });
+      console.log(this.status)
+      this.$emit('sendStatus', this.status)
+
+    }
   },
   setup() {
     const state = reactive({
       checked1: true
     });
+
+    function test() {
+      console.log(state.checked1)
+    }
+
     return {
       ...toRefs(state),
+      test
     };
   },
 }

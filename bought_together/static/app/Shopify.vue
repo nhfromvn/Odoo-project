@@ -1,4 +1,5 @@
 <template>
+  <div v-if="!check_exclude">
   <div id="content_right">
     <div id="rectangle_widget" style="justify-content: center">
       <div id="show_widget_title"
@@ -6,13 +7,13 @@
                     color: widget_title_color,
                 fontSize: widget_title_font_size.value+'px'
                     }"
-      >{{ widget_title }}{{ widget_title_font_size.value }}
+      >{{ widget_title }}
       </div>
       <div id="show_widget_description"
            :style="{
                     color: widget_description_color,
                     fontSize : widget_description_font_size.value+'px'
-                    }">{{ widget_description }}{{ widget_description_font_size.value }}
+                    }">{{ widget_description }}
       </div>
       <div style="display: flex;
                       justify-content: space-around">
@@ -46,7 +47,6 @@
           <div style="display: flex;
                         gap:14px">
             <input type="checkbox" v-model="product.check_box">
-            <p>{{ product.check_box }}</p>
             <p>{{ product.name }}</p>
           </div>
           <div class="product_price">
@@ -70,6 +70,7 @@
       </p>
     </div>
   </div>
+    </div>
 </template>
 
 <script>
@@ -148,7 +149,7 @@ export default {
         name: 'Extra Large', value: 25
       }],
       list_recommend_product: [],
-      list_exclude_product: [],
+      list_exclude_product_id: [],
       widget_title: '',
       widget_title_color: '',
       widget_title_font_size: {
@@ -167,6 +168,7 @@ export default {
       widget_button_border_color: '',
       numbers_product: 0,
       product_included: 0,
+      check_exclude: 0,
     }
   },
   mounted() {
@@ -188,12 +190,14 @@ export default {
       self.numbers_product = widget.numbers_product
       self.product_included = widget.product_included
       self.list_recommend_product = widget.list_recommend_product
-      self.list_exclude_product = widget.list_exclude_product
+      self.list_exclude_product_id = widget.list_exclude_product_id
+      console.log(self.list_exclude_product_id)
       for (let product of self.list_recommend_product) {
         product.check_box = false
       }
-      console.log(self.widget_description_font_size.value)
-      console.log(self.widget_title_font_size.value)
+      self.check_exclude = self.list_exclude_product_id.includes(String(ShopifyAnalytics.meta.product.id))
+          console.log(ShopifyAnalytics.meta.product.id)
+    console.log(self.check_exclude)
     })
   },
 
