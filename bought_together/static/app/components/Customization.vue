@@ -43,7 +43,10 @@
           </div>
           <div id="title_font_size"><p>Title Font Size</p>
             <select v-model="temp.title_font_size">
-              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{ option.name }}</option>
+              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{
+                  option.name
+                }}
+              </option>
             </select></div>
         </div>
         <div id="widget_description">
@@ -65,7 +68,10 @@
           <div id="description_font_size">
             <p>Description Font Size</p>
             <select v-model="temp.description_font_size">
-              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{ option.name }}</option>
+              <option class="option_style" v-for="option in proptemp.font_sizes" :value="option">{{
+                  option.name
+                }}
+              </option>
             </select></div>
         </div>
         <div id="layout_and_number" style="display: flex">
@@ -141,7 +147,8 @@
             fontSize : temp.description_font_size.value
             }">{{ temp.widget_description }}
           </div>
-          <div style="display: flex;
+          <div style=" display: flex;
+                      gap: 30px;
                       justify-content: space-around">
             <div id="images">
               <div v-for="product in temp.list_recommend_product">
@@ -149,7 +156,7 @@
                   <img style="width: 65px;
                         height: 61px;" :src="product.image_url"/>
                   <div style="padding: 9px"
-                       v-if="temp.list_recommend_product.indexOf(product)!=temp.numbers_product-1"
+                       v-if="temp.list_recommend_product.indexOf(product)!=temp.numbers_product-1&&temp.list_recommend_product.indexOf(product)!=temp.list_recommend_product.length-1"
                        class="d-flex align-items-center">
                     <font-awesome-icon :icon="['fas', 'plus']"/>
                   </div>
@@ -783,7 +790,6 @@ export default {
 
 #rectangle_preview {
   box-sizing: border-box;
-  width: 533px;
   background: #FFFFFF;
   border: 1px solid #BFBFBF;
   border-radius: 5px;

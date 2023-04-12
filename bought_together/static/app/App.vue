@@ -110,7 +110,7 @@ export default {
       self.temp.widget_title_font_size = res.data.widget_title_font_size
       self.temp.widget_description = res.data.widget_description
       self.temp.widget_description_color = res.data.widget_description_color
-      self.temp.widget_description_font_size = res.data.widget_title_font_size
+      self.temp.widget_description_font_size = res.data.widget_description_font_size
       self.temp.widget_button_text = res.data.widget_button_text
       self.temp.widget_button_text_color = res.data.widget_button_text_color
       self.temp.widget_button_bg_color = res.data.widget_button_bg_color
@@ -131,8 +131,8 @@ export default {
       list_exclude_product_id: [],
       temp: {
         font_sizes: [{
-          name: 'Extra Small', value: 12
-        }, {
+            name: 'Extra Small', value: 12
+          }, {
           name: 'Small', value: 16
         }, {
           name: 'Medium', value: 18

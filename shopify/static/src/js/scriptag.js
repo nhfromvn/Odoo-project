@@ -50,7 +50,6 @@ const userAction = async () => {
                     </div>`
             dE.innerHTML += dV;
         }
-
     };
 }
 

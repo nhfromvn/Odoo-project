@@ -52,7 +52,6 @@ class ShopifyController(http.Controller):
                 return json.dumps({
                     "error": "not found shop_url in response"
                 })
-
             api_key = request.env['ir.config_parameter'].sudo().get_param('shopify.api_key')
             secret = request.env['ir.config_parameter'].sudo().get_param('shopify.secret_key')
             base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -124,7 +123,23 @@ class ShopifyController(http.Controller):
                     store_exist.write(vals)
                 else:
                     store_exist = request.env['shop'].sudo().create(vals)
-
+                try:
+                    header = {
+                        'X-Shopify-Access-Token': store_exist.access_token,
+                        'Content-Type': 'application/json'
+                    }
+                    script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json",
+                                               headers=header).json()
+                    if not script_tags['script_tags']:
+                        req = requests.post(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header,
+                                            json={"script_tag": {"event": "onload",
+                                                                 "src": request.env[
+                                                                            'ir.config_parameter'].sudo().get_param(
+                                                                     'web.base.url') + "/bought_together/static/js/extension.js"}})
+                    script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header)
+                    print(str(script_tags.content))
+                except Exception as e:
+                    print(e)
                 print(current_user.password)
                 return werkzeug.utils.redirect(base_url + '/bought-together')
 
@@ -157,7 +172,10 @@ class ShopifyController(http.Controller):
                 vals['name'] = product['title']
                 vals['price'] = product['variants'][0]['price']
                 vals['variant_id'] = product['variants'][0]['id']
-                vals['image_url'] = product['image']['src']
+                if not product['image'] == None:
+                    vals['image_url'] = product['image']['src']
+                else:
+                    vals['image_url'] = '/bought_together/static/app/img/img_3.png'
                 vals['compare_at_price'] = product['variants'][0]['compare_at_price']
                 vals['qty_in_stock'] = product['variants'][0]['inventory_quantity']
                 if product_exist:
@@ -197,9 +215,7 @@ class ShopifyController(http.Controller):
             print(shop_url)
             vals = {}
             store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-            widget_exist = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
-                                                                      limit=1)
-            print(widget_exist)
+            widget_exist = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)], limit=1)
             vals['title'] = res['widget_title']
             vals['title_color'] = res['widget_title_color']
             vals['title_font_size'] = res['widget_title_font_size']
@@ -241,32 +257,83 @@ class ShopifyController(http.Controller):
                 "status": True
             }
 
-    @http.route('/bought-together/get/widget', type="http", auth="user", website=True, method=['GET'],
-                csrf=False)
+    @http.route('/bought-together/get/widget', type="http", auth="public", website=True, method=['GET'],
+                csrf=False, cors="*")
     def get_widget(self):
-        shop_url = request.session['shop_url']
-        if shop_url:
+        try:
+            if request.httprequest.data:
+                print(request.httprequest.data)
+            shop_url = request.session['shop_url']
+            if shop_url:
+                store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+            widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
+                                                                limit=1)
+            vals = {}
+            vals['widget_title'] = widget.title
+            vals['widget_title_color'] = widget.title_color
+            vals['widget_title_font_size'] = widget.title_font_size
+            vals['widget_description'] = widget.description
+            vals['widget_description_color'] = widget.description_color
+            vals['widget_description_font_size'] = widget.description_font_size
+            vals['widget_button_text'] = widget.button_text
+            vals['widget_button_text_color'] = widget.button_text_color
+            vals['widget_button_bg_color'] = widget.button_bg_color
+            vals['widget_button_border_color'] = widget.button_border_color
+            vals['numbers_product'] = widget.numbers_product
+            vals['total_price'] = widget.total_price
+            vals['product_included'] = widget.product_included
+            vals['list_recommend_product'] = []
+            vals['list_exclude_product'] = []
+            for product in widget.product_recommend:
+                vals['list_recommend_product'].append(str(product.product_id))
+            for product in widget.product_exclude:
+                vals['list_exclude_product'].append(str(product.product_id))
+            return json.dumps(vals)
+        except Exception as e:
+            print(e)
+
+    @http.route('/bought-together/show/widget', type="json", auth="public", website=True, method=['POST'],
+                csrf=False, cors="*")
+    def show_widget(self):
+        try:
+            if request.httprequest.data:
+                res = json.loads(request.httprequest.data)
+            shop_url = res['shop_url']
             store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
-                                                            limit=1)
-        vals = {}
-        vals['widget_title'] = widget.title
-        vals['widget_title_color'] = widget.title_color
-        vals['widget_title_font_size'] = widget.title_font_size
-        vals['widget_description'] = widget.description
-        vals['widget_description_color'] = widget.description_color
-        vals['widget_description_font_size'] = widget.description_font_size
-        vals['widget_button_text'] = widget.button_text
-        vals['widget_button_text_color'] = widget.button_text_color
-        vals['widget_button_bg_color'] = widget.button_bg_color
-        vals['widget_button_border_color'] = widget.button_border_color
-        vals['numbers_product'] = widget.numbers_product
-        vals['total_price'] = widget.total_price
-        vals['product_included'] = widget.product_included
-        vals['list_recommend_product'] = []
-        vals['list_exclude_product'] = []
-        for product in widget.product_recommend:
-            vals['list_recommend_product'].append(str(product.product_id))
-        for product in widget.product_exclude:
-            vals['list_exclude_product'].append(str(product.product_id))
-        return json.dumps(vals)
+            widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],
+                                                                limit=1)
+            vals = {}
+            vals['widget_title'] = widget.title
+            vals['widget_title_color'] = widget.title_color
+            vals['widget_title_font_size'] = widget.title_font_size
+            vals['widget_description'] = widget.description
+            vals['widget_description_color'] = widget.description_color
+            vals['widget_description_font_size'] = widget.description_font_size
+            vals['widget_button_text'] = widget.button_text
+            vals['widget_button_text_color'] = widget.button_text_color
+            vals['widget_button_bg_color'] = widget.button_bg_color
+            vals['widget_button_border_color'] = widget.button_border_color
+            vals['numbers_product'] = widget.numbers_product
+            vals['total_price'] = widget.total_price
+            vals['product_included'] = widget.product_included
+            vals['list_recommend_product'] = []
+            vals['list_exclude_product'] = []
+            for product in widget.product_recommend:
+                vals['list_recommend_product'].append({'product_id': str(product.product_id),
+                                                       'name': product.name,
+                                                       'variant_id': product.variant_id,
+                                                       'image_url': product.image_url,
+                                                       'price': product.price,
+                                                       'compare_at_price': product.compare_at_price,
+                                                       })
+            for product in widget.product_exclude:
+                vals['list_exclude_product'].append({'product_id': str(product.product_id),
+                                                     'name': product.name,
+                                                     'variant_id': product.variant_id,
+                                                     'image_url': product.image_url,
+                                                     'price': product.price,
+                                                     'compare_at_price': product.compare_at_price,
+                                                     })
+            return vals
+        except Exception as e:
+            print(e)

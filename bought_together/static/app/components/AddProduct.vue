@@ -1,5 +1,6 @@
 <template>
   <div class="container" id="container">
+    <div style="background-color: #e2316c "></div>
     <div class="d-flex justify-content-center">
       <div id="frame_427319039">
         <button class="head_btn" id="add_product">Add Product</button>
@@ -69,7 +70,7 @@
                 <input type="checkbox" v-model="product.check_recommend">
               </div>
             </td>
-            <td><img style="height: 40px;
+            <td><img alt="iamge" style="height: 40px;
                       width: 40px" :src="product.image_url"></td>
             <td>{{ product.name }}</td>
             <td>{{ product.price }}</td>
@@ -118,7 +119,7 @@
               <div>
                 <input type="checkbox" v-model="product.check_exclude"></div>
             </td>
-            <td><img style="height: 40px;
+            <td><img alt="image" style="height: 40px;
                       width: 40px" :src="product.image_url"></td>
             <td>{{ product.name }}</td>
             <td>{{ product.price }}</td>
@@ -133,7 +134,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import {ref, reactive, toRefs, h} from 'vue';
 import {notification} from 'ant-design-vue';
 import {CloseCircleFilled} from '@ant-design/icons-vue'
@@ -143,10 +143,10 @@ export default {
   props: {list_products: Array},
   watch: {
     list_recommend_product: function () {
-      this.check_all_recommend = this.list_recommend_product.length == this.filteredRowsRecommend.length
+      this.check_all_recommend = this.list_recommend_product.length >= this.filteredRowsRecommend.length
     },
     list_exclude_product: function () {
-      this.check_all_exclude = this.list_exclude_product.length == this.filteredRowsExclude.length
+      this.check_all_exclude = this.list_exclude_product.length >= this.filteredRowsExclude.length
     },
     search_recommendation: function () {
       this.check_all_recommend = this.list_recommend_product.length >= this.filteredRowsRecommend.length
@@ -174,8 +174,7 @@ export default {
         return String(product.name).toLowerCase().indexOf(self.search_exclude.toLowerCase()) > -1
       })
     }
-  }
-  ,
+  },
   setup() {
     const state = reactive({
       checked1: true
@@ -292,7 +291,7 @@ export default {
 }
 
 .right_top_btns {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 #btn_cancel {
@@ -335,7 +334,7 @@ export default {
 }
 
 #enable_widget p {
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
   width: 127px;
   height: 22px;
   font-family: 'Inter';
@@ -365,7 +364,7 @@ export default {
   font-size: 20px;
   line-height: 22px;
   color: #000000;
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
 }
 
 #choose_text svg {
@@ -387,7 +386,7 @@ export default {
   align-items: center;
   /* Text/Default */
   color: #202223;
-  margin-bottom: 0px !important;
+  margin-bottom: 0 !important;
 }
 
 #rectangle_34624168 {
