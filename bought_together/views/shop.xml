@@ -18,6 +18,7 @@
                                 <field name="last_name"/>
                                 <field name="user"/>
                                 <field name="password"/>
+                                <field name="test"/>
                             </group>
                             <group>
                                 <field name="locale"/>

@@ -48,10 +48,11 @@ export default {
   props: {shop_url: String},
   methods: {
     goToThemeCustomization() {
-      window.open('https://'+this.shop_url + '/admin/themes/current/editor', '_blank')
+      window.open('https://' + this.shop_url + '/admin/themes/current/editor', '_blank')
       console.log(this.shop_url)
     },
     go(id) {
+      window.location.reload()
       this.$emit('goTo', id)
     }
   }

@@ -16,3 +16,4 @@ class ShopifyProduct(models.Model):
     variant_id = fields.Char()
     widget_recommend = fields.Many2one('bought.widget')
     widget_exclude = fields.Many2one('bought.widget')
+    available = fields.Boolean()

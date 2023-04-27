@@ -25,6 +25,7 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/bought_together_config.xml',
         'views/templates.xml',
         'views/shopify_product.xml',
         'views/bought_widget.xml',

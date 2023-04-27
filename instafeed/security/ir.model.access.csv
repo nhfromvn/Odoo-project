@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_customaddons/instafeed_customaddons/instafeed,customaddons/instafeed.customaddons/instafeed,model_customaddons/instafeed_customaddons/instafeed,base.group_user,1,1,1,1
+access_customaddons/instafeed_customaddons/instafeed,customaddons/instafeed.customaddons/instafeed,model_instafeed,,1,1,1,1
+access_customaddons/instagram_user_customaddons/instafeed,instafeed.instagram_user,model_instagram_user,,1,1,1,1
+access_customaddons/instafeed_user_customaddons/instafeed,instafeed.instafeed_user,model_instafeed_user,,1,1,1,1

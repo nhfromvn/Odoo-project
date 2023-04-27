@@ -1,5 +1,4 @@
 <template>
-
   <NavBar/>
   <div style="display: flex;">
     <SlideBar :is_selected="is_selected" @CustomEventChanged="get_select_id"/>
@@ -12,10 +11,8 @@
         :proptemp="temp"
         @saveCustomization="get_customize" @goTo="go" v-if="is_selected=='customization'&&products&&temp.status"/>
     <Installation :shop_url="shop_url" @goTo="go" v-if="is_selected=='installation'&&products&&temp.status"/>
-
   </div>
 </template>
-
 <script>
 import axios from 'axios'
 import SlideBar from "./components/SlideBar.vue";
@@ -59,6 +56,7 @@ export default {
       this.check = data.check
     },
     get_customize(data) {
+      let self= this
       this.temp.widget_title = data.widget_title
       this.temp.widget_title_color = data.widget_title_color
       this.temp.widget_title_font_size = data.widget_title_font_size
@@ -70,7 +68,6 @@ export default {
       this.temp.widget_button_bg_color = data.widget_button_bg_color
       this.temp.widget_button_border_color = data.widget_button_border_color
       this.temp.total_price = data.total_price
-      let self = this
       let params = {
         shop_url: self.shop_url,
         widget_title: data.widget_title,
@@ -94,7 +91,7 @@ export default {
       axios.post('/bought-together/save/widget', params).then((res) => {
         if (res.data.result.status) {
           console.log(res)
-          window.location.reload()
+          self.is_selected = 'installation'
           alert('Save Success')
         }
       })

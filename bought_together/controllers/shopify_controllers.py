@@ -27,12 +27,15 @@ SCOPES = '''read_products,
           read_price_rules'''
 
 
-class ShopifyController(http.Controller):
-    @http.route('/bought-together/install', auth='user')
+class BoughtTogetherController(http.Controller):
+    @http.route('/bought-together/install', auth='public')
     def install_bought_together(self, **kwargs):
+        db = http.request.env.cr.dbname
+        request.env.cr.commit()
+        request.session.authenticate(db, 'demo', 'demo')
         print(kwargs)
         shop_url = kwargs['shop']
-        api_key = request.env['ir.config_parameter'].sudo().get_param('shopify.api_key')
+        api_key = request.env['ir.config_parameter'].sudo().get_param('bought_together.api_key_bought_together')
         state = kwargs['hmac']
         callback = request.env['ir.config_parameter'].sudo().get_param(
             'web.base.url') + '/bought-together/oauth/callback'
@@ -40,7 +43,7 @@ class ShopifyController(http.Controller):
         url = f"https://{shop_url}/admin/oauth/authorize?client_id={api_key}&scope={SCOPES}&redirect_uri={callback}&state={state}&grant_options[]=per-user"
         return werkzeug.utils.redirect(url)
 
-    @http.route('/bought-together/oauth/callback', type="http", auth="user", website=True, method=['GET'], csrf=False)
+    @http.route('/bought-together/oauth/callback', type="http", auth="public", website=True, method=['GET'], csrf=False)
     def bought_together_callback(self, **kwargs):
         print(kwargs)
         if 'code' in kwargs:
@@ -52,8 +55,8 @@ class ShopifyController(http.Controller):
                 return json.dumps({
                     "error": "not found shop_url in response"
                 })
-            api_key = request.env['ir.config_parameter'].sudo().get_param('shopify.api_key')
-            secret = request.env['ir.config_parameter'].sudo().get_param('shopify.secret_key')
+            api_key = request.env['ir.config_parameter'].sudo().get_param('bought_together.api_key_bought_together')
+            secret = request.env['ir.config_parameter'].sudo().get_param('bought_together.secret_key_bought_together')
             base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
             headers = {'Content-Type': 'application/json'}
@@ -62,93 +65,94 @@ class ShopifyController(http.Controller):
                 "client_secret": secret,
                 "code": code
             }
-            # try:
-            vals = {}
-            url = 'https://' + shop_url + '/admin/oauth/access_token'
+            try:
+                vals = {}
+                url = 'https://' + shop_url + '/admin/oauth/access_token'
 
-            res = requests.post(url=url, headers=headers, data=json.dumps(body))
-            if res.status_code == 200:
-                data = res.json()
-                request.session['shop_url'] = shop_url
-                vals['first_name'] = data['associated_user']['first_name']
-                vals['last_name'] = data['associated_user']['last_name']
-                vals['shop_url'] = shop_url
-                vals['email'] = data['associated_user']['email']
-                vals['locale'] = data['associated_user']['locale']
-                vals['access_token'] = data['access_token']
-                vals['code'] = code
-                current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
-                current_user = request.env['res.users'].sudo().search([('login', '=', kwargs['shop'])], limit=1)
-                password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
-                print(password_generate)
-                if not current_company:
-                    current_company = request.env['res.company'].sudo().create({
-                        'logo': False,
-                        'currency_id': 2,
-                        'sequence': 10,
-                        'name': kwargs['shop'],
-                        'street': False,
-                        'street2': False,
-                        'city': False,
-                        'state_id': False,
-                        'zip': False,
-                        'country_id': False,
-                        'phone': False,
-                        'email': False,
-                        'website': False,
-                        'vat': False,
-                        'company_registry': False,
-                        'parent_id': False,
-                    })
+                res = requests.post(url=url, headers=headers, data=json.dumps(body))
+                if res.status_code == 200:
+                    data = res.json()
+                    request.session['shop_url'] = shop_url
+                    vals['first_name'] = data['associated_user']['first_name']
+                    vals['last_name'] = data['associated_user']['last_name']
+                    vals['shop_url'] = shop_url
+                    vals['email'] = data['associated_user']['email']
+                    vals['locale'] = data['associated_user']['locale']
+                    vals['access_token'] = data['access_token']
+                    vals['code'] = code
+                    current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
+                    current_user = request.env['res.users'].sudo().search([('login', '=', kwargs['shop'])], limit=1)
+                    password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
+                    print(password_generate)
+                    if not current_company:
+                        current_company = request.env['res.company'].sudo().create({
+                            'logo': False,
+                            'currency_id': 2,
+                            'sequence': 10,
+                            'name': kwargs['shop'],
+                            'street': False,
+                            'street2': False,
+                            'city': False,
+                            'state_id': False,
+                            'zip': False,
+                            'country_id': False,
+                            'phone': False,
+                            'email': False,
+                            'website': False,
+                            'vat': False,
+                            'company_registry': False,
+                            'parent_id': False,
+                        })
 
-                if not current_user:
-                    current_user = request.env['res.users'].sudo().create({
-                        'company_ids': [[6, False, [current_company.id]]],
-                        'company_id': current_company.id,
-                        'active': True,
-                        'lang': 'en_US',
-                        'tz': 'Europe/Brussels',
-                        'image_1920': False,
-                        '__last_update': False,
-                        'name': kwargs['shop'],
-                        'email': data['associated_user']['email'],
-                        'login': kwargs['shop'],
-                        'password': password_generate,
-                        'action_id': False,
-                    })
-                vals['user'] = current_user.id
-                vals['password'] = password_generate
-                store_exist = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-                if store_exist:
-                    store_exist.write(vals)
-                else:
-                    store_exist = request.env['shop'].sudo().create(vals)
-                widget_exits = request.env['bought.widget'].sudo().search([('store_id', '=', store_exist.id)], limit=1)
-                if not widget_exits:
-                    widget_exits = request.env['bought.widget'].sudo().create({'store_id': store_exist.id})
-
-                try:
-                    header = {
-                        'X-Shopify-Access-Token': store_exist.access_token,
-                        'Content-Type': 'application/json'
-                    }
-                    script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json",
-                                               headers=header).json()
-                    if not script_tags['script_tags']:
-                        req = requests.post(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header,
-                                            json={"script_tag": {"event": "onload",
-                                                                 "src": request.env[
-                                                                            'ir.config_parameter'].sudo().get_param(
-                                                                     'web.base.url') + "/bought_together/static/js/extension.js"}})
-                    script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json", headers=header)
-                    print(str(script_tags.content))
-                except Exception as e:
-                    print(e)
-                print(current_user.password)
-                return werkzeug.utils.redirect(base_url + '/bought-together')
-
-                # except Exception as e:
-                #     print(e)
+                    if not current_user:
+                        current_user = request.env['res.users'].sudo().create({
+                            'company_ids': [[6, False, [current_company.id]]],
+                            'company_id': current_company.id,
+                            'active': True,
+                            'lang': 'en_US',
+                            'tz': 'Europe/Brussels',
+                            'image_1920': False,
+                            '__last_update': False,
+                            'name': kwargs['shop'],
+                            'email': data['associated_user']['email'],
+                            'login': kwargs['shop'],
+                            'password': password_generate,
+                            'action_id': False,
+                        })
+                    vals['user'] = current_user.id
+                    vals['password'] = password_generate
+                    store_exist = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+                    if store_exist:
+                        store_exist.write(vals)
+                    else:
+                        store_exist = request.env['shop'].sudo().create(vals)
+                    widget_exits = request.env['bought.widget'].sudo().search([('store_id', '=', store_exist.id)],
+                                                                              limit=1)
+                    if not widget_exits:
+                        widget_exits = request.env['bought.widget'].sudo().create({'store_id': store_exist.id})
+                    try:
+                        header = {
+                            'X-Shopify-Access-Token': store_exist.access_token,
+                            'Content-Type': 'application/json'
+                        }
+                        script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json",
+                                                   headers=header).json()
+                        if not script_tags['script_tags']:
+                            req = requests.post(f"https://{shop_url}/admin/api/2023-01/script_tags.json",
+                                                headers=header,
+                                                json={"script_tag": {"event": "onload",
+                                                                     "src": request.env[
+                                                                                'ir.config_parameter'].sudo().get_param(
+                                                                         'web.base.url') + "/bought_together/static/js/extension.js"}})
+                        script_tags = requests.get(f"https://{shop_url}/admin/api/2023-01/script_tags.json",
+                                                   headers=header)
+                        print(str(script_tags.content))
+                    except Exception as e:
+                        print(e)
+                    print(current_user.password)
+                    return werkzeug.utils.redirect(base_url + '/bought-together')
+            except Exception as e:
+                print(e)
         else:
             return json.dumps({"error": "No code in response"})
 
@@ -156,8 +160,7 @@ class ShopifyController(http.Controller):
                 csrf=False)
     def get_product(self, **kwargs):
         shop_url = request.session['shop_url']
-        if shop_url:
-            store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         if self.sync_product():
             products = json.loads(self.sync_product())
         else:

@@ -1,3 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import models
+from . import feed
+from. import shop
+from . import instagram

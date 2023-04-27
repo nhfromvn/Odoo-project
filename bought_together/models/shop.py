@@ -17,3 +17,4 @@ class Shop(models.Model):
                              compute='_check_connect_xero')
     user = fields.Many2one('res.users')
     password = fields.Char()
+    test = fields.Char()

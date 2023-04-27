@@ -22,6 +22,7 @@
                                     <field name="api_key"/>
                                 </div>
                             </div>
+
                             <div class="col-md-6 o_setting_box">
                                 <div class="o_setting_right_pane">
                                     <label for="secret_key" class="oe_inline o_form_label"/>

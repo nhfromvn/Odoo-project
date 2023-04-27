@@ -1,24 +1,21 @@
 <odoo>
     <data>
-<!--
-        <template id="listing">
-          <ul>
-            <li t-foreach="objects" t-as="object">
-              <a t-attf-href="#{ root }/objects/#{ object.id }">
-                <t t-esc="object.display_name"/>
-              </a>
-            </li>
-          </ul>
+
+        <template id="instafeed">
+            <head>
+                <link rel="icon" sizes="32x32" href="/bought_together/static/app/img/nest_scale.jpeg"/>
+                <title>Instafeed</title>
+                <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
+            </head>
+            <body>
+<!--                <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>-->
+                <div id="fb-root"></div>
+                <div id="instafeed"></div>
+                <script src="instafeed/static/js/index.js"/>
+                <script src="instafeed/static/js/facebook.js">
+                </script>
+            </body>
         </template>
-        <template id="object">
-          <h1><t t-esc="object.display_name"/></h1>
-          <dl>
-            <t t-foreach="object._fields" t-as="field">
-              <dt><t t-esc="field"/></dt>
-              <dd><t t-esc="object[field]"/></dd>
-            </t>
-          </dl>
-        </template>
--->
+
     </data>
 </odoo>

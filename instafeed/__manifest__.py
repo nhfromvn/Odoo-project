@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "customaddons/instafeed",
+    'name': "Instafeed",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,13 +20,17 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base', 'bought_together'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
+        'security/ir.model.access.csv',
+        'views/instafeed_view.xml',
+        'views/instafeed_config.xml',
+        'views/instagram_user.xml',
+        'views/shop.xml',
         'views/templates.xml',
+
     ],
     # only loaded in demonstration mode
     'demo': [

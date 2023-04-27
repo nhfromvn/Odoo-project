@@ -11,4 +11,4 @@ library.add(fas, far,faInstagram)
 
 createApp(App)
     .component("font-awesome-icon", FontAwesomeIcon).use(Antd)
-    .mount('#app')
+    .mount('#instafeed')

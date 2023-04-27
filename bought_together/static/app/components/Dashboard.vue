@@ -87,7 +87,7 @@ export default {
         if (res.data.result.status) {
           console.log(res)
           window.location.reload()
-          alert('Save Success')
+          alert('Change Success')
         }
       });
       console.log(this.status)
