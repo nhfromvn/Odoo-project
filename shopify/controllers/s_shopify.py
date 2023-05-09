@@ -456,7 +456,6 @@ class SShopify(http.Controller):
             return False
 
     def get_orders(self, store):
-        print('hihi')
         enpoint = 'https://' + store.shop_url + '/admin/api/2023-01/orders.json?status=any'
         headers = {
             "X-Shopify-Access-Token": store.access_token

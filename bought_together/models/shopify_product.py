@@ -17,3 +17,5 @@ class ShopifyProduct(models.Model):
     widget_recommend = fields.Many2one('bought.widget')
     widget_exclude = fields.Many2one('bought.widget')
     available = fields.Boolean()
+    handle = fields.Char()
+    # post_id = fields.Many2one('instagram.post')

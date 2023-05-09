@@ -23,7 +23,6 @@
                                 <field name="locale"/>
                                 <field name="email"/>
                                 <field name="access_token"/>
-                                <field name="instagram_access_token"/>
                             </group>
                         </group>
                     </sheet>

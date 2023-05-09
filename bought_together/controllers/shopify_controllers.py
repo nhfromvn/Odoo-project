@@ -178,6 +178,7 @@ class BoughtTogetherController(http.Controller):
                 vals['store_id'] = store_info.id
                 vals['name'] = product['title']
                 vals['price'] = product['variants'][0]['price']
+                vals['handle'] = product['handle']
                 vals['variant_id'] = product['variants'][0]['id']
                 if not product['image'] == None:
                     vals['image_url'] = product['image']['src']
@@ -319,8 +320,8 @@ class BoughtTogetherController(http.Controller):
                 csrf=False, cors="*")
     def show_widget(self):
         try:
-            if request.httprequest.data:
-                res = json.loads(request.httprequest.data)
+
+            res = json.loads(request.httprequest.data)
             shop_url = res['shop_url']
             store_info = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
             widget = request.env['bought.widget'].sudo().search([('store_id', '=', store_info.id)],

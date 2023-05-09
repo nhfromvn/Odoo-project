@@ -6,24 +6,20 @@ from odoo import models, fields, api
 class Instafeed(models.Model):
     _name = 'instafeed'
     store_id = fields.Many2one('shop')
-    feed_title = fields.Char()
-    post_spacing = fields.Integer()
-    on_post_click = fields.Integer()
-    layout = fields.Char()
-    per_slide = fields.Integer()
-    numbers_of_post = fields.Integer()
-    numbers_of_rows = fields.Integer()
-    numbers_of_columns = fields.Integer()
-    show_likes = fields.Boolean()
-    show_followers = fields.Boolean()
-
-
-class InstafeedUser(models.Model):
-    _name = 'instafeed.user'
-    user_id = fields.Char()
+    feed_title = fields.Char(default='Hello World')
+    post_spacing = fields.Integer(default='20')
+    on_post_click = fields.Char(default='Open popup/show product')
+    layout = fields.Char('Grid-Tiles')
+    configuration = fields.Char(default='Auto')
+    per_slide = fields.Integer(default=3)
+    number_of_posts = fields.Integer(default=7)
+    number_of_rows = fields.Integer(default=3)
+    number_of_columns = fields.Integer(default=3)
+    show_likes = fields.Boolean(default=1)
+    show_followers = fields.Boolean(default=1)
+    user_id = fields.Char(default='')
     access_token = fields.Char()
-    store_id = fields.Many2one('shop')
-    instagram_user = fields.Many2one('instagram.user')
+    username = fields.Char(default='')
 
 
 class InstafeedConfig(models.TransientModel):

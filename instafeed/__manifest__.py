@@ -26,8 +26,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/instafeed_view.xml',
+        'views/facebook.xml',
         'views/instafeed_config.xml',
-        'views/instagram_user.xml',
         'views/shop.xml',
         'views/templates.xml',
 
