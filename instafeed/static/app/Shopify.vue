@@ -38,17 +38,18 @@
         </div>
         <image_slider v-else @show_post="show_post" :gap="post_spacing" :ratio="ratio" :images="images"
                       :proptemp="temp"/>
-        <Modal style="width: 70%; height: auto;"
+        <Modal id="post_modal_wrapper"
+               style="width: 70%;height: 100%"
                :footer="null"
                v-model:visible="post_modal"
                :maskClosable="false"
                @cancel="post_modal=false">
-            <div style="display: flex">
-                <img v-if="selected_post.media_type == 'IMAGE'"
+            <div id="post_modal_container" style="display: flex">
+                <img class="post_image" v-if="selected_post.media_type == 'IMAGE'"
                      :src="selected_post.media_url"
                      :alt="selected_post.caption"
-                     style="width: 50%; height: 50%">
-                <video height="400" autoplay v-if="selected_post.media_type == 'VIDEO'">
+                >
+                <video autoplay v-if="selected_post.media_type == 'VIDEO'">
                     <source :src="selected_post.media_url">
                 </video>
                 <div style="width: 100%; display: flex; flex-direction: column">
@@ -92,7 +93,7 @@
                         </div>
                     </div>
                     <div v-if="selected_post.list_tags"
-                         style="height: 35%; text-align: center;width:100%;margin: 20px 25px 10px 25px;">
+                         style="height: 600px;overflow-x: auto; text-align: center;width:100%;margin: 20px 25px 0px 25px;">
                         <template v-for="tag in selected_post.list_tags">
                             <div style="color: rgb(0, 0, 0);
                                         font-weight: 600;
@@ -122,6 +123,9 @@ import Image_slider from "./components/image_slider.vue";
 import {Modal} from "ant-design-vue";
 
 export default {
+    props: {
+        feed_id: String
+    },
     name: "App_extension",
     components: {Modal, Image_slider},
     computed: {
@@ -203,32 +207,40 @@ export default {
     ,
     mounted() {
         let self = this
-        axios.post("apps/instaf/instafeed/show/feed", {shop_url: window.location.host}).then((res) => {
+        console.log(self.feed_id)
+        axios.post("apps/instaf/instafeed/show/feed", {
+            shop_url: window.location.host,
+            feed_id: self.feed_id
+        }).then((res) => {
             console.log(res)
-            self.username = res.data.result.user.username
-            self.user_id = res.data.result.user_id
-            self.followers_count = res.data.result.followers_count
-            self.feed_title = res.data.result.feed_title
-            self.on_post_click = res.data.result.on_post_click
-            self.layout = res.data.result.layout
-            self.configuration = res.data.result.configuration
-            self.temp.per_slide = res.data.result.per_slide
-            self.number_of_posts = res.data.result.number_of_posts
-            self.number_of_rows = res.data.result.number_of_rows
-            self.number_of_columns = res.data.result.number_of_columns
-            self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.result.post_spacing)
-            self.show_likes = self.show_likes_options.find(show => show.value == res.data.result.show_likes)
-            self.show_followers = self.show_followers_options.find(show => show.value == res.data.result.show_followers)
-            self.allImages = res.data.result.media.data
-            self.allImages.filter(image => image.hover = false)
-            self.list_products = res.data.result.products
-            for (let post of self.allImages) {
-                if (!post.list_tags) {
-                    post.list_tags = []
+            if (res.data.result) {
+                self.username = res.data.result.user.username
+                self.user_id = res.data.result.user_id
+                self.followers_count = res.data.result.followers_count
+                self.feed_title = res.data.result.feed_title
+                self.on_post_click = res.data.result.on_post_click
+                self.layout = res.data.result.layout
+                self.configuration = res.data.result.configuration
+                self.temp.per_slide = res.data.result.per_slide
+                self.number_of_posts = res.data.result.number_of_posts
+                self.number_of_rows = res.data.result.number_of_rows
+                self.number_of_columns = res.data.result.number_of_columns
+                self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.result.post_spacing)
+                self.show_likes = self.show_likes_options.find(show => show.value == res.data.result.show_likes)
+                self.show_followers = self.show_followers_options.find(show => show.value == res.data.result.show_followers)
+                self.allImages = res.data.result.media.data
+                self.allImages.filter(image => image.hover = false)
+                self.list_products = res.data.result.products
+                for (let post of self.allImages) {
+                    if (!post.list_tags) {
+                        post.list_tags = []
+                    }
                 }
+                console.log(self.allImages)
+                console.log(this)
+            } else {
+                alert('Ban nhap sai ID hoac chua tao feed')
             }
-            console.log(self.allImages)
-            console.log(this)
         })
     }
     ,
@@ -347,8 +359,39 @@ export default {
     margin: 10px 0px 0px 10px;
     z-index: 999;
 }
-
+bought_together
 .controls svg {
     font-size: 25px;
+}
+
+@media screen and (max-width: 800px) {
+    #post_modal_container {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.post_image {
+    width: 60%;
+}
+
+@media (max-width: 767px) {
+    .post_image {
+        width: 100%;
+        aspect-ratio: 1;
+    }
+}
+
+@media (max-width: 767px) {
+    #post_modal_wrapper .ant-modal-content {
+        width: 100%;
+        height: auto;
+        margin:0;
+    }
+}
+
+#post_modal_wrapper .ant-modal-content {
+    width: 70%;
+    height: auto;
 }
 </style>

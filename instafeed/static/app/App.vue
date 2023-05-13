@@ -1,5 +1,27 @@
 <template>
-    <div id="container">
+
+    <div v-if="dashboard" style="width: 50%;
+                                position: absolute;
+                                aspect-ratio: 1 / 1;
+                                overflow-x: auto;
+                                top: 50%;
+                                transform: translate(-50%,0%);
+                                left: 50%;">
+        <div style="border-bottom: solid 1px;width: 100%;
+            height:10%;font-size:20px;
+            padding:20px;
+            font-weight: bold">
+            Select Feed
+        </div>
+        <div class="product_row" style="display: flex; width: 100%;height: 100px ;
+                        margin: 20px 0px 20px 0px;gap:10px;
+                        align-items: center" v-for="feed in feeds" @click="select_feed(feed.feed_id)">
+            <div>{{ feed.feed_id }}</div>
+            <div>{{ feed.feed_title }}</div>
+        </div>
+        <button id="btn_create" @click="create_feed">CREATE NEW FEED</button>
+    </div>
+    <div v-else id="container">
         <div id="navBar">
             <div>
                 <button id="btn_connect" style="display: flex; gap:5px" @click="connect_instagram">
@@ -137,10 +159,11 @@
                 <!--                    <input placeholder="Leave empty to show all post"/>-->
                 <!--                </div>-->
                 <button id="btn_save" @click="save_feed">Save feed</button>
+                                <button style="color:#0A58CA" @click="to_dashboard">Return to dashboard</button>
             </div>
             <div id="content-right">
                 <label id="preview">
-                    <b>PREVIEW</b>
+                    <b>PREVIEW feed:{{feed_id}}</b>
                 </label>
                 <hr>
                 <br>
@@ -193,7 +216,7 @@
                v-model:visible="post_modal"
                :maskClosable="false"
                @cancel="post_modal=false">
-            <div style="display: flex">
+            <div id="post_modal_container" style="display: flex">
                 <img v-if="selected_post.media_type == 'IMAGE'"
                      :src="selected_post.media_url"
                      :alt="selected_post.caption"
@@ -371,6 +394,9 @@ export default {
     },
     data() {
         return {
+            feeds: [],
+            dashboard: true,
+            feed_id: 0,
             shop_url: '',
             user_id: '',
             username: '',
@@ -464,6 +490,7 @@ export default {
         },
         save_feed() {
             let params = {
+                feed_id: this.feed_id,
                 feed: {
                     user_id: this.user_id,
                     username: this.username,
@@ -488,7 +515,6 @@ export default {
             axios.post('/instafeed/save', params).then((res) => {
                 if (res) {
                     alert('Save Success')
-                    window.location.reload()
                 } else {
                     alert('some thing went wrong')
                 }
@@ -544,49 +570,70 @@ export default {
         },
         connect_instagram() {
             window.location.href = '/instafeed/connect'
+        },
+        create_feed() {
+            let self = this
+            axios.get('/instafeed/create/feed').then((res) => {
+                self.feed_id = res.data.feed_id
+                this.dashboard = false
+            })
+        },
+        select_feed(id) {
+            console.log(id)
+            this.feed_id = id
+            this.dashboard = false
+            let self = this
+            axios.get('/instafeed/get/shopify').then((res) => {
+                self.list_products = res.data.products
+                self.shop_url = res.data.shop_url
+                console.log(self.list_products)
+                for (let product of self.list_products) {
+                    product.tag = false
+                }
+            })
+            axios.post('/instafeed/get/data', {'feed_id': id}).then((res) => {
+                console.log(res)
+                self.username = res.data.result.user.username
+                self.fb_username = window.fb_username
+                self.user_id = res.data.result.user_id
+                self.feed_title = res.data.result.feed_title
+                self.on_post_click = res.data.result.on_post_click
+                self.layout = res.data.result.layout
+                self.configuration = res.data.result.configuration
+                self.temp.per_slide = res.data.result.per_slide
+                self.number_of_posts = res.data.result.number_of_posts
+                self.number_of_rows = res.data.result.number_of_rows
+                self.number_of_columns = res.data.result.number_of_columns
+                self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.result.post_spacing)
+                self.show_likes = self.show_likes_options.find(show => show.value == res.data.result.show_likes)
+                self.show_followers = self.show_followers_options.find(show => show.value == res.data.result.show_followers)
+                // self.allImages = res.data.media.data
+                self.feed_id = res.data.result.feed_id
+                console.log(self.feed_id)
+                self.allImages.filter(image => image.hover = false)
+                axios.post('/instafeed/get/fb-data', {'feed_id': id}).then((res) => {
+                    if (res.data.result.media) {
+                        self.fb_username = res.data.result.fb_username
+                        self.allImages = res.data.result.media.data
+                        for (let post of self.allImages) {
+                            if (!post.list_tags) {
+                                post.list_tags = []
+                            }
+                        }
+                        self.followers_count = res.data.result.followers_count
+                    }
+                })
+            })
+        },
+        to_dashboard() {
+            this.dashboard = true
         }
     },
     mounted() {
-
         let self = this
-        axios.get('/instafeed/get/shopify').then((res) => {
+        axios.get('/instafeed/select').then((res) => {
             console.log(res)
-            self.list_products = res.data.products
-            self.shop_url = res.data.shop_url
-            console.log(self.list_products)
-            for (let product of self.list_products) {
-                product.tag = false
-            }
-        })
-        axios.get('/instafeed/get/data').then((res) => {
-            self.username = res.data.user.username
-            self.fb_username = window.fb_username
-            self.user_id = res.data.user_id
-            self.feed_title = res.data.feed_title
-            self.on_post_click = res.data.on_post_click
-            self.layout = res.data.layout
-            self.configuration = res.data.configuration
-            self.temp.per_slide = res.data.per_slide
-            self.number_of_posts = res.data.number_of_posts
-            self.number_of_rows = res.data.number_of_rows
-            self.number_of_columns = res.data.number_of_columns
-            self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.post_spacing)
-            self.show_likes = self.show_likes_options.find(show => show.value == res.data.show_likes)
-            self.show_followers = self.show_followers_options.find(show => show.value == res.data.show_followers)
-            // self.allImages = res.data.media.data
-            self.allImages.filter(image => image.hover = false)
-            axios.get('/instafeed/get/fb-data').then((res) => {
-                if (res.data.media) {
-                    self.fb_username = res.data.fb_username
-                    self.allImages = res.data.media.data
-                    for (let post of self.allImages) {
-                        if (!post.list_tags) {
-                            post.list_tags = []
-                        }
-                    }
-                    self.followers_count = res.data.followers_count
-                }
-            })
+            self.feeds = res.data.feeds
         })
     }
 
@@ -741,8 +788,23 @@ option {
     font-family: -apple-system, blinkmacsystemfont, san francisco, roboto, segoe ui, helvetica neue, sans-serif;
 }
 
-#btn_connect p {
-
+#btn_create {
+    color: #ffffff;
+    align-items: center;
+    flex-wrap: wrap !important;
+    border-radius: 4px;
+    background: rgb(0 128 96);
+    border: 0.1rem solid transparent;
+    box-shadow: inset 0 1px 0 0 transparent, 0 1px 0 0 rgb(22 29 37/5%), 0 0 0 0 transparent;
+    font-weight: 400;
+    margin: 3px;
+    display: inline-block;
+    justify-content: center;
+    padding: 7px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-transform: none;
+    font-family: -apple-system, blinkmacsystemfont, san francisco, roboto, segoe ui, helvetica neue, sans-serif;
 }
 
 #content {
@@ -929,7 +991,12 @@ body {
     opacity: 0.5;
     background: #151515
 }
-
+@media screen and (max-width: 800px) {
+  #post_modal_container{
+      display: flex;
+      flex-direction: column;
+  }
+}
 .ant-modal-close-icon svg {
     margin: 20px !important;;
 }

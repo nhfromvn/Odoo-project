@@ -1,17 +1,7 @@
 from odoo import http
 from odoo.http import request
-import json
-from odoo import http, fields
-from odoo.http import request
-import hmac
-import hashlib
 import requests
 import werkzeug
-import os
-import jinja2
-from pytz import timezone
-from datetime import datetime
-import shopify, binascii, json, string, random
 
 IG_SCOPE = 'user_profile,user_media'
 FB_SCOPE = 'pages_show_list, instagram_basic, pages_manage_engagement'
@@ -43,8 +33,9 @@ class MetaController(http.Controller):
         print(kwargs)
         res = requests.post(enpoint, data=auth_data).json()
         print(res)
-        instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
-        instafeed_user.write(res)
+        instafeed_users = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)])
+        for instafeed_user in instafeed_users:
+            instafeed_user.write(res)
         return werkzeug.utils.redirect('/instafeed')
 
     @http.route('/instafeed/facebook/connect', auth='user')
@@ -72,13 +63,14 @@ class MetaController(http.Controller):
         }
         print(kwargs)
         res = requests.post(enpoint, data=auth_data).json()
-        instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
-        facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
-        if facebook_user:
-            facebook_user.write(res)
-        else:
-            res['feed_id'] = instafeed_user.id
-            request.env['facebook'].sudo().create(res)
+        instafeed_users = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)])
+        for instafeed_user in instafeed_users:
+            facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)], limit=1)
+            if facebook_user:
+                facebook_user.write(res)
+            else:
+                res['feed_id'] = instafeed_user.id
+                request.env['facebook'].sudo().create(res)
         print(res)
 
         return werkzeug.utils.redirect('/instafeed')
@@ -92,4 +84,3 @@ class MetaController(http.Controller):
         facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
         return werkzeug.utils.redirect(
             'https://www.facebook.com/logout.php?next=' + base_url + '/instafeed' + '&access_token=' + facebook_user.access_token)
-

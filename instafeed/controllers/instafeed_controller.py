@@ -80,10 +80,10 @@ class InstafeedController(http.Controller):
                     store_exist.write(vals)
                 else:
                     store_exist = request.env['shop'].sudo().create(vals)
-                instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', store_exist.id)],
-                                                                        limit=1)
-                if not instafeed_user:
-                    feed_exist = request.env['instafeed'].sudo().create({'store_id': store_exist.id})
+                # instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', store_exist.id)],
+                #                                                         limit=1)
+                # if not instafeed_user:
+                #     feed_exist = request.env['instafeed'].sudo().create({'store_id': store_exist.id})
                 header = {
                     'X-Shopify-Access-Token': store_exist.access_token,
                     'Content-Type': 'application/json'
@@ -106,15 +106,36 @@ class InstafeedController(http.Controller):
         else:
             return json.dumps({"error": "No code in response"})
 
+    @http.route('/instafeed/select', type='http', auth='user', csrf=False)
+    def select_feed(self, **kwargs):
+        shop_url = request.session['shop_url']
+        shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        feeds = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)])
+        list = []
+        for feed in feeds:
+            list.append({
+                'feed_id': feed.id,
+                'feed_title': feed.feed_title
+            })
+        return json.dumps({'feeds': list})
+
+    @http.route('/instafeed/create', type='http', auth='user', csrf=False)
+    def create_feed(self, **kwargs):
+        shop_url = request.session['shop_url']
+        shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
+        feed = request.env['instafeed'].sudo().create({'store_id': shop.id})
+        return json.dumps({'feed_id': feed.id})
+
     @http.route('/instafeed/save', type='json', auth="user")
     def save_feed(self, **kwargs):
         if request.httprequest.data:
             res = json.loads(request.httprequest.data)
             feed = res['feed']
             posts = res['posts']
+            feed_id = res['feed_id']
             shop_url = request.session['shop_url']
             shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-            instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
+            instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(feed_id))], limit=1)
             facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)], limit=1)
             for post in posts:
                 post_exist = request.env['instagram.post'].sudo().search(
@@ -164,32 +185,35 @@ class InstafeedController(http.Controller):
         else:
             return False
 
-    @http.route('/instafeed/get/data', auth='user', csrf=False)
+    @http.route('/instafeed/get/data', type='json', auth='user', csrf=False)
     def get_user_info(self, **kwargs):
+        data = json.loads(request.httprequest.data)
+        feed_id = data['feed_id']
         shop_url = request.session['shop_url']
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
+        instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(feed_id))], limit=1)
         enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.access_token
         res = requests.get(enpoint)
         if res.ok:
             user = res.json()
             instafeed_user.write({'username': user['username']})
             media = self.get_media(instafeed_user)
-            return json.dumps({'user': user,
-                               'user_id': instafeed_user.user_id,
-                               'media': media,
-                               'feed_title': instafeed_user.feed_title,
-                               'post_spacing': instafeed_user.post_spacing,
-                               'on_post_click': instafeed_user.on_post_click,
-                               'layout': instafeed_user.layout,
-                               'configuration': instafeed_user.configuration,
-                               'per_slide': instafeed_user.per_slide,
-                               'number_of_posts': instafeed_user.number_of_posts,
-                               'number_of_rows': instafeed_user.number_of_rows,
-                               'number_of_columns': instafeed_user.number_of_columns,
-                               'show_likes': instafeed_user.show_likes,
-                               'show_followers': instafeed_user.show_followers,
-                               })
+            return ({'user': user,
+                     'user_id': instafeed_user.user_id,
+                     'media': media,
+                     'feed_title': instafeed_user.feed_title,
+                     'post_spacing': instafeed_user.post_spacing,
+                     'on_post_click': instafeed_user.on_post_click,
+                     'layout': instafeed_user.layout,
+                     'configuration': instafeed_user.configuration,
+                     'per_slide': instafeed_user.per_slide,
+                     'number_of_posts': instafeed_user.number_of_posts,
+                     'number_of_rows': instafeed_user.number_of_rows,
+                     'number_of_columns': instafeed_user.number_of_columns,
+                     'show_likes': instafeed_user.show_likes,
+                     'show_followers': instafeed_user.show_followers,
+                     'feed_id': instafeed_user.id
+                     })
         else:
 
             return False
@@ -202,12 +226,15 @@ class InstafeedController(http.Controller):
         else:
             return False
 
-    @http.route('/instafeed/get/fb-data', auth='user', csrf=False)
+    @http.route('/instafeed/get/fb-data', type='json', auth='user', csrf=False)
     def get_fb_data(self, **kwargs):
         shop_url = request.session['shop_url']
+        data = json.loads(request.httprequest.data)
+        feed_id = data['feed_id']
+        shop_url = request.session['shop_url']
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
-        facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
+        instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(feed_id))], limit=1)
+        facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)], limit=1)
         enpoint = 'https://graph.facebook.com/v12.0/me?fields=id,name,accounts&access_token=' + facebook_user.access_token
         res = requests.get(enpoint)
         if res.ok:
@@ -236,7 +263,7 @@ class InstafeedController(http.Controller):
                     })
             facebook_user.write(vals)
             vals['media'] = instagram_info['media']
-            return json.dumps(vals)
+            return vals
 
     def get_insta_business(self, page_id, facebook_user):
         enpoint = 'https://graph.facebook.com/v12.0/' + page_id + '?fields=instagram_business_account&access_token=' + facebook_user.access_token
@@ -258,56 +285,60 @@ class InstafeedController(http.Controller):
         res = json.loads(request.httprequest.data)
         shop_url = res['shop_url']
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        instafeed_user = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)], limit=1)
-        facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
-        enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.access_token
-        res = requests.get(enpoint)
-        products = json.loads(self.sync_product(shop_url))
-        print(products)
-        vals = []
-        for product in products['products']:
-            vals.append({
-                'product_id': product['id'],
-                'name': product['title'],
-                'handle': product['handle'],
-                'image_url': product['image']['src']
-            })
-        if res.ok:
-            user = res.json()
-            instafeed_user.write({'username': user['username']})
-            business_info = self.get_info(facebook_user.instagram_business_account_id, facebook_user)
-            for post in business_info['media']['data']:
-                post_exist = request.env['instagram.post'].sudo().search(
-                    [('post_id', '=', post['id']), ('facebook_id', '=', facebook_user.id)], limit=1)
-                if post_exist:
-                    post_exist.write({'facebook_id': facebook_user.id,
-                                      'post_id': post['id']})
-                    list = []
-                    for product in post_exist.products:
-                        list.append(product.product_id)
-                        post['list_tags'] = list
-                else:
-                    post_exist = request.env['instagram.post'].sudo().create({
-                        'facebook_id': facebook_user.id,
-                        'post_id': post['id']
-                    })
-            return {'user': user,
-                    'user_id': instafeed_user.user_id,
-                    'media': business_info['media'],
-                    'feed_title': instafeed_user.feed_title,
-                    'post_spacing': instafeed_user.post_spacing,
-                    'on_post_click': instafeed_user.on_post_click,
-                    'layout': instafeed_user.layout,
-                    'configuration': instafeed_user.configuration,
-                    'per_slide': instafeed_user.per_slide,
-                    'number_of_posts': instafeed_user.number_of_posts,
-                    'number_of_rows': instafeed_user.number_of_rows,
-                    'number_of_columns': instafeed_user.number_of_columns,
-                    'show_likes': instafeed_user.show_likes,
-                    'show_followers': instafeed_user.show_followers,
-                    'followers_count': business_info['followers_count'],
-                    'products': vals
-                    }
+        instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(res['feed_id']))], limit=1)
+        if instafeed_user:
+            facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
+            enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.access_token
+            res = requests.get(enpoint)
+            products = json.loads(self.sync_product(shop_url))
+            print(products)
+            vals = []
+            for product in products['products']:
+                vals.append({
+                    'product_id': product['id'],
+                    'name': product['title'],
+                    'handle': product['handle'],
+                    'image_url': product['image']['src']
+                })
+            if res.ok:
+                user = res.json()
+                instafeed_user.write({'username': user['username']})
+                business_info = self.get_info(facebook_user.instagram_business_account_id, facebook_user)
+                for post in business_info['media']['data']:
+                    post_exist = request.env['instagram.post'].sudo().search(
+                        [('post_id', '=', post['id']), ('facebook_id', '=', facebook_user.id)], limit=1)
+                    if post_exist:
+                        post_exist.write({'facebook_id': facebook_user.id,
+                                          'post_id': post['id']})
+                        list = []
+                        for product in post_exist.products:
+                            list.append(product.product_id)
+                            post['list_tags'] = list
+                    else:
+                        post_exist = request.env['instagram.post'].sudo().create({
+                            'facebook_id': facebook_user.id,
+                            'post_id': post['id']
+                        })
+                return {'user': user,
+                        'user_id': instafeed_user.user_id,
+                        'media': business_info['media'],
+                        'feed_title': instafeed_user.feed_title,
+                        'post_spacing': instafeed_user.post_spacing,
+                        'on_post_click': instafeed_user.on_post_click,
+                        'layout': instafeed_user.layout,
+                        'configuration': instafeed_user.configuration,
+                        'per_slide': instafeed_user.per_slide,
+                        'number_of_posts': instafeed_user.number_of_posts,
+                        'number_of_rows': instafeed_user.number_of_rows,
+                        'number_of_columns': instafeed_user.number_of_columns,
+                        'show_likes': instafeed_user.show_likes,
+                        'show_followers': instafeed_user.show_followers,
+                        'followers_count': business_info['followers_count'],
+                        'products': vals,
+                        'feed_id': instafeed_user.id
+                        }
+            else:
+                return False
         else:
             return False
 

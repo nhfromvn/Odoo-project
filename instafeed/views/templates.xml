@@ -2,9 +2,11 @@
     <data>
         <template id="instafeed">
             <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <link rel="stylesheet" href="/instafeed/static/css/style.css"/>
+                <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
                 <link rel="icon" sizes="32x32" href="/bought_together/static/app/img/nest_scale.jpeg"/>
                 <title>Instafeed</title>
-                <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
             </head>
             <body>
                 <div id="instafeed"></div>

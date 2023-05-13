@@ -1,4 +1,4 @@
-import {createApp} from 'vue/dist/vue.esm-bundler';
+import {createApp, h} from 'vue/dist/vue.esm-bundler';
 import Shopify from './Shopify.vue'
 import 'ant-design-vue/dist/antd.css';
 import Antd from 'ant-design-vue';
@@ -9,7 +9,13 @@ import {far} from '@fortawesome/free-regular-svg-icons';
 import {faInstagram} from "@fortawesome/free-brands-svg-icons";
 
 library.add(fas, far, faInstagram)
-
-createApp(Shopify)
-    .component("font-awesome-icon", FontAwesomeIcon).use(Antd)
-    .mount('#instafeed_extension')
+var elements = document.getElementsByClassName('instafeeds')
+for (let element of elements) {
+    createApp({
+        render: () => {
+            return h(Shopify, {feed_id: element.getAttribute('feed-id')})
+        }
+    })
+        .component("font-awesome-icon", FontAwesomeIcon).use(Antd)
+        .mount(element)
+}
