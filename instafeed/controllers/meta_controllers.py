@@ -36,6 +36,11 @@ class MetaController(http.Controller):
         instafeed_users = request.env['instafeed'].sudo().search([('store_id', '=', shop.id)])
         for instafeed_user in instafeed_users:
             instafeed_user.write(res)
+        new_enpoint ="https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret="+client_secret+"&access_token="+instafeed_users[0].access_token
+        new_res = requests.get(new_enpoint).json()
+        print(new_res)
+        for instafeed_user in instafeed_users:
+            instafeed_user.write({'long_live_access_token': new_res['access_token']})
         return werkzeug.utils.redirect('/instafeed')
 
     @http.route('/instafeed/facebook/connect', auth='user')

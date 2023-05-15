@@ -192,7 +192,7 @@ class InstafeedController(http.Controller):
         shop_url = request.session['shop_url']
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(feed_id))], limit=1)
-        enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.access_token
+        enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.long_live_access_token
         res = requests.get(enpoint)
         if res.ok:
             user = res.json()
@@ -219,7 +219,7 @@ class InstafeedController(http.Controller):
             return False
 
     def get_media(self, instafeed_user):
-        enpoint = 'https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,thumbnail_url,username,timestamp&access_token=' + instafeed_user.access_token
+        enpoint = 'https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,thumbnail_url,username,timestamp&access_token=' + instafeed_user.long_live_access_token
         res = requests.get(enpoint)
         if res.ok:
             return res.json()
@@ -288,7 +288,7 @@ class InstafeedController(http.Controller):
         instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(res['feed_id']))], limit=1)
         if instafeed_user:
             facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
-            enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.access_token
+            enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.long_live_access_token
             res = requests.get(enpoint)
             products = json.loads(self.sync_product(shop_url))
             print(products)

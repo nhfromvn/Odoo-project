@@ -1,5 +1,4 @@
 <template>
-    <div>Hello</div>
     <div id="insta_feed">
         <div id="feed_title">{{ feed_title }}</div>
         <div v-if="layout.includes('Grid')" id="images" :style="{
@@ -38,7 +37,7 @@
         </div>
         <image_slider v-else @show_post="show_post" :gap="post_spacing" :ratio="ratio" :images="images"
                       :proptemp="temp"/>
-        <Modal id="post_modal_wrapper"
+        <Modal v-if="screenWidth>767" id="post_modal_wrapper"
                style="width: 70%;height: 100%"
                :footer="null"
                v-model:visible="post_modal"
@@ -114,6 +113,82 @@
                 </div>
             </div>
         </Modal>
+        <Modal v-else id="post_modal_wrapper"
+               style="max-width: 100%;width: 100vw;height: 100%; margin:0;top:0"
+               :footer="null"
+               v-model:visible="post_modal"
+               :maskClosable="false"
+               @cancel="post_modal=false">
+            <div id="post_modal_container" style="display: flex">
+                <img class="post_image" v-if="selected_post.media_type == 'IMAGE'"
+                     :src="selected_post.media_url"
+                     :alt="selected_post.caption"
+                >
+                <video autoplay v-if="selected_post.media_type == 'VIDEO'">
+                    <source :src="selected_post.media_url">
+                </video>
+                <div style="width: 100%; display: flex; flex-direction: column">
+                    <div style="margin-left:20px; display: flex; background-color: white; align-items: center;border-bottom: 1px solid #dcdcdc;">
+                        <div style="display: flex; justify-content: center; align-items: center;border: 1px solid #E2E2E2; border-radius: 50%; height: 40px; width: 40px">
+                            <font-awesome-icon icon="fa-brands fa-instagram"
+                                               style="height:30px; width: 30px; color: black"/>
+                        </div>
+                        <div @click="redirectToInstagramUser"
+                             style="cursor: pointer; color: #000; font-weight: 600; line-height: 23px; font-size: 17px; margin-left: 15px">
+                            {{ username }}
+                            <div v-if="show_followers.value"
+                                 style="color: #000; font-weight: 400;font-size: 13px;">
+                                {{ followers_count }} Followers
+                            </div>
+                        </div>
+                    </div>
+                    <div class="controls" style="margin: 10px 0px 0px 0px">
+                        <font-awesome-icon @click="prev_slide" :icon="['fas', 'chevron-left']"/>
+                        <font-awesome-icon @click="next_slide" :icon="['fas', 'chevron-right']"/>
+                    </div>
+                    <div v-if="selected_post.caption" style="margin: 10px 0px 10px 25px">{{
+                        selected_post.caption
+                        }}
+                    </div>
+                    <div style="display: flex;gap: 20px; margin-bottom: 20px">
+                        <div v-if="show_likes.value" style="margin: 10px 0px 0px 25px">
+                            {{ selected_post.like_count }}
+                            <font-awesome-icon icon="fa-regular fa-heart" beat style="color: black"/>
+                        </div>
+                        <div style="margin: 10px 0px 0px 25px">
+                            {{ selected_post.comments_count }}
+                            <font-awesome-icon :icon="['far', 'message']"/>
+                        </div>
+                    </div>
+                    <div v-if="selected_post.comments" style="display: flex;flex-direction: column; gap: 10px">
+                        <div v-for="comment in selected_post.comments.data"
+                             style="margin: 0px 0px 0px 25px; display: flex;gap: 10px">
+                            <b>{{ comment.from.username }}</b>
+                            <p>{{ comment.text }}</p>
+                        </div>
+                    </div>
+                    <div v-if="selected_post.list_tags"
+                         style="height: 600px;overflow-x: auto; text-align: center;width:100%;margin: 20px 0px 0px 0px;">
+                        <template v-for="tag in selected_post.list_tags">
+                            <div style="color: rgb(0, 0, 0);
+                                        font-weight: 600;
+                                        line-height: 23px;
+                                        font-size: 17px;
+                                        margin: 15px;">
+                                {{ list_products.find(product => product.product_id == tag).name }}
+                            </div>
+                            <div style="margin: 20px;">
+                                <img :src="list_products.find(product => product.product_id == tag).image_url"
+                                     style="width: 80%;aspect-ratio: 1.2"/>
+                            </div>
+                            <button @click="handleShopNow(list_products.find(product => product.product_id == tag).handle)"
+                            >Shop now
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -152,6 +227,7 @@ export default {
     },
     data() {
         return {
+            screenWidth: 0,
             followers_count: 0,
             allImages: [],
             post_modal: false,
@@ -207,6 +283,8 @@ export default {
     ,
     mounted() {
         let self = this
+        this.screenWidth = screen.width
+        console.log(screen.width)
         console.log(self.feed_id)
         axios.post("apps/instaf/instafeed/show/feed", {
             shop_url: window.location.host,
@@ -351,6 +429,13 @@ export default {
     margin: 20px;
 }
 
+@media (max-width: 767px) {
+    .ant-modal-close-icon svg {
+        margin: 0px 0px 5px 30px;
+        font-size: 25px;
+    }
+}
+
 .controls {
     display: flex;
     flex-direction: row;
@@ -359,7 +444,7 @@ export default {
     margin: 10px 0px 0px 10px;
     z-index: 999;
 }
-bought_together
+
 .controls svg {
     font-size: 25px;
 }
@@ -380,18 +465,5 @@ bought_together
         width: 100%;
         aspect-ratio: 1;
     }
-}
-
-@media (max-width: 767px) {
-    #post_modal_wrapper .ant-modal-content {
-        width: 100%;
-        height: auto;
-        margin:0;
-    }
-}
-
-#post_modal_wrapper .ant-modal-content {
-    width: 70%;
-    height: auto;
 }
 </style>

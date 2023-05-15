@@ -30,7 +30,7 @@
                 </button>
                 <div v-if="username" style="display: flex"><p>Connected to {{ username }} with instagram</p>
                     <p style="margin: 0px 5px">|</p>
-                    <a>Change account</a></div>
+                    <a @click="changeAccount()">Change account</a></div>
             </div>
             <div>
                 <button id="btn_connect_fb" style="display: flex; gap:5px" @click="connect_facebook">
@@ -112,16 +112,6 @@
                 </div>
                 <div class="line">
                     <div>
-                        <label><b>SLIDER PAGES-MOBILE</b></label>
-                        <input class="input_setting" v-model="slider_pages_mobile" min="0" type="number">
-                    </div>
-                    <div>
-                        <label><b>NUMBER OF POSTS-MOBILE</b></label>
-                        <input class="input_setting" v-model="number_of_post_mobile" min="0" max="10" type="number">
-                    </div>
-                </div>
-                <div class="line">
-                    <div>
                         <label><b>SHOW LIKES</b></label>
                         <select v-model="show_likes">
                             <option v-for="option in show_likes_options" :value="option">
@@ -138,32 +128,12 @@
                         </select>
                     </div>
                 </div>
-                <!--                <div class="line">-->
-                <!--                    <div>-->
-                <!--                        <label><b>POST TO SHOW</b></label>-->
-                <!--                        <select v-model="post_to_show"></select>-->
-                <!--                    </div>-->
-                <!--                    <div>-->
-                <!--                        <label><b>VIDEOS AUTOPLAY</b></label>-->
-                <!--                        <select v-model="videos_autoplay"></select>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-                <!--                <div>-->
-                <!--                    <label><b>AUTOMATIC PRODUCT FEED</b></label>-->
-                <!--                    <select v-model="automatic_product_feed">-->
-                <!--                        <option> hello</option>-->
-                <!--                    </select>-->
-                <!--                </div>-->
-                <!--                <div>-->
-                <!--                    <label><b>FILTER BY HASHTAGS</b></label>-->
-                <!--                    <input placeholder="Leave empty to show all post"/>-->
-                <!--                </div>-->
                 <button id="btn_save" @click="save_feed">Save feed</button>
-                                <button style="color:#0A58CA" @click="to_dashboard">Return to dashboard</button>
+                <button style="color:#0A58CA" @click="to_dashboard">Return to dashboard</button>
             </div>
             <div id="content-right">
                 <label id="preview">
-                    <b>PREVIEW feed:{{feed_id}}</b>
+                    <b>PREVIEW feed:{{ feed_id }}</b>
                 </label>
                 <hr>
                 <br>
@@ -401,7 +371,6 @@ export default {
             user_id: '',
             username: '',
             fb_username: '',
-            // fb_status: 'unknown',
             followers_count: 0,
             search_recommendation: '',
             list_products: [],
@@ -421,8 +390,6 @@ export default {
             temp: {
                 per_slide: 3,
             },
-            slider_pages_mobile: 3,
-            number_of_post_mobile: 3,
             number_of_rows: 3,
             number_of_columns: 3,
             show_likes: {name: 'Yes', value: true},
@@ -458,6 +425,9 @@ export default {
         }
     },
     methods: {
+        changeAccount(){
+          alert('go to instagram.com to change your account and reconnect')
+        },
         handleShopNow(handle) {
             window.open('https://' + this.shop_url + '/products/' + handle)
         },
@@ -580,9 +550,9 @@ export default {
         },
         select_feed(id) {
             console.log(id)
-            this.feed_id = id
             this.dashboard = false
             let self = this
+            this.feed_id = id
             axios.get('/instafeed/get/shopify').then((res) => {
                 self.list_products = res.data.products
                 self.shop_url = res.data.shop_url
@@ -594,7 +564,6 @@ export default {
             axios.post('/instafeed/get/data', {'feed_id': id}).then((res) => {
                 console.log(res)
                 self.username = res.data.result.user.username
-                self.fb_username = window.fb_username
                 self.user_id = res.data.result.user_id
                 self.feed_title = res.data.result.feed_title
                 self.on_post_click = res.data.result.on_post_click
@@ -607,7 +576,6 @@ export default {
                 self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.result.post_spacing)
                 self.show_likes = self.show_likes_options.find(show => show.value == res.data.result.show_likes)
                 self.show_followers = self.show_followers_options.find(show => show.value == res.data.result.show_followers)
-                // self.allImages = res.data.media.data
                 self.feed_id = res.data.result.feed_id
                 console.log(self.feed_id)
                 self.allImages.filter(image => image.hover = false)
@@ -991,12 +959,14 @@ body {
     opacity: 0.5;
     background: #151515
 }
+
 @media screen and (max-width: 800px) {
-  #post_modal_container{
-      display: flex;
-      flex-direction: column;
-  }
+    #post_modal_container {
+        display: flex;
+        flex-direction: column;
+    }
 }
+
 .ant-modal-close-icon svg {
     margin: 20px !important;;
 }

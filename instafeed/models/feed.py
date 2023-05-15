@@ -19,6 +19,7 @@ class Instafeed(models.Model):
     show_followers = fields.Boolean(default=1)
     user_id = fields.Char(default='')
     access_token = fields.Char()
+    long_live_access_token = fields.Char()
     username = fields.Char(default='')
 
 

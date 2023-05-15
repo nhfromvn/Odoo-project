@@ -124,6 +124,9 @@ img {
     position: absolute;
     z-index: 99;
 }
+.slide_controls svg{
+font-size: 30px;
+}
 
 .post_hover {
     width: 100%;
