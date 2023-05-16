@@ -123,8 +123,21 @@ class InstafeedController(http.Controller):
     def create_feed(self, **kwargs):
         shop_url = request.session['shop_url']
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-        feed = request.env['instafeed'].sudo().create({'store_id': shop.id})
+        feeds = request.env['instafeed'].sudo().search([])
+        feed = request.env['instafeed'].sudo().create({'store_id': shop.id,
+                                                       'long_live_access_token': feeds[0].access_token})
+        facebook_user = request.env['facebook'].sudo().create({'feed_id': feed.id,
+                                                               'access_token':
+                                                                   request.env['facebook'].sudo().search([])[
+                                                                       0].access_token})
         return json.dumps({'feed_id': feed.id})
+
+    @http.route('/instafeed/delete', type='json', auth='user', csrf=False)
+    def delete_feed(self, **kwargs):
+        res = json.loads(request.httprequest.data)
+        feed = request.env['instafeed'].sudo().search([(('id', '=', int(res['feed_id'])))])
+        feed.unlink()
+        return ({'status': 'success'})
 
     @http.route('/instafeed/save', type='json', auth="user")
     def save_feed(self, **kwargs):

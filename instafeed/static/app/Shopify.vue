@@ -284,13 +284,10 @@ export default {
     mounted() {
         let self = this
         this.screenWidth = screen.width
-        console.log(screen.width)
-        console.log(self.feed_id)
         axios.post("apps/instaf/instafeed/show/feed", {
             shop_url: window.location.host,
             feed_id: self.feed_id
         }).then((res) => {
-            console.log(res)
             if (res.data.result) {
                 self.username = res.data.result.user.username
                 self.user_id = res.data.result.user_id
@@ -314,8 +311,6 @@ export default {
                         post.list_tags = []
                     }
                 }
-                console.log(self.allImages)
-                console.log(this)
             } else {
                 alert('Ban nhap sai ID hoac chua tao feed')
             }
