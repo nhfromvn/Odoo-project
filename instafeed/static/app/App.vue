@@ -4,7 +4,7 @@
                                 position: absolute;
                                 aspect-ratio: 1 / 1;
                                 overflow-x: auto;
-                                top: 50%;
+                                top: 300px;
                                 transform: translate(-50%,0%);
                                 left: 50%;">
         <div style="border-bottom: solid 1px;width: 100%;
@@ -15,9 +15,13 @@
         </div>
         <div class="product_row" style="display: flex; width: 100%;height: 100px ;
                         margin: 20px 0px 20px 0px;gap:10px;
-                        align-items: center" v-for="feed in feeds" @click="select_feed(feed.feed_id)">
-            <div>{{ feed.feed_id }}</div>
-            <div>{{ feed.feed_title }}</div>
+                         text-decoration: underline;
+                        align-items: center" v-for="feed in feeds">
+            <div style="cursor: pointer;" @click="select_feed(feed.feed_id)">{{ feed.feed_id }}</div>
+            <div style="cursor: pointer;" @click="select_feed(feed.feed_id)">{{ feed.feed_title }}</div>
+            <div style="margin-left: 30px;z-index: 999;cursor: default;" @click="delete_feed(feed.feed_id)">
+                <font-awesome-icon :icon="['fas', 'trash-can']"/>
+            </div>
         </div>
         <button id="btn_create" @click="create_feed">CREATE NEW FEED</button>
     </div>
@@ -38,7 +42,7 @@
                                        style="color: white"/>
                     <p>Connect with Facebook</p>
                 </button>
-                <div v-if="fb_username" style="display: flex"><p>Connected to {{ fb_username }} with instagram</p>
+                <div v-if="fb_username" style="display: flex"><p>Connected to {{ fb_username }} with facebook</p>
                     <p style="margin: 0px 5px">|</p>
                     <a @click="fb_logout">Log out</a></div>
             </div>
@@ -128,7 +132,7 @@
                         </select>
                     </div>
                 </div>
-                <button id="btn_save" @click="save_feed">Save feed</button>
+                <button id="btn_save" @click="save_feed()">Save feed</button>
                 <button style="color:#0A58CA" @click="to_dashboard">Return to dashboard</button>
             </div>
             <div id="content-right">
@@ -216,6 +220,7 @@
                     <div v-if="selected_post.caption" style="margin: 10px 0px 10px 25px">{{
                         selected_post.caption
                         }}
+
                     </div>
                     <div style="display: flex;gap: 20px; margin-bottom: 20px">
                         <div v-if="show_likes.value" style="margin: 10px 0px 0px 25px">
@@ -238,7 +243,7 @@
                         <button @click="tagProduct(selected_post)" class="tag_product">Tag product</button>
                     </div>
                     <div v-if="selected_post.list_tags"
-                         style="height: 35%; text-align: center;width:100%;margin: 20px 25px 10px 25px;">
+                         style="height: 600px;overflow-x: auto; text-align: center;width:100%;margin: 20px 0px 0px 0px;">
                         <template v-for="tag in selected_post.list_tags">
                             <div style="color: rgb(0, 0, 0);
                                         font-weight: 600;
@@ -425,8 +430,18 @@ export default {
         }
     },
     methods: {
-        changeAccount(){
-          alert('go to instagram.com to change your account and reconnect')
+        delete_feed(feed_id) {
+            axios.post('/instafeed/delete', {'feed_id': feed_id}).then((res) => {
+                if (res.data.result.status) {
+                    alert('delete Success')
+                    window.location.reload()
+                } else {
+                    alert('some thing went wrong')
+                }
+            })
+        },
+        changeAccount() {
+            alert('go to instagram.com to change your account and reconnect')
         },
         handleShopNow(handle) {
             window.open('https://' + this.shop_url + '/products/' + handle)
@@ -485,6 +500,7 @@ export default {
             axios.post('/instafeed/save', params).then((res) => {
                 if (res) {
                     alert('Save Success')
+                    window.location.reload()
                 } else {
                     alert('some thing went wrong')
                 }
@@ -543,8 +559,8 @@ export default {
         },
         create_feed() {
             let self = this
-            axios.get('/instafeed/create/feed').then((res) => {
-                self.feed_id = res.data.feed_id
+            axios.get('/instafeed/create').then((res) => {
+                self.select_feed(res.data.feed_id)
                 this.dashboard = false
             })
         },
@@ -564,6 +580,7 @@ export default {
             axios.post('/instafeed/get/data', {'feed_id': id}).then((res) => {
                 console.log(res)
                 self.username = res.data.result.user.username
+                self.fb_username = window.fb_username
                 self.user_id = res.data.result.user_id
                 self.feed_title = res.data.result.feed_title
                 self.on_post_click = res.data.result.on_post_click
@@ -576,6 +593,7 @@ export default {
                 self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == res.data.result.post_spacing)
                 self.show_likes = self.show_likes_options.find(show => show.value == res.data.result.show_likes)
                 self.show_followers = self.show_followers_options.find(show => show.value == res.data.result.show_followers)
+                // self.allImages = res.data.media.data
                 self.feed_id = res.data.result.feed_id
                 console.log(self.feed_id)
                 self.allImages.filter(image => image.hover = false)
@@ -1005,11 +1023,6 @@ body {
     align-items: center;
     border-bottom: solid 1px;
     padding: 16px;
-}
-
-.product_row:hover {
-    background-color: #6f726f;
-    cursor: pointer;
 }
 
 .checkbox_container {
