@@ -3,3 +3,4 @@
 from . import feed
 from . import facebook
 from . import instagram_post
+from . import analytics

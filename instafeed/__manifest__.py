@@ -30,7 +30,7 @@
         'views/instafeed_config.xml',
         'views/shop.xml',
         'views/templates.xml',
-
+        'data/test.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

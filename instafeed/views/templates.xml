@@ -6,11 +6,13 @@
                 <link rel="stylesheet" href="/instafeed/static/css/style.css"/>
                 <link rel="stylesheet" href="/bought_together/static/css/style.css"/>
                 <link rel="icon" sizes="32x32" href="/bought_together/static/app/img/nest_scale.jpeg"/>
+
                 <title>Instafeed</title>
             </head>
             <body>
                 <div id="instafeed"></div>
                 <script src="instafeed/static/js/index.js"/>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                 <script src="instafeed/static/js/facebook.js">
                 </script>
             </body>

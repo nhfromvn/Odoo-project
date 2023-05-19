@@ -135,7 +135,11 @@ class InstafeedController(http.Controller):
     @http.route('/instafeed/delete', type='json', auth='user', csrf=False)
     def delete_feed(self, **kwargs):
         res = json.loads(request.httprequest.data)
-        feed = request.env['instafeed'].sudo().search([(('id', '=', int(res['feed_id'])))])
+        feed = request.env['instafeed'].sudo().search([('id', '=', int(res['feed_id']))])
+        facebook = request.env['facebook'].sudo().search([('feed_id', '=', feed.id)])
+        for post in facebook.posts:
+            post.unlink()
+        facebook.unlink()
         feed.unlink()
         return ({'status': 'success'})
 
@@ -206,6 +210,13 @@ class InstafeedController(http.Controller):
         shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(feed_id))], limit=1)
         enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.long_live_access_token
+        analytics = request.env['analytics'].sudo().search([('feed_id', '=', int(feed_id))])
+        analytic_days = []
+        for analytic in analytics:
+            analytic_days.append({
+                'day': analytic.date.strftime('%Y-%m-%d'),
+                'analytics': json.loads(analytic.json_analytics)
+            })
         res = requests.get(enpoint)
         if res.ok:
             user = res.json()
@@ -225,7 +236,8 @@ class InstafeedController(http.Controller):
                      'number_of_columns': instafeed_user.number_of_columns,
                      'show_likes': instafeed_user.show_likes,
                      'show_followers': instafeed_user.show_followers,
-                     'feed_id': instafeed_user.id
+                     'feed_id': instafeed_user.id,
+                     'analytic_days': analytic_days
                      })
         else:
 
@@ -355,6 +367,56 @@ class InstafeedController(http.Controller):
         else:
             return False
 
+    @http.route('/instafeed/analytics', type='json', auth='public', csrf=False)
+    def analytics_post(self, **kwargs):
+        res = json.loads(request.httprequest.data)
+        today = datetime.today().date()
+        print(today)
+        print(res)
+        analytics = request.env['analytics'].sudo().search([('feed_id', '=', int(res['feed_id']))])
+        print(analytics)
+        check = 0
+        if analytics:
+            for analytic in analytics:
+                if analytic.date == today:
+                    if analytic.json_analytics:
+                        vals = json.loads(analytic.json_analytics)
+                    else:
+                        vals = {
+                            'posts': 0,
+                            'feeds': 0,
+                            'products': 0,
+                        }
+                    if 'is_clicked' in res:
+                        if not res['is_clicked']:
+                            vals['feeds'] += 1
+                    if 'post_id' in res:
+                        vals['posts'] += 1
+                    if 'product_id' in res:
+                        vals['products'] += 1
+                    analytic.json_analytics = json.dumps(vals)
+                    print(analytic.json_analytics)
+                    check = 1
+                    break
+        if not check:
+            vals = {
+                'posts': 0,
+                'feeds': 0,
+                'products': 0,
+            }
+            if 'is_clicked' in res:
+                if not res['is_clicked']:
+                    vals['feeds'] += 1
+            if 'post_id' in res:
+                vals['posts'] += 1
+            if 'product_id' in res:
+                vals['products'] += 1
+            analytic = request.env['analytics'].sudo().create({'feed_id': int(res['feed_id']),
+                                                               'date': today,
+                                                               'json_analytics': json.dumps(vals)})
+            print(analytic)
+            print(analytic.json_analytics)
+
     @http.route('/instafeed/get/shopify', type='http', auth='public', csrf=False)
     def get_shopify(self, **kwargs):
         shop_url = request.session['shop_url']
@@ -370,8 +432,9 @@ class InstafeedController(http.Controller):
             for product in products['products']:
                 vals = {}
 
-                product_exist = request.env['shopify.product'].sudo().search([('product_id', '=', str(product['id']))],
-                                                                             limit=1)
+                product_exist = request.env['shopify.product'].sudo().search(
+                    [('product_id', '=', str(product['id']))],
+                    limit=1)
                 vals['product_id'] = product['id']
                 vals['store_id'] = store_info.id
                 vals['name'] = product['title']

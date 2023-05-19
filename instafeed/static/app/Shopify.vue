@@ -1,5 +1,5 @@
 <template>
-    <div id="insta_feed">
+    <div v-if="!no_information" id="insta_feed">
         <div id="feed_title">{{ feed_title }}</div>
         <div v-if="layout.includes('Grid')" id="images" :style="{
                         display: 'grid',
@@ -105,7 +105,7 @@
                                 <img :src="list_products.find(product => product.product_id == tag).image_url"
                                      style="width: 80%;aspect-ratio: 1.2"/>
                             </div>
-                            <button @click="handleShopNow(list_products.find(product => product.product_id == tag).handle)"
+                            <button @click="handleShopNow(list_products.find(product => product.product_id == tag))"
                             >Shop now
                             </button>
                         </template>
@@ -181,7 +181,7 @@
                                 <img :src="list_products.find(product => product.product_id == tag).image_url"
                                      style="width: 80%;aspect-ratio: 1.2"/>
                             </div>
-                            <button @click="handleShopNow(list_products.find(product => product.product_id == tag).handle)"
+                            <button @click="handleShopNow(list_products.find(product => product.product_id == tag))"
                             >Shop now
                             </button>
                         </template>
@@ -190,6 +190,7 @@
             </div>
         </Modal>
     </div>
+    <div v-else>Please import your feed id</div>
 </template>
 
 <script>
@@ -227,6 +228,8 @@ export default {
     },
     data() {
         return {
+            is_clicked: false,
+            no_information: false,
             screenWidth: 0,
             followers_count: 0,
             allImages: [],
@@ -310,16 +313,27 @@ export default {
                     if (!post.list_tags) {
                         post.list_tags = []
                     }
+                    self.no_information = false
                 }
             } else {
-                alert('Ban nhap sai ID hoac chua tao feed')
+                self.no_information = true
             }
         })
     }
     ,
     methods: {
-        handleShopNow(handle) {
-            window.open('/products/' + handle)
+        handleShopNow(product) {
+            let self=this
+            console.log(product)
+            window.open('/products/' + product.handle)
+            axios.post('apps/instaf/instafeed/analytics', {
+                feed_id: self.feed_id,
+                product_id: product.product_id
+            }).then((res) => {
+                if (res) {
+                    console.log(res)
+                }
+            })
         },
         redirectToInstagramUser() {
             window.open('https://instagram.com/' + this.username)
@@ -355,12 +369,25 @@ export default {
             }
         },
         show_post(post) {
+            let self = this
             if (this.on_post_click.includes('pop')) {
                 this.selected_post = post
                 this.post_modal = true
             } else if (this.on_post_click.includes('instagram')) {
                 window.open(post.permalink, '_blank')
             }
+            console.log('haha')
+            axios.post('apps/instaf/instafeed/analytics', {
+                feed_id: self.feed_id,
+                post_id: post.id,
+                is_clicked: self.is_clicked
+            }).then((res) => {
+                if (res) {
+                    if (!self.is_clicked) {
+                        this.is_clicked = true
+                    }
+                }
+            })
         },
     }
 
