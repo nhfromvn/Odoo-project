@@ -34,48 +34,17 @@
                                     <field name="secret_key_instafeed"/>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div style="display:flex;
-                                 gap:20px">
-                        <div class="text-muted">
-                            Instagram app id
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <field name="ig_app_id"/>
-                        </div>
-<!--                        <div class="text-muted">-->
-<!--                            Instagram api key-->
-<!--                        </div>-->
-<!--                        <div class="o_setting_right_pane">-->
-<!--                            <field name="api_key_instagram"/>-->
-<!--                        </div>-->
-                        <div class="text-muted">
-                            Instagram secret key
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <field name="secret_key_instagram"/>
-                        </div>
-                    </div>
-                    <div style="display:flex;
-                                 gap:20px">
-                        <div class="text-muted">
-                            Facebook app id
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <field name="fb_app_id"/>
-                        </div>
-<!--                        <div class="text-muted">-->
-<!--                            Facebook api key-->
-<!--                        </div>-->
-<!--                        <div class="o_setting_right_pane">-->
-<!--                            <field name="api_key_facebook"/>-->
-<!--                        </div>-->
-                        <div class="text-muted">
-                            Facebook secret key
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <field name="secret_key_facebook"/>
+                            <div class="col-md-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="api_version_instafeed" class="oe_inline o_form_label"/>
+                                    <div class="text-muted">
+                                        Instafeed API version
+                                    </div>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <field name="api_version_instafeed"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </xpath>

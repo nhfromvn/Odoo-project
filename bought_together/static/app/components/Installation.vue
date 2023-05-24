@@ -52,7 +52,6 @@ export default {
       console.log(this.shop_url)
     },
     go(id) {
-      window.location.reload()
       this.$emit('goTo', id)
     }
   }

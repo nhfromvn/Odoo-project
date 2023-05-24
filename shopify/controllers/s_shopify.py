@@ -491,6 +491,7 @@ class SShopify(http.Controller):
                         item_exist.write(vals_item)
                     else:
                         item_exist.create(vals_item)
+
     @http.route('/shopify/cart/list', type="http", auth="public", website=True, method=['POST'], csrf=False)
     def get_cart(self, **kw):
         if request.httprequest.data:
@@ -641,12 +642,13 @@ class SShopify(http.Controller):
             except Exception as e:
                 print(e)
 
-    @http.route('/shopify/combo/list', type="http", auth="public", website=True, method=['GET'], csrf=False)
+    @http.route('/shopify/combo/list', type="http", auth="public", website=True, csrf=False)
     def get_combo(self, **kw):
-        if request.httprequest.data:
-            shop_url = request.httprequest.data.decode('ascii')
-        elif request.session:
+        if request.session:
             shop_url = request.session['shop_url']
+        elif request.httprequest.data:
+            shop_url = request.httprequest.data.decode('ascii')
+
         store_info = request.env['s.store.info'].sudo().search([('shop_url', '=', shop_url)], limit=1)
         if store_info:
             combo = request.env['s.combo'].sudo().search([('store_id', '=', store_info.id)])

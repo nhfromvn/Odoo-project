@@ -2,4 +2,4 @@
 
 from . import controllers
 from . import meta_controllers
-from . import instafeed_controller
+from . import app_controllers
