@@ -235,7 +235,7 @@
                   <img :src="list_products.find(product => product.product_id == tag).image_url"
                        style="width: 80%;aspect-ratio: 1.2"/>
                 </div>
-                <button @click="handleShopNow(list_products.find(product => product.product_id == tag).handle)"
+                <button @click="handleShopNow(list_products.find(product => product.product_id == tag))"
                 >Shop now
                 </button>
               </template>
@@ -306,6 +306,14 @@
       </Modal>
     </div>
   </div>
+  <div v-if="show_chart" id="Chart">
+    <div>
+      <a-space direction="vertical" :size="12">
+        <a-range-picker v-model:value="value4" :format="dateFormat"/>
+      </a-space>
+    </div>
+    <canvas id="myChart" style="font-size: 30px;width: 100%;height: 600px"></canvas>
+  </div>
 </template>
 <script>
 import {defineComponent} from 'vue'
@@ -320,29 +328,56 @@ export default defineComponent({
     proptemp: Object
   },
   components: {image_slider, Modal},
+  watch: {
+    value4: function () {
+      const diffInDays = this.value4[1].diff(this.value4[0], 'day');
+      const allDays = [];
+      for (let i = 0; i <= diffInDays; i++) {
+        const day = this.value4[0].add(i, 'day');
+        allDays.push(day.format(this.dateFormat));
+      }
+      this.recent_days = allDays
+      const analyticsSet = new Set(this.analytics.map(e => e.day));
+      this.list_post_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.posts : 0;
+      });
+      this.list_feed_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.feeds : 0;
+      });
+      this.list_product_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.products : 0;
+      });
+      console.log(this.list_product_count)
+      const ctx = document.getElementById('myChart')
+      let chart = Chart.getChart(ctx)
+      chart.config.data.labels = this.recent_days
+      chart.config.data.datasets[0].data = this.list_post_count
+      chart.config.data.datasets[1].data = this.list_product_count
+      chart.config.data.datasets[2].data = this.list_feed_count
+      chart.update()
+    }
+  },
   data() {
     return {
       contents: ['select_widget', 'edit_widget', 'analytics', 'select_media_sources'],
       selected_content: 'select_widget',
       new_widget_name: 'Hello World',
-      // value4: [dayjs(), dayjs().subtract(4, 'days')],
-      // dateFormat: 'YYYY/MM/DD',
-      // weekFormat: 'MM/DD',
-      // monthFormat: 'YYYY/MM',
-      // dateFormatList: ['DD/MM/YYYY', 'DD/MM/YY'],
-      // analytics: [],
-      // recent_days: [],
-      // feeds: [],
+      value4: [dayjs(), dayjs().subtract(4, 'days')],
+      dateFormat: 'YYYY/MM/DD',
+      weekFormat: 'MM/DD',
+      monthFormat: 'YYYY/MM',
+      dateFormatList: ['DD/MM/YYYY', 'DD/MM/YY'],
+      analytics: [],
+      recent_days: [],
       selected_widget: null,
       feed_id: 0,
-      // shop_url: '',
       search_recommendation: '',
       list_products: [],
-      // list_post_count: [],
-      // list_feed_count: [],
-      // list_product_count: [],
       allPosts: [],
-      // show_chart: false,
+      show_chart: false,
       post_modal: false,
       tag_modal: false,
       selected_post: null,
@@ -386,6 +421,61 @@ export default defineComponent({
       show_followers_options: [{name: 'Yes', value: true}, {name: 'No', value: false}]
     }
   }, methods: {
+    showChart() {
+      this.show_chart = !this.show_chart
+      if (this.show_chart) {
+        if (document.getElementById('myChart')) {
+          this.chart()
+        } else {
+          setTimeout(this.chart, 1000)
+        }
+      }
+    },
+    chart() {
+      let self = this
+      const ctx = document.getElementById('myChart').getContext('2d');
+      console.log(ctx)
+      ctx.canvas.width = 600;
+      ctx.canvas.height = 350;
+      const myChart = new Chart(ctx, {
+        title: 'Analytics',
+        type: 'line',
+        data: {
+          labels: self.recent_days,
+          datasets: [{
+            label: 'Number of posts clicks',
+            data: self.list_post_count,
+            fill: false,
+            borderColor: 'rgb(48,148,248)',
+            tension: 0.3
+          }, {
+            label: 'Number of product clicks',
+            data: self.list_product_count,
+            fill: false,
+            borderColor: 'rgb(248,218,98)',
+            tension: 0.1
+          }, {
+            label: 'Number of feed clicks',
+            data: self.list_feed_count,
+            fill: false,
+            borderColor: 'rgb(229,7,7)',
+            borderWidth: 5,
+            tension: 0.5
+          }]
+        },
+        options: {
+          title: {
+            display: true,
+            text: 'Analytics',
+            fontSize: 18,
+            fontColor: 'black'
+          }
+        }
+      });
+    },
+    handleShopNow(product) {
+      window.open(product.url)
+    },
     addWidget() {
       this.selected_content = 'select_media_sources'
     },
@@ -400,39 +490,55 @@ export default defineComponent({
       })
     },
     edit(widget) {
-      let self = this
-      this.selected_widget = widget
-      self.feed_title = widget.feed_title
-      self.on_post_click = widget.on_post_click
-      self.layout = widget.layout
-      self.configuration = widget.configuration
-      self.per_slide = widget.per_slide
-      self.number_of_posts = widget.number_of_posts
-      self.number_of_rows = widget.number_of_rows
-      self.number_of_columns = widget.number_of_columns
-      self.post_spacing = self.post_spacing_options.find(spacing => spacing.value == widget.post_spacing)
-      self.show_likes = self.show_likes_options.find(show => show.value == widget.show_likes)
-      self.show_followers = self.show_followers_options.find(show => show.value == widget.show_followers)
-      self.feed_id = widget.feed_id
-
+      this.selected_widget = widget;
+      this.feed_title = widget.feed_title;
+      this.on_post_click = widget.on_post_click;
+      this.layout = widget.layout;
+      this.configuration = widget.configuration;
+      this.per_slide = widget.per_slide;
+      this.number_of_posts = widget.number_of_posts;
+      this.number_of_rows = widget.number_of_rows;
+      this.number_of_columns = widget.number_of_columns;
+      this.post_spacing = this.post_spacing_options.find(spacing => spacing.value == widget.post_spacing);
+      this.show_likes = this.show_likes_options.find(show => show.value == widget.show_likes);
+      this.show_followers = this.show_followers_options.find(show => show.value == widget.show_followers);
+      this.feed_id = widget.feed_id;
+      this.analytics = widget.analytic_days;
+      console.log(this.analytics);
       for (let media_source of this.proptemp.media_sources) {
         if (widget.media_sources_id.includes(media_source.id)) {
-          media_source.select = true
-          console.log(widget)
-          console.log(this.proptemp.media_sources)
+          media_source.select = true;
+          console.log(widget);
+          console.log(this.proptemp.media_sources);
         }
       }
       for (let media_source of this.list_select_media_sources) {
-        for (let post of media_source.posts) {
-          this.allPosts.push(post)
-        }
+        this.allPosts.push(...media_source.posts);
       }
-      this.allPosts.filter(image => image.hover = false)
-      this.list_products = this.proptemp.products
-      for (let product of this.list_products) {
-        product.tag = false
-      }
-      this.selected_content = 'edit_widget'
+      this.allPosts.forEach(image => image.hover = false);
+      this.list_products = this.proptemp.products;
+      this.list_products.forEach(product => product.tag = false);
+      const analyticsSet = new Set(this.analytics.map(e => e.day));
+      this.list_post_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.posts : 0;
+      });
+      this.list_feed_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.feeds : 0;
+      });
+      this.list_product_count = this.recent_days.map(day => {
+        const d = dayjs(day).format('YYYY-MM-DD');
+        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.products : 0;
+      });
+      const ctx = document.getElementById('myChart');
+      let chart = Chart.getChart(ctx);
+      chart.config.data.labels = this.recent_days;
+      chart.config.data.datasets[0].data = this.list_post_count;
+      chart.config.data.datasets[1].data = this.list_product_count;
+      chart.config.data.datasets[2].data = this.list_feed_count;
+      chart.update();
+      this.selected_content = 'edit_widget';
     },
     tagProduct(post) {
       this.tag_modal = true
@@ -556,7 +662,16 @@ export default defineComponent({
     },
   },
   mounted() {
-
+    this.showChart()
+    let self = this
+    let allDays = []
+    let d = dayjs()
+    d.format(this.dateFormat)
+    for (let i = 4; i >= 0; i--) {
+      const day = d.add(-i, 'day');
+      allDays.push(day.format(this.dateFormat));
+    }
+    this.recent_days = allDays
   }
 })
 </script>

@@ -23,6 +23,7 @@ import Integration from "./components/Integration.vue";
 import DashBoard from "./components/DashBoard.vue";
 import Widgets from "./components/Widgets.vue";
 import MediaSources from "./components/MediaSources.vue";
+import dayjs from "dayjs";
 
 export default {
   name: "App",
@@ -45,7 +46,10 @@ export default {
         media_sources: [],
         products: [],
         widgets: [],
-
+        analytics: [],
+        list_post_count: [],
+        list_feed_count: [],
+        list_product_count: []
       },
     }
   },
@@ -100,6 +104,7 @@ export default {
           }
           self.$refs.widget_ref.selected_content = self.$refs.widget_ref.contents[0]
           self.widget_temp.media_sources.filter(e => e.select = false)
+          window.location.reload()
         }
       })
     },
@@ -120,6 +125,7 @@ export default {
         if (self.$refs.media_sources_ref) {
           self.$refs.media_sources_ref.selectMediaSource();
           let a = self.media_source_temp.media_sources.find(e => e.id == res.data.result.id)
+          a.posts.forEach(e => e.select = false)
           console.log(a)
         }
       })

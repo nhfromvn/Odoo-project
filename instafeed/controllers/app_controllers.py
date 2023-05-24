@@ -197,14 +197,14 @@ class InstafeedController(http.Controller):
     @http.route('/instafeed/get/data', type='http', auth='user', csrf=False)
     def get_data(self, **kwargs):
         try:
-            curren_user = request.env.user
-            media_sources = request.env['media.source'].sudo().search([('admin', '=', curren_user.id)])
-            facebook_accounts = request.env['facebook.account'].sudo().search([('admin', '=', curren_user.id)])
-            widget_datas = request.env['widget.data'].sudo().search([('admin', '=', curren_user.id)])
+            current_user = request.env.user
+            media_sources = request.env['media.source'].sudo().search([('admin', '=', current_user.id)])
+            facebook_accounts = request.env['facebook.account'].sudo().search([('admin', '=', current_user.id)])
+            widget_datas = request.env['widget.data'].sudo().search([('admin', '=', current_user.id)])
             list_media_sources = []
             for media_source in media_sources:
                 list = []
-                for post in media_source.selected_private_posts_advance:
+                for post in media_source.selected_private_posts:
                     list_tags = []
                     for hotspot in post.hotspot:
                         list_tags.append(int(hotspot.product_id))
@@ -263,6 +263,13 @@ class InstafeedController(http.Controller):
                 list_facebook_accounts.append(vals)
             list_widgets = []
             for widget in widget_datas:
+                analytics = request.env['analytics'].sudo().search([('feed_id', '=', widget.id)])
+                analytic_days = []
+                for analytic in analytics:
+                    analytic_days.append({
+                        'day': analytic.date.strftime('%Y-%m-%d'),
+                        'analytics': json.loads(analytic.json_analytics)
+                    })
                 list_media_sources_id = []
                 widget_config = request.env['widget.config'].sudo().search([('widget', '=', widget.id)], limit=1)
                 for media_source in widget.media_sources:
@@ -281,7 +288,8 @@ class InstafeedController(http.Controller):
                     'number_of_columns': widget_config.number_of_columns,
                     'show_likes': widget_config.show_likes,
                     'show_followers': widget_config.show_followers,
-                    'media_sources_id': list_media_sources_id
+                    'media_sources_id': list_media_sources_id,
+                    'analytic_days': analytic_days
                 })
             social_accounts = {
                 'facebook_accounts': list_facebook_accounts
@@ -291,9 +299,9 @@ class InstafeedController(http.Controller):
             data = {
                 'media_sources': list_media_sources,
                 'social_accounts': social_accounts,
-                'username': curren_user.login,
+                'username': current_user.login,
                 'products': products,
-                'widgets': list_widgets
+                'widgets': list_widgets,
             }
             return json.dumps(data)
         except Exception as e:
@@ -369,15 +377,15 @@ class InstafeedController(http.Controller):
             facebook_account = request.env['facebook.account'].sudo().search([('user_id', '=', res['user_id'])],
                                                                              limit=1)
             media_source = request.env['media.source'].sudo().search([('id', '=', res['media_source_id'])], limit=1)
-            for post in media_source.selected_private_posts_advance:
+            for post in media_source.selected_private_posts:
                 if str(post.post_id) not in res['list_selected_post_id']:
-                    media_source.write({'selected_private_posts_advance': [(3, post.id)]})
+                    media_source.write({'selected_private_posts': [(3, post.id)]})
             for post_id in res['list_selected_post_id']:
-                post = request.env['post.private.advance'].sudo().search(
+                post = request.env['post.private'].sudo().search(
                     [('post_id', '=', post_id), ('facebook_user', '=', facebook_account.id)])
-                media_source.write({'selected_private_posts_advance': [(4, post.id)]})
+                media_source.write({'selected_private_posts': [(4, post.id)]})
             list = []
-            for post in media_source.selected_private_posts_advance:
+            for post in media_source.selected_private_posts:
                 list.append({
                     'post_id': post.post_id,
                     'media_url': post.media_url,
@@ -388,7 +396,9 @@ class InstafeedController(http.Controller):
                     'like_count': post.like_count,
                     'comments_count': post.comments_count,
                     # 'create_date': json.dumps(post.create_date),
-                    'link_to_post': post.link_to_post
+                    'link_to_post': post.link_to_post,
+                    'instagram_business_account_username': media_source.facebook_account.instagram_business_account_username,
+                    'instagram_business_account_followers_count': media_source.facebook_account.instagram_business_account_followers_count,
                 })
             return {'id': media_source.id,
                     'name': media_source.name,
@@ -416,7 +426,7 @@ class InstafeedController(http.Controller):
 
         for post in res['posts']:
             # print(json.dumps(post['list_tags']))
-            post_exist = request.env['post.private.advance'].sudo().search(
+            post_exist = request.env['post.private'].sudo().search(
                 [('post_id', '=', post['post_id']), ('facebook_user', '=', int(post['facebook_id']))],
                 limit=1)
             if 'list_tags' in post:
@@ -434,18 +444,6 @@ class InstafeedController(http.Controller):
                             'post_id': post_exist.id
                         })
                     print(hotspot)
-                # for product_id in post['list_tags']:
-                #     print(post['list_tags'])
-                #     hotspot = request.env['hotspot.private'].sudo().search(['product_id', '=', str(product_id), ('admin', '=', current_user.id)])
-                #     if hotspot:
-                #         hotspot.write({'post_id': post_exist.id})
-                #     else:
-                #         request.env['hotspot.private'].sudo().create({
-                #             'product_id': str(product_id),
-                #             'admin': current_user.id,
-                #             'post_id': post_exist.id
-                #         })
-                #     print(str(product_id))
         return {'status': 'success'}
 
     # except Exception as e:
@@ -637,139 +635,105 @@ class InstafeedController(http.Controller):
     #         account = res.json()
     #     return res.json()
     #
-    # @http.route('/instafeed/show/feed', type='json', auth='public', csrf=False)
-    # def show_feed(self, **kwargs):
-    #     res = json.loads(request.httprequest.data)
-    #     shop_url = res['shop_url']
-    #     shop = request.env['shop'].sudo().search([('shop_url', '=', shop_url)], limit=1)
-    #     instafeed_user = request.env['instafeed'].sudo().search([('id', '=', int(res['feed_id']))], limit=1)
-    #     if instafeed_user:
-    #         facebook_user = request.env['facebook'].sudo().search([('feed_id', '=', instafeed_user.id)])
-    #         enpoint = 'https://graph.instagram.com/me?fields=id,username&access_token=' + instafeed_user.long_live_access_token
-    #         res = requests.get(enpoint)
-    #         products = json.loads(self.sync_product(shop_url))
-    #         print(products)
-    #         vals = []
-    #         for product in products['products']:
-    #             vals.append({
-    #                 'product_id': product['id'],
-    #                 'name': product['title'],
-    #                 'handle': product['handle'],
-    #                 'image_url': product['image']['src']
-    #             })
-    #         if res.ok:
-    #             user = res.json()
-    #             instafeed_user.write({'username': user['username']})
-    #             business_info = self.get_info(facebook_user.instagram_business_account_id, facebook_user)
-    #             for post in business_info['media']['data']:
-    #                 post_exist = request.env['instagram.post'].sudo().search(
-    #                     [('post_id', '=', post['id']), ('facebook_id', '=', facebook_user.id)], limit=1)
-    #                 if post_exist:
-    #                     post_exist.write({'facebook_id': facebook_user.id,
-    #                                       'post_id': post['id']})
-    #                     list = []
-    #                     for product in post_exist.products:
-    #                         list.append(product.product_id)
-    #                         post['list_tags'] = list
-    #                 else:
-    #                     post_exist = request.env['instagram.post'].sudo().create({
-    #                         'facebook_id': facebook_user.id,
-    #                         'post_id': post['id']
-    #                     })
-    #             return {'user': user,
-    #                     'user_id': instafeed_user.user_id,
-    #                     'media': business_info['media'],
-    #                     'feed_title': instafeed_user.feed_title,
-    #                     'post_spacing': instafeed_user.post_spacing,
-    #                     'on_post_click': instafeed_user.on_post_click,
-    #                     'layout': instafeed_user.layout,
-    #                     'configuration': instafeed_user.configuration,
-    #                     'per_slide': instafeed_user.per_slide,
-    #                     'number_of_posts': instafeed_user.number_of_posts,
-    #                     'number_of_rows': instafeed_user.number_of_rows,
-    #                     'number_of_columns': instafeed_user.number_of_columns,
-    #                     'show_likes': instafeed_user.show_likes,
-    #                     'show_followers': instafeed_user.show_followers,
-    #                     'followers_count': business_info['followers_count'],
-    #                     'products': vals,
-    #                     'feed_id': instafeed_user.id
-    #                     }
-    #         else:
-    #             return False
-    #     else:
-    #         return False
+    @http.route('/instafeed/show/feed', type='json', auth='public', csrf=False)
+    def show_feed(self, **kwargs):
+        res = json.loads(request.httprequest.data)
+        print(res)
+        shop_url = res['shop_url']
+        shop = request.env['shopify.store'].sudo().search([('url', '=', f"https://{shop_url}")], limit=1)
+        widget = request.env['widget.data'].sudo().search(
+            [('admin', '=', shop.admin.id), ('id', '=', int(res['feed_id']))], limit=1)
+        widget_config = request.env['widget.config'].sudo().search([('widget', '=', widget.id)], limit=1)
+        list = []
+        products = shop.get_product()
+        for media_source in widget.media_sources:
+            for post in media_source.selected_private_posts:
+                list_tags = []
+                for hotspot in post.hotspot:
+                    list_tags.append(hotspot.product_id)
+                list.append({
+                    'post_id': post.post_id,
+                    'media_url': post.media_url,
+                    'type': post.type,
+                    'caption': post.caption,
+                    'insta_profile_link': post.insta_profile_link,
+                    'thumbnail_url': post.thumbnail_url,
+                    'like_count': post.like_count,
+                    'comments_count': post.comments_count,
+                    'link_to_post': post.link_to_post,
+                    'instagram_business_account_username': media_source.facebook_account.instagram_business_account_username,
+                    'instagram_business_account_followers_count': media_source.facebook_account.instagram_business_account_followers_count,
+                    'list_tags': list_tags
+                })
+        return {
+            'products': products,
+            'feed_id': widget.id,
+            'feed_title': widget_config.feed_title,
+            'post_spacing': widget_config.post_spacing,
+            'on_post_click': widget_config.on_post_click,
+            'layout': widget_config.layout,
+            'configuration': widget_config.configuration,
+            'per_slide': widget_config.per_slide,
+            'number_of_posts': widget_config.number_of_posts,
+            'number_of_rows': widget_config.number_of_rows,
+            'number_of_columns': widget_config.number_of_columns,
+            'show_likes': widget_config.show_likes,
+            'show_followers': widget_config.show_followers,
+            'posts': list
+        }
 
-    # @http.route('/instafeed/analytics', type='json', auth='public', csrf=False)
-    # def analytics_post(self, **kwargs):
-    #     res = json.loads(request.httprequest.data)
-    #     today = datetime.today().date()
-    #     print(today)
-    #     print(res)
-    #     analytics = request.env['analytics'].sudo().search([('feed_id', '=', int(res['feed_id']))])
-    #     print(analytics)
-    #     check = 0
-    #     if analytics:
-    #         for analytic in analytics:
-    #             if analytic.date == today:
-    #                 if analytic.json_analytics:
-    #                     vals = json.loads(analytic.json_analytics)
-    #                 else:
-    #                     vals = {
-    #                         'posts': 0,
-    #                         'feeds': 0,
-    #                         'products': 0,
-    #                     }
-    #                 if 'is_clicked' in res:
-    #                     if not res['is_clicked']:
-    #                         vals['feeds'] += 1
-    #                 if 'post_id' in res:
-    #                     vals['posts'] += 1
-    #                 if 'product_id' in res:
-    #                     vals['products'] += 1
-    #                 analytic.json_analytics = json.dumps(vals)
-    #                 print(analytic.json_analytics)
-    #                 check = 1
-    #                 break
-    #     if not check:
-    #         vals = {
-    #             'posts': 0,
-    #             'feeds': 0,
-    #             'products': 0,
-    #         }
-    #         if 'is_clicked' in res:
-    #             if not res['is_clicked']:
-    #                 vals['feeds'] += 1
-    #         if 'post_id' in res:
-    #             vals['posts'] += 1
-    #         if 'product_id' in res:
-    #             vals['products'] += 1
-    #         analytic = request.env['analytics'].sudo().create({'feed_id': int(res['feed_id']),
-    #                                                            'date': today,
-    #                                                            'json_analytics': json.dumps(vals)})
-    #         print(analytic)
-    #         print(analytic.json_analytics)
+    @http.route('/instafeed/analytics', type='json', auth='public', csrf=False)
+    def analytics_post(self, **kwargs):
+        res = json.loads(request.httprequest.data)
+        today = datetime.today().date()
+        print(today)
+        print(res)
+        analytics = request.env['analytics'].sudo().search([('feed_id', '=', int(res['feed_id']))])
+        print(analytics)
+        check = 0
+        if analytics:
+            for analytic in analytics:
+                if analytic.date == today:
+                    if analytic.json_analytics:
+                        vals = json.loads(analytic.json_analytics)
+                    else:
+                        vals = {
+                            'posts': 0,
+                            'feeds': 0,
+                            'products': 0,
+                        }
+                    if 'is_clicked' in res:
+                        if not res['is_clicked']:
+                            vals['feeds'] += 1
+                    if 'post_id' in res:
+                        vals['posts'] += 1
+                    if 'product_id' in res:
+                        vals['products'] += 1
+                    analytic.json_analytics = json.dumps(vals)
+                    print(analytic.json_analytics)
+                    check = 1
+                    break
+        if not check:
+            vals = {
+                'posts': 0,
+                'feeds': 0,
+                'products': 0,
+            }
+            if 'is_clicked' in res:
+                if not res['is_clicked']:
+                    vals['feeds'] += 1
+            if 'post_id' in res:
+                vals['posts'] += 1
+            if 'product_id' in res:
+                vals['products'] += 1
+            analytic = request.env['analytics'].sudo().create({'feed_id': int(res['feed_id']),
+                                                               'date': today,
+                                                               'json_analytics': json.dumps(vals)})
+            print(analytic)
+            print(analytic.json_analytics)
 
-    # @http.route('/instafeed/get/shopify', type='http', auth='public', csrf=False)
     def get_shopify_product(self, **kwargs):
         current_user = request.env.user
         store_info = request.env['shopify.store'].sudo().search([("admin", '=', current_user.id)], limit=1)
-        new_session = shopify.Session(store_info.url, request.env['ir.config_parameter'].sudo().get_param(
-            'instafeed.api_version_instafeed'),
-                                      token=store_info.access_token)
-        shopify.ShopifyResource.activate_session(new_session)
-        products = shopify.Product.find()
-        print(products)
-        vals = []
-        for product in products:
-            vals.append({
-                'product_id': product.id,
-                'name': product.title,
-                'url': f'{store_info.url}/products/{product.handle}',
-                'shop_id': store_info.id,
-                'price': float(product.variants[0].price),
-                "compare_at_price": product.variants[0].compare_at_price,
-                'qty': product.variants[0].inventory_quantity,
-                "variant_id": product.variants[0].id,
-                'image_url': product.image.src
-            })
-        return vals
+
+        return store_info.get_product()

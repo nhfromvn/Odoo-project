@@ -5,7 +5,7 @@ class HotspotPrivate(models.Model):
     _name = 'hotspot.private'
     name = fields.Char()
     admin = fields.Many2one('res.users')
-    post_id = fields.Many2one('post.private.advance')
+    post_id = fields.Many2one('post.private')
     product_id = fields.Char()
 # shopify_product_handle = fields.Char()
 # shopify_product_img_src = fields.Char()

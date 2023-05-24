@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 import shopify
+from odoo.http import request
 from odoo.exceptions import ValidationError
 
 
@@ -20,7 +21,27 @@ class ShopifyStore(models.Model):
     password = fields.Char()
     is_update_script_tag = fields.Boolean()
     shopify_owner = fields.Char()
-
+    def get_product(self):
+        new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
+            'instafeed.api_version_instafeed'),
+                                      token=self.access_token)
+        shopify.ShopifyResource.activate_session(new_session)
+        products = shopify.Product.find()
+        print(products)
+        vals = []
+        for product in products:
+            vals.append({
+                'product_id': product.id,
+                'name': product.title,
+                'url': f'{self.url}/products/{product.handle}',
+                'shop_id': self.id,
+                'price': float(product.variants[0].price),
+                "compare_at_price": product.variants[0].compare_at_price,
+                'qty': product.variants[0].inventory_quantity,
+                "variant_id": product.variants[0].id,
+                'image_url': product.image.src
+            })
+        return vals
     def change_script_tag_url(self):
         try:
             print("start cron job change_script_tag!")

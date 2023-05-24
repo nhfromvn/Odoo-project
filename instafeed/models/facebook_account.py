@@ -14,7 +14,7 @@ class FacebookAccount(models.Model):
     instagram_business_account_id = fields.Char()
     instagram_business_account_username = fields.Char()
     instagram_business_account_followers_count = fields.Char()
-    posts = fields.One2many('post.private.advance', 'facebook_user')
+    posts = fields.One2many('post.private', 'facebook_user')
 
     def get_posts(self):
         current_user = request.env.user
@@ -26,7 +26,7 @@ class FacebookAccount(models.Model):
             'instagram_business_account_followers_count': res['followers_count']
         })
         for post in res['media']['data']:
-            exist_post = self.env['post.private.advance'].sudo().search(
+            exist_post = self.env['post.private'].sudo().search(
                 [('post_id', "=", post['id']), ('admin', '=', current_user.id)])
             post_data = {
                 'admin': current_user.id,
@@ -43,6 +43,6 @@ class FacebookAccount(models.Model):
             if exist_post:
                 exist_post.sudo().write(post_data)
             else:
-                exist_post = self.env['post.private.advance'].sudo().create(post_data)
+                exist_post = self.env['post.private'].sudo().create(post_data)
 
 
