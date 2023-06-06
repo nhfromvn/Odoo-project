@@ -1,4 +1,7 @@
 <template>
+  <nav style="display: flex; justify-content: flex-end">
+    <a href="/web/session/logout?redirect=/web">Log out</a>
+  </nav>
   <div style="display: flex">
     <SideBar :is_selected="is_selected" @CustomEventChanged="get_select_id"/>
     <div id="container" class="container">
@@ -23,7 +26,6 @@ import Integration from "./components/Integration.vue";
 import DashBoard from "./components/DashBoard.vue";
 import Widgets from "./components/Widgets.vue";
 import MediaSources from "./components/MediaSources.vue";
-import dayjs from "dayjs";
 
 export default {
   name: "App",
@@ -32,7 +34,8 @@ export default {
     return {
       is_selected: 'dashboard',
       dashboard_temp: {
-        app_user: ''
+        app_user: '',
+        shop_url: ''
       },
       integration_temp: {
         facebook_count: 0,
@@ -41,15 +44,14 @@ export default {
       media_source_temp: {
         social_accounts: null,
         media_sources: null,
+        products: [],
       },
       widget_temp: {
         media_sources: [],
         products: [],
         widgets: [],
         analytics: [],
-        list_post_count: [],
-        list_feed_count: [],
-        list_product_count: []
+        shop_url:''
       },
     }
   },
@@ -58,18 +60,25 @@ export default {
     axios.get('/instafeed/get/data').then((res) => {
       console.log(res)
       self.dashboard_temp.app_user = res.data.username
+       self.dashboard_temp.shop_url = res.data.shop_url
       self.integration_temp.facebook_count = res.data.social_accounts.facebook_accounts ? res.data.social_accounts.facebook_accounts.length : 0
       self.integration_temp.instagram_count = res.data.social_accounts.instagram_accounts ? res.data.social_accounts.instagram_accounts.length : 0
       self.media_source_temp.social_accounts = res.data.social_accounts
       self.media_source_temp.media_sources = res.data.media_sources
+      self.media_source_temp.products = res.data.products
       self.widget_temp.media_sources = res.data.media_sources
       self.widget_temp.products = res.data.products
       self.widget_temp.widgets = res.data.widgets
+      self.widget_temp.shop_url = res.data.shop_url
       if (self.media_source_temp.social_accounts.facebook_accounts) {
-        for (let account of self.media_source_temp.social_accounts.facebook_accounts) {
-          account.posts.filter(post => post.select = false)
-          console.log(account)
-        }
+        for (let source of self.media_source_temp.media_sources) {
+          for(let post of source.posts){}
+          source.posts.forEach(post => post.select = false)}
+      }
+       if (self.media_source_temp.social_accounts.instagram_accounts) {
+        for (let source of self.media_source_temp.media_sources) {
+          for(let post of source.posts){}
+          source.posts.forEach(post => post.select = false)}
       }
       if (self.widget_temp.media_sources) {
         for (let source of self.widget_temp.media_sources) {
@@ -96,6 +105,7 @@ export default {
     },
     saveFeed(data) {
       let self = this
+      console.log(data)
       axios.post('/instafeed/save/feed', data).then((res) => {
         if (self.$refs.widget_ref) {
           console.log(res)
@@ -113,6 +123,7 @@ export default {
       console.log(data)
       axios.post('/instafeed/create/media_source', data).then((res) => {
         if (self.$refs.media_sources_ref) {
+          console.log(res)
           self.$refs.media_sources_ref.selectPost();
           self.media_source_temp.media_sources.push(res.data.result)
           self.$refs.media_sources_ref.editMediaSource(res.data.result);
@@ -124,9 +135,10 @@ export default {
       axios.post('/instafeed/save/media_source', data).then((res) => {
         if (self.$refs.media_sources_ref) {
           self.$refs.media_sources_ref.selectMediaSource();
-          let a = self.media_source_temp.media_sources.find(e => e.id == res.data.result.id)
-          a.posts.forEach(e => e.select = false)
-          console.log(a)
+          // a = self.$refs.media_sources_ref.selected_source.posts
+          // a.posts.forEach(e => e.select = false)
+          window.location.reload()
+          console.log(res)
         }
       })
     }

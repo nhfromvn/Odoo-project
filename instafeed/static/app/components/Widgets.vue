@@ -3,15 +3,23 @@
     <button @click="addWidget">
       Add New Widget
     </button>
-    <div> List Widgets</div>
+    <div style="font-size: 25px; margin: 20px 0px 0px 0px; font-weight: bold">List Widgets</div>
+
     <div v-for="widget in proptemp.widgets" style="display: flex;gap: 15px;margin: 40px">
       <div>{{ widget.feed_id }}</div>
-      <div>{{ widget.widget_name }}</div>
-      <div @click="edit(widget)">
+      <div v-if="!widget.onChange">{{ widget.widget_name }}</div>
+      <input v-else type="text" v-model="widget.widget_name"/>
+      <div v-if="!widget.onChange" @click="changeName(widget)">
         <font-awesome-icon :icon="['fasr', 'pencil']"/>
+      </div>
+      <div v-else @click="saveName(widget)">
+        <font-awesome-icon :icon="['fas', 'floppy-disk']"/>
       </div>
       <div @click="deleteWidget(widget)">
         <font-awesome-icon :icon="['fas', 'trash-can']"/>
+      </div>
+      <div @click="edit(widget)">
+        edit
       </div>
     </div>
   </div>
@@ -117,10 +125,11 @@
           </div>
           <button id="btn_save" @click="saveFeed()">Save feed</button>
           <button id="btn_save" @click="selected_content=contents[0]">Return to DashBoard</button>
+          <button id="btn_save" @click="embedded">Embedded</button>
         </div>
         <div id="content-right">
           <label id="preview">
-            <b>PREVIEW feed:{{ feed_id }}</b>
+            <b>PREVIEW feed:{{ feed_id }} (enter this id to embed widget)</b>
           </label>
           <hr>
           <br>
@@ -191,10 +200,17 @@
               </div>
               <div @click="redirectToInstagramUser"
                    style="cursor: pointer; color: #000; font-weight: 600; line-height: 23px; font-size: 17px; margin-left: 15px">
-                {{ selected_post.instagram_business_account_username }}
+                <template v-if="selected_post.instagram_business_account_username">
+                  {{ selected_post.instagram_business_account_username }}
+                </template>
+                <template v-else>
+                  {{ selected_post.instagram_username }}
+                </template>
                 <div v-if="show_followers.value"
                      style="color: #000; font-weight: 400;font-size: 13px;">
-                  {{ selected_post.instagram_business_account_followers_count }} Followers
+                  <template v-if="selected_post.instagram_business_account_followers_count">
+                    {{ selected_post.instagram_business_account_followers_count }} Followers
+                  </template>
                 </div>
               </div>
             </div>
@@ -208,12 +224,17 @@
 
             </div>
             <div style="display: flex;gap: 20px; margin-bottom: 20px">
-              <div v-if="show_likes.value" style="margin: 10px 0px 0px 25px">
+              <div v-if="show_likes.value&&selected_post.like_count" style="margin: 10px 0px 0px 25px">
+
                 {{ selected_post.like_count }}
+
+
                 <font-awesome-icon icon="fa-regular fa-heart" beat style="color: black"/>
               </div>
-              <div style="margin: 10px 0px 0px 25px">
+              <div v-if="selected_post.comments_count" style="margin: 10px 0px 0px 25px">
+
                 {{ selected_post.comments_count }}
+
                 <font-awesome-icon :icon="['far', 'message']"/>
               </div>
             </div>
@@ -309,7 +330,7 @@
   <div v-if="show_chart" id="Chart">
     <div>
       <a-space direction="vertical" :size="12">
-        <a-range-picker v-model:value="value4" :format="dateFormat"/>
+        <a-range-picker v-model:value="default_date" :format="dateFormat"/>
       </a-space>
     </div>
     <canvas id="myChart" style="font-size: 30px;width: 100%;height: 600px"></canvas>
@@ -320,6 +341,7 @@ import {defineComponent} from 'vue'
 import dayjs from 'dayjs'
 import image_slider from "./image_slider.vue";
 import {Modal, notification} from 'ant-design-vue'
+import axios from 'axios'
 
 export default defineComponent({
   name: "Widgets",
@@ -329,11 +351,11 @@ export default defineComponent({
   },
   components: {image_slider, Modal},
   watch: {
-    value4: function () {
-      const diffInDays = this.value4[1].diff(this.value4[0], 'day');
+    default_date: function () {
+      const diffInDays = this.default_date[1].diff(this.default_date[0], 'day');
       const allDays = [];
       for (let i = 0; i <= diffInDays; i++) {
-        const day = this.value4[0].add(i, 'day');
+        const day = this.default_date[0].add(i, 'day');
         allDays.push(day.format(this.dateFormat));
       }
       this.recent_days = allDays
@@ -365,7 +387,7 @@ export default defineComponent({
       contents: ['select_widget', 'edit_widget', 'analytics', 'select_media_sources'],
       selected_content: 'select_widget',
       new_widget_name: 'Hello World',
-      value4: [dayjs(), dayjs().subtract(4, 'days')],
+      default_date: [dayjs(), dayjs().subtract(4, 'days')],
       dateFormat: 'YYYY/MM/DD',
       weekFormat: 'MM/DD',
       monthFormat: 'YYYY/MM',
@@ -421,6 +443,34 @@ export default defineComponent({
       show_followers_options: [{name: 'Yes', value: true}, {name: 'No', value: false}]
     }
   }, methods: {
+    embedded() {
+      window.open(this.proptemp.shop_url + '/admin/themes/current/editor', '_blank')
+      console.log(this.proptemp.shop_url)
+    },
+    changeName(widget) {
+      widget.onChange = true
+    },
+    saveName(widget) {
+      let self = this
+      axios.post('/instafeed/change/widget_name', {widget_id: widget.feed_id, widget_name: widget.widget_name}
+      ).then((res) => {
+        console.log(res)
+        if (res) {
+          alert('change success')
+          widget.onChange = false
+        }
+      })
+    },
+    deleteWidget(widget) {
+      let self = this
+      axios.post('/instafeed/delete/widget', {widget_id: widget.feed_id}).then((res) => {
+        console.log(res)
+        self.proptemp.widgets = self.proptemp.widgets.filter(e => e.feed_id != widget.feed_id)
+        if (res) {
+          alert('Delete success')
+        }
+      })
+    },
     showChart() {
       this.show_chart = !this.show_chart
       if (this.show_chart) {
@@ -440,6 +490,14 @@ export default defineComponent({
       const myChart = new Chart(ctx, {
         title: 'Analytics',
         type: 'line',
+        options: {
+          title: {
+            display: true,
+            text: 'Analytics',
+            fontSize: 18,
+            fontColor: 'black'
+          }
+        },
         data: {
           labels: self.recent_days,
           datasets: [{
@@ -463,14 +521,6 @@ export default defineComponent({
             tension: 0.5
           }]
         },
-        options: {
-          title: {
-            display: true,
-            text: 'Analytics',
-            fontSize: 18,
-            fontColor: 'black'
-          }
-        }
       });
     },
     handleShopNow(product) {
@@ -505,6 +555,7 @@ export default defineComponent({
       this.feed_id = widget.feed_id;
       this.analytics = widget.analytic_days;
       console.log(this.analytics);
+
       for (let media_source of this.proptemp.media_sources) {
         if (widget.media_sources_id.includes(media_source.id)) {
           media_source.select = true;
@@ -512,32 +563,36 @@ export default defineComponent({
           console.log(this.proptemp.media_sources);
         }
       }
+
       for (let media_source of this.list_select_media_sources) {
         this.allPosts.push(...media_source.posts);
       }
       this.allPosts.forEach(image => image.hover = false);
       this.list_products = this.proptemp.products;
       this.list_products.forEach(product => product.tag = false);
-      const analyticsSet = new Set(this.analytics.map(e => e.day));
-      this.list_post_count = this.recent_days.map(day => {
-        const d = dayjs(day).format('YYYY-MM-DD');
-        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.posts : 0;
-      });
-      this.list_feed_count = this.recent_days.map(day => {
-        const d = dayjs(day).format('YYYY-MM-DD');
-        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.feeds : 0;
-      });
-      this.list_product_count = this.recent_days.map(day => {
-        const d = dayjs(day).format('YYYY-MM-DD');
-        return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.products : 0;
-      });
-      const ctx = document.getElementById('myChart');
-      let chart = Chart.getChart(ctx);
-      chart.config.data.labels = this.recent_days;
-      chart.config.data.datasets[0].data = this.list_post_count;
-      chart.config.data.datasets[1].data = this.list_product_count;
-      chart.config.data.datasets[2].data = this.list_feed_count;
-      chart.update();
+      if (this.analytics) {
+        const analyticsSet = new Set(this.analytics.map(e => e.day));
+
+        this.list_post_count = this.recent_days.map(day => {
+          const d = dayjs(day).format('YYYY-MM-DD');
+          return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.posts : 0;
+        });
+        this.list_feed_count = this.recent_days.map(day => {
+          const d = dayjs(day).format('YYYY-MM-DD');
+          return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.feeds : 0;
+        });
+        this.list_product_count = this.recent_days.map(day => {
+          const d = dayjs(day).format('YYYY-MM-DD');
+          return analyticsSet.has(d) ? this.analytics.find(e => e.day === d).analytics.products : 0;
+        });
+        const ctx = document.getElementById('myChart');
+        let chart = Chart.getChart(ctx);
+        chart.config.data.labels = this.recent_days;
+        chart.config.data.datasets[0].data = this.list_post_count;
+        chart.config.data.datasets[1].data = this.list_product_count;
+        chart.config.data.datasets[2].data = this.list_feed_count;
+        chart.update();
+      }
       this.selected_content = 'edit_widget';
     },
     tagProduct(post) {
@@ -583,36 +638,29 @@ export default defineComponent({
       }
       this.$emit('saveFeed', params)
     },
+
     next_slide() {
-      if (this.layout.includes('Grid')) {
-        if (this.allPosts.indexOf(this.selected_post) >= this.number_of_grid_posts - 1) {
-          this.selected_post = this.allPosts[0]
-        } else {
-          this.selected_post = this.allPosts[this.allPosts.indexOf(this.selected_post) + 1]
-        }
+      const index = this.allPosts.indexOf(this.selected_post);
+      if (this.layout.includes('grid')) {
+        const nextIndex = index >= this.number_of_grid_posts - 1 ? 0 : index + 1;
+        this.selected_post = this.allPosts[nextIndex];
       } else {
-        if (this.allPosts.indexOf(this.selected_post) >= this.number_of_posts - 1) {
-          this.selected_post = this.allPosts[0]
-        } else {
-          this.selected_post = this.allPosts[this.allPosts.indexOf(this.selected_post) + 1]
-        }
+        const nextIndex = index >= this.number_of_posts - 1 || index >= this.allPosts.length - 1 ? 0 : index + 1;
+        this.selected_post = this.allPosts[nextIndex];
       }
     },
+
     prev_slide() {
-      if (this.layout.includes('Grid')) {
-        if (this.allPosts.indexOf(this.selected_post) > 0) {
-          this.selected_post = this.allPosts[this.allPosts.indexOf(this.selected_post) - 1]
-        } else {
-          this.selected_post = this.allPosts[this.number_of_grid_posts - 1]
-        }
+      const index = this.allPosts.indexOf(this.selected_post);
+      if (this.layout.includes('grid')) {
+        const prevIndex = index > 0 ? index - 1 : this.number_of_grid_posts - 1;
+        this.selected_post = this.allPosts[prevIndex];
       } else {
-        if (this.allPosts.indexOf(this.selected_post) > 0) {
-          this.selected_post = this.allPosts[this.allPosts.indexOf(this.selected_post) - 1]
-        } else {
-          this.selected_post = this.allPosts[this.number_of_posts - 1]
-        }
+        const prevIndex = index > 0 ? index - 1 : Math.min(this.number_of_posts - 1, this.allPosts.length - 1);
+        this.selected_post = this.allPosts[prevIndex];
       }
-    },
+    }
+    ,
     show_post(post) {
       console.log(post)
       if (this.on_post_click.includes('pop')) {
@@ -663,15 +711,13 @@ export default defineComponent({
   },
   mounted() {
     this.showChart()
-    let self = this
-    let allDays = []
-    let d = dayjs()
-    d.format(this.dateFormat)
-    for (let i = 4; i >= 0; i--) {
-      const day = d.add(-i, 'day');
-      allDays.push(day.format(this.dateFormat));
-    }
-    this.recent_days = allDays
+    const DAYS_TO_INCLUDE = 5;
+    const allDays = Array.from({length: DAYS_TO_INCLUDE}, (_, i) => {
+      const day = dayjs().add(-4 + i, 'day');
+      return day.format(this.dateFormat);
+    });
+    this.recent_days = allDays;
+    this.proptemp.widgets.forEach(e => e.onChange = false)
   }
 })
 </script>
@@ -682,34 +728,6 @@ label {
   display: block;
   color: #212b35;
   font-weight: 400;
-}
-
-
-.input_setting {
-  margin-bottom: 24px !important;
-  flex: 1;
-  text-size-adjust: 100%;
-  fill: currentColor;
-  -webkit-font-smoothing: antialiased;
-  -webkit-box-direction: normal;
-  padding: .5rem 1rem;
-  background-color: #fff;
-  border: .1rem solid #c4cdd5;
-  border-radius: .3rem;
-  color: #31373d;
-  display: block;
-  font-size: 15px;
-  width: 100%;
-  vertical-align: baseline;
-  height: auto;
-  margin: 0;
-  max-width: 100%;
-  font-family: -apple-system, blinkmacsystemfont, san francisco, roboto, segoe ui, helvetica neue, sans-serif;
-  box-shadow: 0 0 0 1px transparent, 0 1px 0 0 rgba(22, 29, 37, .05);
-  box-sizing: border-box;
-  transition: box-shadow .2s cubic-bezier(.64, 0, .35, 1);
-  appearance: none;
-
 }
 
 select {
@@ -1171,7 +1189,7 @@ body {
 <!--    <div v-if="show_chart" id="Chart">-->
 <!--      <div>-->
 <!--        <a-space direction="vertical" :size="12">-->
-<!--          <a-range-picker v-model:value="value4" :format="dateFormat"/>-->
+<!--          <a-range-picker v-model:value="default_date" :format="dateFormat"/>-->
 <!--        </a-space>-->
 <!--      </div>-->
 <!--      <canvas id="myChart" style="font-size: 30px;width: 100%;height: 600px"></canvas>-->
@@ -1468,11 +1486,11 @@ body {
 <!--  name: "App",-->
 <!--  components: {Image_slider, Modal},-->
 <!--  watch: {-->
-<!--    value4: function () {-->
-<!--      const diffInDays = this.value4[1].diff(this.value4[0], 'day');-->
+<!--    default_date: function () {-->
+<!--      const diffInDays = this.default_date[1].diff(this.default_date[0], 'day');-->
 <!--      const allDays = [];-->
 <!--      for (let i = 0; i <= diffInDays; i++) {-->
-<!--        const day = this.value4[0].add(i, 'day');-->
+<!--        const day = this.default_date[0].add(i, 'day');-->
 <!--        allDays.push(day.format(this.dateFormat));-->
 <!--      }-->
 <!--      this.recent_days = allDays-->
@@ -1533,7 +1551,7 @@ body {
 <!--  },-->
 <!--  data() {-->
 <!--    return {-->
-<!--      value4: [dayjs(), dayjs().subtract(4, 'days')],-->
+<!--      default_date: [dayjs(), dayjs().subtract(4, 'days')],-->
 <!--      dateFormat: 'YYYY/MM/DD',-->
 <!--      weekFormat: 'MM/DD',-->
 <!--      monthFormat: 'YYYY/MM',-->

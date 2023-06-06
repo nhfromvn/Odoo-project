@@ -1,0 +1,91 @@
+<odoo>
+    <template id="ns_layout" name="NS Frontend Layout" inherit_id="portal.frontend_layout">
+        <xpath expr="//div[@id='wrapwrap']/header" position="replace">
+            <template></template>
+        </xpath>
+        <xpath expr="//div[@id='wrapwrap']/footer" position="replace">
+            <div>
+                Hello
+            </div>
+        </xpath>
+        <xpath expr="//div[@id='wrapwrap']/main" position="attributes">
+            <attribute name="t-att-style" add="('background:#ffffff;')"/>
+        </xpath>
+    </template>
+    <template id="web_login_inherit" name="NS Frontend Layout" inherit_id="web.login">
+        <xpath expr="//form" position="before">
+            <div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;margin: 30px 0px">
+                <div>Don't have account?</div>
+
+                <a style="width:100px;margin-right:50px;color:#ffffff" class="btn btn-primary btn-block" role="button"
+                   href="/web/signup">Sign up
+                </a>
+            </div>
+            <div style="font-weight: bold; text-align: center;margin-top:40px">Login to instafeed</div>
+        </xpath>
+        <xpath expr="//form" position="replace">
+            <form class="oe_login_form" role="form" t-attf-action="/web/login" method="post"
+                  onsubmit="this.action = '/web/login' + location.hash">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="form-group field-db" t-if="databases and len(databases) &gt; 1">
+                    <label for="db" class="col-form-label">Database</label>
+                    <div t-attf-class="input-group {{'input-group-sm' if form_small else ''}}">
+                        <input type="text" name="db" t-att-value="request.db" id="db"
+                               t-attf-class="form-control #{'form-control-sm' if form_small else ''}"
+                               required="required" readonly="readonly"/>
+                        <span class="input-group-append">
+                            <a role="button" href="/web/database/selector" class="btn btn-secondary">Select
+                                <i class="fa fa-database" role="img" aria-label="Database" title="Database"></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group field-login">
+                    <label for="login">Email</label>
+                    <input type="text" placeholder="Email" name="login" t-att-value="login" id="login"
+                           class="input_setting"
+                           required="required"
+                           autofocus="autofocus" autocapitalize="off"/>
+                </div>
+
+                <div class="form-group field-password">
+                    <label for="password">Password</label>
+                    <input type="password" placeholder="Password" name="password" id="password" class="input_setting"
+                           required="required"
+                           autocomplete="current-password" t-att-autofocus="'autofocus' if login else None"
+                           maxlength="4096"/>
+                </div>
+
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <p class="alert alert-success" t-if="message" role="status">
+                    <t t-esc="message"/>
+                </p>
+
+                <div style="width: 700px;
+    transform: translate(-200px, 10px);"
+                     t-attf-class="clearfix oe_login_buttons text-center mb-1 {{'pt-2' if form_small else 'pt-3'}}">
+                    <button type="submit" class="btn btn-primary btn-block">Sign in
+                    </button>
+                </div>
+
+                <input type="hidden" name="redirect" t-att-value="'/instafeed'"/>
+            </form>
+        </xpath>
+    </template>
+    <template id="instafeed.sigup_resest" inherit_id="instafeed.web_login_inherit" name="Sign up Reset">
+        <xpath expr="//button[@type='submit']" position="after">
+            <div class="justify-content-between mt-2 d-flex small">
+                <a t-if="signup_enabled" t-attf-href="/web/signup?{{ keep_query() }}">Sign up</a>
+                <a t-if="reset_password_enabled" t-attf-href="/web/reset_password?{{ keep_query() }}">Reset Password</a>
+            </div>
+        </xpath>
+    </template>
+    <template inherit_id="auth_signup.signup" id="instafeed.singup" name="sign up login">
+        <xpath expr="//input[@name='redirect']" position="replace">
+            <input type="hidden" name="redirect" t-att-value="'/instafeed'"/>
+        </xpath>
+    </template>
+</odoo>

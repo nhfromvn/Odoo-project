@@ -61,10 +61,18 @@
             </div>
             <div @click="redirectToInstagramUser"
                  style="cursor: pointer; color: #000; font-weight: 600; line-height: 23px; font-size: 17px; margin-left: 15px">
-              {{ selected_post.instagram_business_account_username }}
+
+               <template v-if="selected_post.instagram_business_account_username">
+                  {{ selected_post.instagram_business_account_username }}
+                </template>
+                <template v-else>
+                  {{ selected_post.instagram_username }}
+                </template>
               <div v-if="show_followers.value"
                    style="color: #000; font-weight: 400;font-size: 13px;">
-                {{ followers_count }} Followers
+              <template v-if="selected_post.instagram_business_account_followers_count">
+                    {{ selected_post.instagram_business_account_followers_count }} Followers
+                  </template>
               </div>
             </div>
           </div>
@@ -77,20 +85,13 @@
             }}
           </div>
           <div style="display: flex;gap: 20px; margin-bottom: 20px">
-            <div v-if="show_likes.value" style="margin: 10px 0px 0px 25px">
+            <div v-if="show_likes.value&&selected_post.like_count" style="margin: 10px 0px 0px 25px">
               {{ selected_post.like_count }}
               <font-awesome-icon icon="fa-regular fa-heart" beat style="color: black"/>
             </div>
-            <div style="margin: 10px 0px 0px 25px">
+            <div v-if="selected_post.comments_count" style="margin: 10px 0px 0px 25px">
               {{ selected_post.comments_count }}
               <font-awesome-icon :icon="['far', 'message']"/>
-            </div>
-          </div>
-          <div v-if="selected_post.comments" style="display: flex;flex-direction: column; gap: 10px">
-            <div v-for="comment in selected_post.comments.data"
-                 style="margin: 0px 0px 0px 25px; display: flex;gap: 10px">
-              <b>{{ comment.from.username }}</b>
-              <p>{{ comment.text }}</p>
             </div>
           </div>
           <div v-if="selected_post.list_tags"
@@ -142,7 +143,7 @@
               {{ selected_post.instagram_business_account_username }}
               <div v-if="show_followers.value"
                    style="color: #000; font-weight: 400;font-size: 13px;">
-                {{ followers_count }} Followers
+                {{ selected_post.instagram_business_account_followers_count }} Followers
               </div>
             </div>
           </div>
@@ -297,7 +298,6 @@ export default {
     }).then((res) => {
       console.log(res)
       if (res.data.result) {
-        self.followers_count = res.data.result.followers_count
         self.feed_title = res.data.result.feed_title
         self.on_post_click = res.data.result.on_post_click
         self.layout = res.data.result.layout

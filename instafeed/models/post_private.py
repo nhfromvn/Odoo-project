@@ -4,7 +4,7 @@ from odoo import models, fields, api
 class PostPrivate(models.Model):
     _name = 'post.private'
     post_id = fields.Char()
-    facebook_user = fields.Many2one('facebook.account')
+    social_account = fields.Many2one('social.account')
     media_url = fields.Char()
     type = fields.Char()
     caption = fields.Char()

@@ -10,14 +10,20 @@
       </div>
       <div>{{ account.username }}</div>
     </div>
-    <button @click="createMedia()">Create</button>
+    <div>List instagram account</div>
+    <div style="display:flex;gap: 15px;align-items: center;margin: 20px"
+         v-for="account in proptemp.social_accounts.instagram_accounts">
+      <input type="radio" id="option1" :value="account" v-model="selected_account">
+      <div>{{ account.username }}</div>
+    </div>
+    <button @click="createMediaSource()">Create</button>
   </div>
   <div id="list_media_source" v-if="selected_content=='list_media_source'">
     <button @click="addMediaSource">
       Add media source
     </button>
     <div>
-      <div>List media source</div>
+      <div style="font-size: 25px; margin: 20px 0px; font-weight: bold">List media source</div>
       <div style="display:flex;gap: 20px">
         <table class="table table-responsive table-bordered" id="table_1">
           <tr>
@@ -28,7 +34,7 @@
               Media Source Name
             </th>
             <th>
-              Facebook account Name
+              Social account Name
             </th>
             <th>
             </th>
@@ -73,9 +79,11 @@
 <script>
 import {defineComponent} from 'vue'
 import axios from 'axios'
+import {Modal} from "ant-design-vue";
 
 export default defineComponent({
   name: "MediaSources",
+  components: {Modal},
   emits: ['createMediaSource', 'saveMediaSource'],
   props: {
     proptemp: Object
@@ -87,12 +95,24 @@ export default defineComponent({
       selected_account: null,
       new_media_source_name: 'Default Name',
       selected_source: null,
+      search_recommendation: '',
     }
   }
   ,
+
+
   methods: {
-    test() {
-      console.log(this.list_selected_post)
+    cancel() {
+      this.tag_modal = false;
+      this.proptemp.products.filter(product => product.tag = false)
+    },
+    addProductTag(post) {
+      console.log(post)
+      post.list_tags = this.list_recommend_product.map(product => {
+        return product.product_id
+      })
+      this.selected_source.posts.find(e => e.post_id == post.post_id).list_tags = post.list_tags
+      this.cancel()
     },
     selectPost() {
       console.log()
@@ -104,17 +124,23 @@ export default defineComponent({
     },
     editMediaSource(source) {
       this.selected_source = source
-      if (this.selected_source) {
-        this.selected_account = this.proptemp.social_accounts.facebook_accounts.find(account => account.user_id == source.social_account.user_id)
-        if (this.selected_account) {
-          for (let post of this.selected_account.posts) {
-            if (this.selected_source.posts.map(e => e.post_id).includes(post.post_id)) {
-              post.select = true
-            }
+      this.selected_account = [].concat(this.proptemp.social_accounts.facebook_accounts, this.proptemp.social_accounts.instagram_accounts).find(account => account.user_id == source.social_account.user_id)
+      console.log([].concat(this.proptemp.social_accounts.facebook_accounts, this.proptemp.social_accounts.instagram_accounts))
+      console.log(source.social_account.user_id)
+      if (this.selected_account) {
+        for (let post of this.selected_account.posts) {
+          if (this.selected_source.posts.find(e => e.post_id == post.post_id)) {
+            post.select = true
+            post.list_tags = this.selected_source.posts.find(e => e.post_id == post.post_id).list_tags
           }
-          this.selectPost()
+          if (!this.selected_source.posts) {
+            this.selected_source.posts = this.this.proptemp.social_accounts.facebook_accounts.find(account => account.user_id == source.social_account.user_id).posts
+          } else {
+            this.selected_source.posts.forEach(e => e.select = true)
+          }
         }
       }
+      this.selectPost()
     },
     deleteMediaSource(source) {
       let self = this
@@ -155,6 +181,16 @@ export default defineComponent({
     },
   },
   computed: {
+    list_recommend_product: function () {
+      console.log(this.proptemp.products)
+      return this.proptemp.products.filter(product => product.tag == true)
+    },
+    filteredRowsRecommend: function () {
+      var self = this;
+      return this.proptemp.products.filter(function (product) {
+        return String(product.name).toLowerCase().indexOf(self.search_recommendation.toLowerCase()) > -1
+      })
+    },
     list_selected_post() {
       console.log(this.list_selected_post)
       return this.selected_account.posts.filter(post => post.select == true)
@@ -190,4 +226,5 @@ export default defineComponent({
   order: 0;
   flex-grow: 0;
 }
+
 </style>

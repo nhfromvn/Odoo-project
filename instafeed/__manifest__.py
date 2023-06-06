@@ -20,17 +20,23 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'bought_together'],
+    'depends': ['base', 'bought_together','portal','web','auth_signup'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'views/instafeed_config.xml',
         'views/templates.xml',
+        'views/login.xml',
+        # 'views/login.xml',
         'data/test.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
         'demo/demo.xml',
-    ],
+    ], 'assets': {
+        'web.assets_frontend': [
+            'instafeed/static/css/style.css',
+        ],
+    },
 }

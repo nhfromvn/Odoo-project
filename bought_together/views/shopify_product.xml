@@ -13,7 +13,7 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="post_id"/>
+<!--                        <field name="post_id"/>-->
                         <field name="compare_at_price"/>
                     </group>
                 </sheet>

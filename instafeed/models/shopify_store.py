@@ -21,13 +21,13 @@ class ShopifyStore(models.Model):
     password = fields.Char()
     is_update_script_tag = fields.Boolean()
     shopify_owner = fields.Char()
+
     def get_product(self):
         new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
             'instafeed.api_version_instafeed'),
                                       token=self.access_token)
         shopify.ShopifyResource.activate_session(new_session)
         products = shopify.Product.find()
-        print(products)
         vals = []
         for product in products:
             vals.append({
@@ -39,9 +39,10 @@ class ShopifyStore(models.Model):
                 "compare_at_price": product.variants[0].compare_at_price,
                 'qty': product.variants[0].inventory_quantity,
                 "variant_id": product.variants[0].id,
-                'image_url': product.image.src
+                'image_url': product.image.src if product.image else None
             })
         return vals
+
     def change_script_tag_url(self):
         try:
             print("start cron job change_script_tag!")
@@ -68,6 +69,8 @@ class ShopifyStore(models.Model):
             print("end cron job change_script_tag!")
         except Exception as e:
             print(e)
+
+
 class InstafeedConfig(models.TransientModel):
     _inherit = 'res.config.settings'
     api_key_instafeed = fields.Char()
@@ -79,6 +82,8 @@ class InstafeedConfig(models.TransientModel):
     fb_app_id = fields.Char()
     # api_key_facebook = fields.Char()
     secret_key_facebook = fields.Char()
+    tiktok_app_id = fields.Char()
+    secret_key_tiktok = fields.Char()
 
     @api.model
     def get_values(self):
@@ -94,6 +99,9 @@ class InstafeedConfig(models.TransientModel):
             fb_app_id=str(params.get_param('instafeed.fb_app_id')),
             # api_key_facebook=str(params.get_param('instafeed.api_key_facebook')),
             secret_key_facebook=str(params.get_param('instafeed.secret_key_facebook')),
+            tiktok_app_id=str(params.get_param('instafeed.tiktok_app_id')),
+            secret_key_tiktok=str(params.get_param('instafeed.secret_key_tiktok')),
+
         )
         return res
 
@@ -109,6 +117,8 @@ class InstafeedConfig(models.TransientModel):
         field_fb_app_id = self.fb_app_id if self.fb_app_id else False
         # field_api_key_facebook = self.api_key_facebook if self.api_key_facebook else False
         field_secret_key_facebook = self.secret_key_facebook if self.secret_key_facebook else False
+        field_tiktok_app_id = self.tiktok_app_id if self.tiktok_app_id else False
+        field_secret_key_tiktok = self.secret_key_tiktok if self.secret_key_tiktok else False
 
         param.set_param('instafeed.api_key_instafeed', field_api_key)
         param.set_param('instafeed.secret_key_instafeed', field_secret_key)
@@ -119,3 +129,5 @@ class InstafeedConfig(models.TransientModel):
         param.set_param('instafeed.fb_app_id', field_fb_app_id)
         # param.set_param('instafeed.api_key_facebook', field_api_key_facebook)
         param.set_param('instafeed.secret_key_facebook', field_secret_key_facebook)
+        param.set_param('instafeed.tiktok_app_id', field_tiktok_app_id)
+        param.set_param('instafeed.secret_key_tiktok', field_secret_key_tiktok)
