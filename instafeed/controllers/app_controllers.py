@@ -12,7 +12,9 @@ scopes = [
     'read_script_tags',
     'write_script_tags',
     "read_draft_orders",
-    'write_draft_orders'
+    'write_draft_orders',
+    'read_themes',
+    'write_themes'
 ]
 
 
@@ -110,27 +112,7 @@ class InstafeedController(http.Controller):
                             })
                     except Exception as e:
                         print(e)
-                    current_company = request.env['res.company'].sudo().search([('name', '=', kwargs['shop'])], limit=1)
                     password_generate = ''.join(random.choice(string.ascii_letters) for i in range(20))
-                    if not current_company:
-                        current_company = request.env['res.company'].sudo().create({
-                            'logo': False,
-                            'currency_id': 2,
-                            'sequence': 10,
-                            'name': kwargs['shop'],
-                            'street': False,
-                            'street2': False,
-                            'city': False,
-                            'state_id': False,
-                            'zip': False,
-                            'country_id': False,
-                            'phone': False,
-                            'email': False,
-                            'website': False,
-                            'vat': False,
-                            'company_registry': False,
-                            'parent_id': False
-                        })
                     current_user = request.env.user
                     if request.env.user.id == request.env.ref('base.public_user').id:
                         return werkzeug.utils.redirect('/web/login')
@@ -190,6 +172,8 @@ class InstafeedController(http.Controller):
                 [('admin', '=', current_user.id), ('type', '=', 'facebook')])
             instagram_accounts = request.env['social.account'].sudo().search(
                 [('admin', '=', current_user.id), ('type', '=', 'instagram')])
+            tiktok_accounts = request.env['social.account'].sudo().search(
+                [('admin', '=', current_user.id), ('type', '=', 'tiktok')])
             widget_datas = request.env['widget.data'].sudo().search([('admin', '=', current_user.id)])
             list_media_sources = []
             for media_source in media_sources:
@@ -213,7 +197,8 @@ class InstafeedController(http.Controller):
                         'facebook_id': media_source.social_account.id if media_source.social_account.type == 'facebook' else False,
                         'instagram_id': media_source.social_account.id if media_source.social_account.type == 'instagram' else False,
                         'instagram_username': media_source.social_account.username,
-                        'list_tags': list_tags
+                        'list_tags': list_tags,
+                        'tiktok': post.tiktok
                     })
                 list_media_sources.append({
                     'id': media_source.id,
@@ -270,6 +255,30 @@ class InstafeedController(http.Controller):
                     'posts': list
                 }
                 list_instagram_accounts.append(vals)
+            list_tiktok_accounts = []
+            for tiktok_account in tiktok_accounts:
+                list = []
+                for post in tiktok_account.posts:
+                    list.append({
+                        'post_id': post.post_id,
+                        'media_url': post.media_url,
+                        'type': post.type,
+                        'caption': post.caption,
+                        'insta_profile_link': post.insta_profile_link,
+                        'thumbnail_url': post.thumbnail_url,
+                        'like_count': post.like_count,
+                        'comments_count': post.comments_count,
+                        'link_to_post': post.link_to_post,
+                        'tiktok': post.tiktok
+                    })
+                vals = {
+                    'user_id': tiktok_account.user_id,
+                    'url_image': tiktok_account.url_image,
+                    'username': tiktok_account.username,
+                    'status': tiktok_account.status,
+                    'posts': list
+                }
+                list_tiktok_accounts.append(vals)
             list_widgets = []
             for widget in widget_datas:
                 analytics = request.env['analytics'].sudo().search([('feed_id', '=', widget.id)])
@@ -303,8 +312,13 @@ class InstafeedController(http.Controller):
             social_accounts = {
                 'facebook_accounts': list_facebook_accounts,
                 'instagram_accounts': list_instagram_accounts,
+                'tiktok_accounts': list_tiktok_accounts
             }
-            products = self.get_shopify_product()
+            products = []
+            try:
+                products = self.get_shopify_product()
+            except Exception as e:
+                print(e)
             data = {
                 'media_sources': list_media_sources,
                 'social_accounts': social_accounts,
@@ -330,9 +344,12 @@ class InstafeedController(http.Controller):
             instagram_account = request.env['social.account'].sudo().search(
                 [('type', '=', 'instagram'), ('admin', '=', current_user.id), ('user_id', '=', res['user_id'])],
                 limit=1)
+            tiktok_account = request.env['social.account'].sudo().search(
+                [('type', '=', 'tiktok'), ('admin', '=', current_user.id), ('user_id', '=', res['user_id'])],
+                limit=1)
             media_source = request.env['media.source'].sudo().create(
                 {'admin': current_user.id,
-                 'social_account': instagram_account.id if instagram_account else facebook_account.id if facebook_account else None,
+                 'social_account': instagram_account.id if instagram_account else facebook_account.id if facebook_account else tiktok_account.id if tiktok_account else None,
                  'name': res['name']})
             return {'id': media_source.id,
                     'name': media_source.name,
@@ -391,6 +408,9 @@ class InstafeedController(http.Controller):
             instagram_account = request.env['social.account'].sudo().search(
                 [('admin', '=', current_user.id), ('user_id', '=', res['user_id']), ('type', '=', 'instagram')],
                 limit=1)
+            tiktok_account = request.env['social.account'].sudo().search(
+                [('admin', '=', current_user.id), ('user_id', '=', res['user_id']), ('type', '=', 'tiktok')],
+                limit=1)
             media_source = request.env['media.source'].sudo().search(
                 [('admin', '=', current_user.id), ('id', '=', res['media_source_id'])], limit=1)
             for post in media_source.selected_private_posts:
@@ -404,6 +424,10 @@ class InstafeedController(http.Controller):
                     post = request.env['post.private'].sudo().search(
                         [('post_id', '=', post_id), ('admin', '=', current_user.id),
                          ('social_account', '=', instagram_account.id)])
+                    if not post:
+                        post = request.env['post.private'].sudo().search(
+                            [('post_id', '=', post_id), ('admin', '=', current_user.id),
+                             ('social_account', '=', tiktok_account.id)])
                 media_source.write({'selected_private_posts': [(4, post.id)]})
             list = []
             for post in media_source.selected_private_posts:

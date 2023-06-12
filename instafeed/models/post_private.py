@@ -17,3 +17,4 @@ class PostPrivate(models.Model):
     create_date = fields.Date()
     link_to_post = fields.Char()
     list_tags = fields.Char()
+    tiktok = fields.Boolean()

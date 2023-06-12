@@ -1,6 +1,15 @@
 <template>
   <div v-if="selected_content=='select_account'">
     <input type="text" v-model="new_media_source_name"/>
+    <div>List tiktok account</div>
+    <div style="display:flex;gap: 15px;align-items: center;margin: 20px"
+         v-for="account in proptemp.social_accounts.tiktok_accounts">
+      <input type="radio" id="option1" :value="account" v-model="selected_account">
+      <div>
+        <img style="width: 50px ;height: 50px" :src="account.url_image">
+      </div>
+      <div>{{ account.username }}</div>
+    </div>
     <div>List facebook account</div>
     <div style="display:flex;gap: 15px;align-items: center;margin: 20px"
          v-for="account in proptemp.social_accounts.facebook_accounts">
@@ -67,9 +76,14 @@
     <div>
       <div style="display: flex;gap: 15px;margin: 40px" v-for="post in selected_account.posts">
         <input @click="test" type="checkbox" v-model="post.select">
-        <div style="width: 100px;height: 100px">
-          <img style="width: 100%;
+
+        <div v-if="post.type=='IMAGE'" style="width: 100px;height: 100px">
+          Image : <img style="width: 100%;
                       height: 100%" :src="post.media_url"/>
+        </div>
+        <div v-else style="width: 100px;height: 100px">
+          Video : <img style="width: 100%;
+                      height: 100%" :src="post.thumbnail_url"/>
         </div>
       </div>
     </div>
@@ -124,7 +138,7 @@ export default defineComponent({
     },
     editMediaSource(source) {
       this.selected_source = source
-      this.selected_account = [].concat(this.proptemp.social_accounts.facebook_accounts, this.proptemp.social_accounts.instagram_accounts).find(account => account.user_id == source.social_account.user_id)
+      this.selected_account = [].concat(this.proptemp.social_accounts.facebook_accounts, this.proptemp.social_accounts.instagram_accounts, this.proptemp.social_accounts.tiktok_accounts).find(account => account.user_id == source.social_account.user_id)
       console.log([].concat(this.proptemp.social_accounts.facebook_accounts, this.proptemp.social_accounts.instagram_accounts))
       console.log(source.social_account.user_id)
       if (this.selected_account) {

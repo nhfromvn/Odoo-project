@@ -40,6 +40,7 @@ export default {
       integration_temp: {
         facebook_count: 0,
         instagram_count: 0,
+        tiktok_count: 0,
       },
       media_source_temp: {
         social_accounts: null,
@@ -51,7 +52,7 @@ export default {
         products: [],
         widgets: [],
         analytics: [],
-        shop_url:''
+        shop_url: ''
       },
     }
   },
@@ -60,9 +61,10 @@ export default {
     axios.get('/instafeed/get/data').then((res) => {
       console.log(res)
       self.dashboard_temp.app_user = res.data.username
-       self.dashboard_temp.shop_url = res.data.shop_url
+      self.dashboard_temp.shop_url = res.data.shop_url
       self.integration_temp.facebook_count = res.data.social_accounts.facebook_accounts ? res.data.social_accounts.facebook_accounts.length : 0
       self.integration_temp.instagram_count = res.data.social_accounts.instagram_accounts ? res.data.social_accounts.instagram_accounts.length : 0
+      self.integration_temp.tiktok_count = res.data.social_accounts.tiktok_accounts ? res.data.social_accounts.tiktok_accounts.length : 0
       self.media_source_temp.social_accounts = res.data.social_accounts
       self.media_source_temp.media_sources = res.data.media_sources
       self.media_source_temp.products = res.data.products
@@ -72,13 +74,17 @@ export default {
       self.widget_temp.shop_url = res.data.shop_url
       if (self.media_source_temp.social_accounts.facebook_accounts) {
         for (let source of self.media_source_temp.media_sources) {
-          for(let post of source.posts){}
-          source.posts.forEach(post => post.select = false)}
+          for (let post of source.posts) {
+          }
+          source.posts.forEach(post => post.select = false)
+        }
       }
-       if (self.media_source_temp.social_accounts.instagram_accounts) {
+      if (self.media_source_temp.social_accounts.instagram_accounts) {
         for (let source of self.media_source_temp.media_sources) {
-          for(let post of source.posts){}
-          source.posts.forEach(post => post.select = false)}
+          for (let post of source.posts) {
+          }
+          source.posts.forEach(post => post.select = false)
+        }
       }
       if (self.widget_temp.media_sources) {
         for (let source of self.widget_temp.media_sources) {

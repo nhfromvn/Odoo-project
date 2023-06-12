@@ -183,14 +183,18 @@
              :maskClosable="false"
              @cancel="post_modal=false">
         <div id="post_modal_container" style="display: flex">
-          <img v-if="selected_post.type == 'IMAGE'"
-               :src="selected_post.media_url"
-               :alt="selected_post.caption"
-               style="width: 50%; height: 50%">
-          <video height="400" autoplay v-if="selected_post.type == 'VIDEO'">
-            <source :src="selected_post.media_url">
-          </video>
-          <div style="width: 100%; display: flex; flex-direction: column">
+          <div style="    flex: 1 1 0%;
+                          align-items: center;
+                          display: flex;">
+            <img v-if="selected_post.type == 'IMAGE'"
+                 :src="selected_post.media_url"
+                 :alt="selected_post.caption"
+                 style="width: 100%"/>
+            <video autoplay width="400" v-if="selected_post.type == 'VIDEO'">
+              <source :src="selected_post.media_url">
+            </video>
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column; flex: 1">
             <div
                 style="margin-left:20px; display: flex; background-color: white; align-items: center;border-bottom: 1px solid #dcdcdc;">
               <div
@@ -242,7 +246,7 @@
               <button @click="tagProduct(selected_post)" class="tag_product">Tag product</button>
             </div>
             <div v-if="selected_post.list_tags"
-                 style="height: 600px;overflow-x: auto; text-align: center;width:100%;margin: 20px 0px 0px 0px;">
+                 style="height: 500px;overflow-x: auto; text-align: center;width:100%;margin: 20px 0px 0px 0px;">
               <template v-for="tag in selected_post.list_tags">
                 <div style="color: rgb(0, 0, 0);
                                               font-weight: 600;
@@ -563,9 +567,15 @@ export default defineComponent({
           console.log(this.proptemp.media_sources);
         }
       }
-
+      this.allPosts = []
+      let set_post_ids = new Set()
       for (let media_source of this.list_select_media_sources) {
-        this.allPosts.push(...media_source.posts);
+        for (let post of media_source.posts) {
+          if (!set_post_ids.has(post.post_id)) {
+            set_post_ids.add(post.post_id)
+            this.allPosts.push(post)
+          }
+        }
       }
       this.allPosts.forEach(image => image.hover = false);
       this.list_products = this.proptemp.products;
@@ -662,10 +672,10 @@ export default defineComponent({
     }
     ,
     show_post(post) {
-      console.log(post)
       if (this.on_post_click.includes('pop')) {
         this.selected_post = post
         this.post_modal = true
+        let tiktok_post = document.getElementById('tiktok_post')
       } else if (this.on_post_click.includes('instagram')) {
         window.open(post.link_to_post, '_blank')
       }

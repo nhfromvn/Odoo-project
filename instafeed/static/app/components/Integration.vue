@@ -8,14 +8,11 @@
       <div>
         {{ proptemp.instagram_count }} connected
       </div>
-      <div v-if="username" style="display: flex"><p>Connected to {{ username }} with instagram</p>
-        <p style="margin: 0px 5px">|</p>
-        <a @click="changeAccount()">Change account</a></div>
     </div>
     <div>
       <button id="btn_connect_fb" style="display: flex; gap:5px" @click="connect_facebook">
-        <font-awesome-icon icon="fa-brands fa-facebook-f"
-                           style="color: white"/>
+        <font-awesome-icon style="margin-right: 10px; margin-left: 10px; color: white"
+                           icon="fa-brands fa-facebook-f"/>
         <p>Add Facebook Account</p>
       </button>
       <div style="    padding-top: 0.75em;
@@ -29,8 +26,14 @@
       <div>
         {{ proptemp.facebook_count }} connected
       </div>
-      <div v-if="fb_username" style="display: flex"><p>Connected to {{ fb_username }} with facebook</p>
-        <p style="margin: 0px 5px">|</p>
+    </div>
+    <div>
+      <button id="btn_connect" style="display: flex; gap:5px" @click="connect_tiktok">
+        <font-awesome-icon icon="tiktok"/>
+        <p>Add Tiktok Account</p>
+      </button>
+      <div>
+        {{ proptemp.tiktok_count }} connected
       </div>
     </div>
   </div>
@@ -51,6 +54,9 @@ export default defineComponent({
     connect_instagram() {
       window.location.href = '/instafeed/connect'
     },
+    connect_tiktok() {
+      window.location.href = '/tiktok/connect'
+    }
   }
 })
 </script>
