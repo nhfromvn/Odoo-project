@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+
+         <template id="index">
+            <head>
+                <title>King variant</title>
+                <meta name="viewport" content="width=device-width"/>
+            </head>
+            <div id="app">
+            </div>
+            <!-- use in local instead assets (ctrl + f5) refresh code-->
+            <script type="text/javascript" src="/king_variant/static/js/index.js?v=8"/>
+        </template>
+    </data>
+</odoo>
