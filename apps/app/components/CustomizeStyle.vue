@@ -12,7 +12,7 @@ export default defineComponent({
 <template>
   <h2>Customize style for variant option</h2>
   <div v-for="style in proptemp">
-    {{style}}
+    {{style.type}}
   </div>
 </template>
 
