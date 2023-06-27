@@ -5,6 +5,7 @@
             <head>
                 <title>King variant</title>
                 <meta name="viewport" content="width=device-width"/>
+                 <link rel="stylesheet" href="/king_variant/static/css/style.css"/>
             </head>
             <div id="app">
             </div>

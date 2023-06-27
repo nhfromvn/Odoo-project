@@ -2,11 +2,14 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "DesignProductPage"
+  name: "Home"
 })
 </script>
 
 <template>
+  <div>
+    Welcome,Hoang Nam
+  </div>
 
 </template>
 

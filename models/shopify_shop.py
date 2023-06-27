@@ -25,7 +25,15 @@ class ShopifyShop(models.Model):
             if not theme_exist:
                 request.env['shopify.theme'].sudo().create({
                     'shop': self.id,
-                    'theme_id': str(theme.id)
+                    'theme_id': str(theme.id),
+                    'theme_name': theme.name,
+                    'role': theme.role,
+                    'is_active': True,
+                })
+            else:
+                theme_exist.write({
+                    'role': theme.role,
+                    'theme_name': theme.name,
                 })
 
     def get_product(self):
@@ -35,6 +43,23 @@ class ShopifyShop(models.Model):
         shopify.ShopifyResource.activate_session(new_session)
         products = shopify.Product.find()
         vals = []
+        setting = request.env['variant.option'].sudo().search([('shop', '=', self.id), ('type', '=', 'general')])
+        if not setting:
+            request.env['variant.option'].sudo().create({
+                'type': 'general',
+                'shop': self.id
+            })
+        for type in ['Square swatch', 'Swatch in pill', 'Button']:
+            style = request.env['variant.style'].sudo().search(
+                [('shop', '=', self.id),
+                 ('type', '=', type)],
+                limit=1)
+            if not style:
+                request.env['variant.style'].sudo().create({
+                    'shop': self.id,
+                    'type': type
+                })
+        square_swatch_id = request.env['variant.style'].sudo().search([('type', '=', 'Square swatch')], limit=1).id
         variant_options = request.env['variant.option'].sudo().search([('shop', '=', self.id)])
         for variant_option in variant_options:
             variant_option.product_affected = 0
@@ -55,32 +80,13 @@ class ShopifyShop(models.Model):
                         variant_option = request.env['variant.option'].sudo().create({
                             'option_name': option.name,
                             'shop': self.id,
-                            'product_affected': 1
+                            'product_affected': 1,
+                            'type': 'option_only',
+                            'product_style': square_swatch_id,
+                            'collection_style': square_swatch_id
                         })
                     else:
                         variant_option.product_affected += 1
-                    for type in ['Square swatch', 'Square in pill', 'Button']:
-                        style_collection = request.env['variant.style'].sudo().search(
-                            [('shop', '=', self.id), ('variant_option_collection', '=', variant_option.id),
-                             ('type', '=', type)],
-                            limit=1)
-                        if not style_collection:
-                            request.env['variant.style'].sudo().create({
-                                'shop': self.id,
-                                'variant_option_collection': variant_option.id,
-                                'type': type
-                            })
-                        style_product = request.env['variant.style'].sudo().search(
-                            [('shop', '=', self.id), ('variant_option_product', '=', variant_option.id),
-                             ('type', '=', type)],
-                            limit=1)
-                        if not style_product:
-                            request.env['variant.style'].sudo().create({
-                                'shop': self.id,
-                                'variant_option_product': variant_option.id,
-                                'type': type
-                            })
-
             vals.append({
                 'options': options,
                 'product_id': product.id,

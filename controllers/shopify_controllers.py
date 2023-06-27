@@ -137,6 +137,8 @@ class KingVariant(http.Controller):
             shopify_session = shopify.Session(kw['shop'], api_version)
             token = shopify_session.request_token(kw)
             shop = request.env['shopify.shop'].sudo().search([('url', '=', kw['shop'])], limit=1)
+            param = self.env['ir.config_parameter'].sudo()
+            param.set_param('king.variant.shop_url', kw['shop'])
             if not shop:
                 shop = request.env['shopify.shop'].sudo().create({
                     'url': kw['shop'],
@@ -144,7 +146,6 @@ class KingVariant(http.Controller):
                 })
             else:
                 shop.access_token = token
-            shop.get_themes()
             request.session['king_variant'] = kw['shop']
             redirect_url = 'https://' + kw['shop'] + '/admin/apps/' + api_key
             return werkzeug.utils.redirect(redirect_url)
@@ -181,20 +182,97 @@ class KingVariant(http.Controller):
         shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
         variant_options = request.env['variant.option'].sudo().search(
             [('shop', '=', shop.id), ('type', '=', 'option_only')])
+        variant_styles = request.env['variant.style'].sudo().search(
+            [('shop', '=', shop.id)])
+        settings = request.env['variant.option'].sudo().search(
+            [('shop', '=', shop.id), ('type', '=', 'general')], limit=1)
+        general = {
+            'inventory_threshold': settings.inventory_threshold,
+            'notification_message': settings.notification_message,
+            'option_label': settings.option_label,
+            'add_to_cart_label': settings.add_to_cart_label
+        }
         options = []
         themes = []
+        styles = []
         shop.get_themes()
         for theme in shop.themes:
             themes.append(
-                {'theme_id': theme.theme_id}
+                {'theme_id': theme.theme_id,
+                 'theme_name': theme.theme_name,
+                 'is_active': theme.is_active,
+                 'role': theme.role}
             )
         for variant_option in variant_options:
             options.append({
                 'name': variant_option.option_name,
                 'product_affect': variant_option.product_affected,
+                'product_style': variant_option.product_style.type,
+                'collection_style': variant_option.collection_style.type,
+                'collection_page_swatch_image': variant_option.collection_page_swatch_image,
+                'product_page_swatch_image': variant_option.product_page_swatch_image,
+                'prevent_default': variant_option.prevent_default
             })
-        return json.dumps({'option': options,
-                           'theme': themes})
+        for variant_style in variant_styles:
+            styles.append({
+                'type': variant_style.type,
+                'selected_swatch_outer_border': variant_style.selected_swatch_outer_border,
+                'selected_swatch_inner_border': variant_style.selected_swatch_inner_border,
+                'selected_button_border': variant_style.selected_button_border,
+                'selected_button_swatch_border': variant_style.selected_button_swatch_border,
+                'selected_button_text_color': variant_style.selected_button_text_color,
+                'selected_button_background_color': variant_style.selected_button_background_color,
+                'animation': variant_style.animation,
+
+            })
+        return json.dumps({'options': options,
+                           'theme': themes,
+                           'styles': styles,
+                           'general': general})
+
+    @http.route('/king_variant/save/option_data', auth='public', type='json')
+    def save_option_data(self, **kwargs):
+        try:
+            res = json.loads(request.httprequest.data)
+            shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+            shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+            for option in res['options']:
+                variant_option = request.env['variant.option'].sudo().search(
+                    [('type', '=', 'option_only'), ('shop', '=', shop.id), ('option_name', '=', option['name'])],
+                    limit=1)
+                variant_option.write({
+                    'prevent_default': option['prevent_default'],
+                    'product_page_swatch_image': option['product_page_swatch_image'],
+                    'collection_page_swatch_image': option['collection_page_swatch_image'],
+                    'collection_style': request.env['variant.style'].sudo().search(
+                        [('shop', '=', shop.id), ('type', '=', option['collection_style'])]),
+                    'product_style': request.env['variant.style'].sudo().search(
+                        [('shop', '=', shop.id), ('type', '=', option['product_style'])]),
+                })
+            variant_settings = request.env['variant.option'].sudo().search(
+                [('type', '=', 'general'), ('shop', '=', shop.id)], limit=1)
+            variant_settings.write({
+                'add_to_cart_label': res['general']['add_to_cart_label'],
+                'inventory_threshold': res['general']['inventory_threshold'],
+                'notification_message': res['general']['notification_message'],
+                'option_label': res['general']['option_label'],
+            })
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    @http.route('/king_variant/save/theme', auth='public', type='json')
+    def save_theme(self, **kwargs):
+        res = json.loads(request.httprequest.data)
+        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+        for theme in res['themes ']:
+            theme_exist = request.env['shopify.theme'].sudo().search(
+                [('shop', '=', shop.id), ('theme_id', '=', theme['theme_id'])], limit=1)
+            print(theme_exist)
+        print('haha')
+        return True
 
     @staticmethod
     def is_limit_shop_request():
