@@ -12,13 +12,78 @@ class ShopifyShop(models.Model):
     shop_id = fields.Char()
     variant_options = fields.One2many('variant.option', 'shop')
     themes = fields.One2many('shopify.theme', 'shop')
+    last_login = fields.Float()
+    recent_timestamp = fields.Datetime()
+
+    def put_asset_theme(self, theme_id):
+        new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
+            'king.variant.api_version_king_variant'),
+                                      token=self.access_token)
+        shopify.ShopifyResource.activate_session(new_session)
+        asset = shopify.Asset.create({
+            "theme_id": theme_id,
+            "key": "snippets/card-product.liquid",
+            "src": "/king_variant/static/liquid/card-product.liquid"
+        })
+        asset = shopify.Asset.create({
+            "theme_id": theme_id,
+            "key": "snippets/product-variant-options.liquid",
+            "src": "/king_variant/static/liquid/product-variant-options.liquid"
+        })
+        print(asset)
+
+    def restore_theme(self, theme_id):
+        new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
+            'king.variant.api_version_king_variant'),
+                                      token=self.access_token)
+        shopify.ShopifyResource.activate_session(new_session)
+        asset = shopify.Asset.create({
+            "theme_id": theme_id,
+            "key": "snippets/card-product.liquid",
+            "src": "/king_variant/static/liquid/card-product-restore.liquid"
+        })
+        asset = shopify.Asset.create({
+            "theme_id": theme_id,
+            "key": "snippets/product-variant-options.liquid",
+            "src": "/king_variant/static/liquid/product-variant-options-restore .liquid"
+        })
+        print(asset)
+
+    def script_tags_register(self):
+        new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
+            'king.variant.api_version_king_variant'),
+                                      token=self.access_token)
+        shopify.ShopifyResource.activate_session(new_session)
+        existing_script_tags = shopify.ScriptTag.find()
+        base_url = request.env['ir.config_parameter'].sudo().get_param(
+            'web.base.url')
+        new_script_tag_url = f'{base_url}/king_variant/static/js/extension.js?v=8'
+        new_script_tag = ''
+        try:
+            if existing_script_tags:
+                for script_tag in existing_script_tags:
+                    if script_tag.src != new_script_tag_url:
+                        shopify.ScriptTag.find(script_tag.id).destroy()
+                        new_script_tag = shopify.ScriptTag.create({
+                            "event": "onload",
+                            "src": new_script_tag_url
+                        })
+            else:
+                new_script_tag = shopify.ScriptTag.create({
+                    "event": "onload",
+                    "src": new_script_tag_url
+                })
+                print(new_script_tag)
+        except Exception as e:
+            print(e)
 
     def get_themes(self):
         new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
-            'instafeed.api_version_instafeed'),
+            'king.variant.api_version_king_variant'),
                                       token=self.access_token)
         shopify.ShopifyResource.activate_session(new_session)
         themes = shopify.Theme.find()
+
         for theme in themes:
             theme_exist = request.env['shopify.theme'].sudo().search(
                 [('shop', '=', self.id), ('theme_id', '=', theme.id)], limit=1)
@@ -38,10 +103,11 @@ class ShopifyShop(models.Model):
 
     def get_product(self):
         new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
-            'instafeed.api_version_instafeed'),
+            'king.variant.api_version_king_variant'),
                                       token=self.access_token)
         shopify.ShopifyResource.activate_session(new_session)
         products = shopify.Product.find()
+        existing_script_tags = shopify.ScriptTag.find()
         vals = []
         setting = request.env['variant.option'].sudo().search([('shop', '=', self.id), ('type', '=', 'general')])
         if not setting:
@@ -49,15 +115,34 @@ class ShopifyShop(models.Model):
                 'type': 'general',
                 'shop': self.id
             })
-        for type in ['Square swatch', 'Swatch in pill', 'Button']:
+        for type in [{'type': 'Square swatch',
+                      'option': 'Color',
+                      'image_url1': '/king_variant/static/images/example.jpg',
+                      'image_url2': '/king_variant/static/images/Anh-meo-cute-dang-yeu-de-thuong.jpg',
+                      }, {'type': 'Swatch in pill',
+                          'option': 'Color',
+                          'image_url1': '/king_variant/static/images/example.jpg',
+                          'image_url2': '/king_variant/static/images/Anh-meo-cute-dang-yeu-de-thuong.jpg',
+                          'text1': 'Red',
+                          'text2': 'Blue'
+                          }, {'type': 'Button',
+                              'text1': 'Large',
+                              'text2': 'Small',
+                              'option': 'Size',
+                              }]:
             style = request.env['variant.style'].sudo().search(
                 [('shop', '=', self.id),
-                 ('type', '=', type)],
+                 ('type', '=', type['type'])],
                 limit=1)
             if not style:
                 request.env['variant.style'].sudo().create({
                     'shop': self.id,
-                    'type': type
+                    'type': type['type'],
+                    'example_option': type['option'],
+                    'example_text1': type['text1'] if 'text1' in type else False,
+                    'example_text2': type['text2'] if 'text2' in type else False,
+                    'example_image_url1': type['image_url1'] if 'image_url1' in type else False,
+                    'example_image_url2': type['image_url2'] if 'image_url2' in type else False
                 })
         square_swatch_id = request.env['variant.style'].sudo().search([('type', '=', 'Square swatch')], limit=1).id
         variant_options = request.env['variant.option'].sudo().search([('shop', '=', self.id)])
@@ -66,10 +151,32 @@ class ShopifyShop(models.Model):
         for product in products:
             options = []
             for option in product.options:
+                list_values = []
+                for option_value in option.values:
+                    image_id = product.image.id if product.image else 0
+                    for variant in product.variants:
+                        if option_value == variant.option1 or option_value == variant.option2 or option_value == variant.option3:
+                            if variant.image_id:
+                                image_id = variant.image_id
+                                break
+                    flag = False
+                    for image in product.images:
+                        if image.id == image_id:
+                            url = image.src
+                            flag = True
+                    if flag:
+                        list_values.append({
+                            'name': option_value,
+                            'image_url': url
+                        })
+                    else:
+                        list_values.append({
+                            'name': option_value,
+                        })
                 options.append({
                     'id': option.id,
                     'name': option.name,
-                    'values': option.values,
+                    'values': list_values,
                     'product_id': option.product_id,
                 })
                 if len(option.values) > 1:

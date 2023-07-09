@@ -6,7 +6,7 @@
       <ActivateApp v-if="is_selected=='activate_app'" :proptemp="activate_app_temp" @saveData="saveTheme"/>
       <ConfigVariantOption :proptemp="config_variant_temp" @saveData="saveDataConfigVariant"
                            v-if="is_selected=='config_variant_option'"/>
-      <CustomizeStyle :proptemp="customize_temp" @saveData="savePoductStyle"
+      <CustomizeStyle :proptemp="customize_temp" @saveStyle="savePoductStyle"
                       v-if="is_selected=='customize_style'"/>
 
     </div>
@@ -29,7 +29,7 @@ export default {
       config_variant_temp: {
         options: [],
         general: {},
-        styles:[],
+        styles: [],
       },
       activate_app_temp: {},
       customize_temp: [],
@@ -44,6 +44,16 @@ export default {
   },
   computed: {},
   methods: {
+    savePoductStyle(param) {
+      axios.post('/king_variant/save/style', param).then((res) => {
+        console.log(res)
+        if (res.data.result) {
+          alert('Save success')
+        } else {
+          alert('error')
+        }
+      })
+    },
     get_select_id(data) {
       this.is_selected = data
     },

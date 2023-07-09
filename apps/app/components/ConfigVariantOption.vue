@@ -78,11 +78,11 @@ export default defineComponent({
               </option>
             </select>
           </div>
-          <div>Prevent default selection</div>
-          <div style="display: flex; gap: 10px"><input type="checkbox" v-model="option.prevent_default">Make your
-            customer choose this option manually,
-            before adding item to the cart
-          </div>
+<!--          <div>Prevent default selection</div>-->
+<!--          <div style="display: flex; gap: 10px"><input type="checkbox" v-model="option.prevent_default">Make your-->
+<!--            customer choose this option manually,-->
+<!--            before adding item to the cart-->
+<!--          </div>-->
         </div>
       </div>
 

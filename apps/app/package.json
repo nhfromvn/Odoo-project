@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "",
     "build": "webpack --env NODE_ENV=development --config ./webpack.config.dev.js",
+    "build_extension": "webpack --env NODE_ENV=development --config ./webpack.extension.config.dev.js",
     "production": "webpack --env NODE_ENV=production --config ./webpack.config.dev.js"
   },
   "author": "",

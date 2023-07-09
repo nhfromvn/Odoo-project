@@ -12,3 +12,8 @@ class VariantStyle(models.Model):
     selected_button_text_color = fields.Char(default='#FFFFFF')
     selected_button_background_color = fields.Char(default='#292929')
     animation = fields.Char(default='no effect')
+    example_option= fields.Char()
+    example_text1 = fields.Char()
+    example_text2 = fields.Char()
+    example_image_url1 = fields.Char()
+    example_image_url2 = fields.Char()

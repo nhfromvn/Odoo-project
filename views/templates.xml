@@ -1,16 +1,21 @@
 <odoo>
     <data>
 
-         <template id="index">
+        <template id="index">
             <head>
                 <title>King variant</title>
                 <meta name="viewport" content="width=device-width"/>
-                 <link rel="stylesheet" href="/king_variant/static/css/style.css"/>
+                <link rel="stylesheet" href="/king_variant/static/css/style.css"/>
             </head>
+
             <div id="app">
+            </div>
+            <div id="king_variant">
+
             </div>
             <!-- use in local instead assets (ctrl + f5) refresh code-->
             <script type="text/javascript" src="/king_variant/static/js/index.js?v=8"/>
+            <script type="text/javascript" src="/king_variant/static/js/extension.js?v=8"/>
         </template>
     </data>
 </odoo>

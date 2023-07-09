@@ -16,7 +16,16 @@ import werkzeug
 from odoo import http
 from odoo.http import request, _logger, Response
 
-SCOPES = ['read_products', 'read_themes']
+SCOPES = [
+    "read_products",
+    "read_orders",
+    'read_script_tags',
+    'write_script_tags',
+    "read_draft_orders",
+    'write_draft_orders',
+    'read_themes',
+    'write_themes'
+]
 
 
 class Root(http.Root):
@@ -76,32 +85,6 @@ class KingVariant(http.Controller):
         # base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         return werkzeug.utils.redirect("/king_variant/auth?" + urlencode(request.params))
 
-    @staticmethod
-    def expire_session(timestamp):
-        # todo
-        current_timestamp = datetime.now().timestamp()
-        timestamp = current_timestamp
-        dt_obj = datetime.fromtimestamp(timestamp)
-        print(dt_obj)
-        # check last shop last login by field last_login in shop, > 30p return False
-        return False
-
-    @staticmethod
-    def is_shop_auth(self, kw):
-        shop_url = kw['shop']
-        timestamp = kw['timestamp']
-        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
-        if shop and not self.expire_session(timestamp):
-            return True
-        return False
-
-    @staticmethod
-    def is_shop_login(kw):
-        shop_url = kw['shop']
-        is_shop_login = 'king_variant' in request.session and request.session['is_shop_login'] == shop_url
-        print(is_shop_login)
-        return is_shop_login
-
     @http.route('/king_variant/auth', auth='public')
     def install(self, **kw):
         if 'shop' in kw:
@@ -137,7 +120,7 @@ class KingVariant(http.Controller):
             shopify_session = shopify.Session(kw['shop'], api_version)
             token = shopify_session.request_token(kw)
             shop = request.env['shopify.shop'].sudo().search([('url', '=', kw['shop'])], limit=1)
-            param = self.env['ir.config_parameter'].sudo()
+            param = request.env['ir.config_parameter'].sudo()
             param.set_param('king.variant.shop_url', kw['shop'])
             if not shop:
                 shop = request.env['shopify.shop'].sudo().create({
@@ -146,6 +129,7 @@ class KingVariant(http.Controller):
                 })
             else:
                 shop.access_token = token
+            shop.script_tags_register()
             request.session['king_variant'] = kw['shop']
             redirect_url = 'https://' + kw['shop'] + '/admin/apps/' + api_key
             return werkzeug.utils.redirect(redirect_url)
@@ -156,9 +140,10 @@ class KingVariant(http.Controller):
 
     @http.route('/king_variant', auth='public')
     def main(self, **kw):
+        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
         self.verify_request()
         headers = {
-            'Content-Security-Policy': "frame-ancestors " + "https://hoangnam3.myshopify.com" + " https://admin.shopify.com;"}
+            'Content-Security-Policy': "frame-ancestors " + shop_url + " https://admin.shopify.com;"}
         return request.render('king_variant.index', {}, headers=headers)
 
     @http.route('/shopify/bundle/api', methods=['POST'], type='json', auth='public')
@@ -170,65 +155,78 @@ class KingVariant(http.Controller):
 
     @http.route('/king_variant/get_product', auth='public')
     def get_product(self, **kw):
-        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
-        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
-        product = shop.get_product()
-        print(product)
-        return json.dumps({'text': product})
+        if not self.is_limit_shop_request() and self.is_shop_login(kw):
+            shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+            shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+            product = shop.get_product()
+            print(product)
+            return json.dumps({'text': product})
+        return False
 
     @http.route('/king_variant/get_data', auth='public')
     def get_data(self, **kw):
-        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
-        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
-        variant_options = request.env['variant.option'].sudo().search(
-            [('shop', '=', shop.id), ('type', '=', 'option_only')])
-        variant_styles = request.env['variant.style'].sudo().search(
-            [('shop', '=', shop.id)])
-        settings = request.env['variant.option'].sudo().search(
-            [('shop', '=', shop.id), ('type', '=', 'general')], limit=1)
-        general = {
-            'inventory_threshold': settings.inventory_threshold,
-            'notification_message': settings.notification_message,
-            'option_label': settings.option_label,
-            'add_to_cart_label': settings.add_to_cart_label
-        }
-        options = []
-        themes = []
-        styles = []
-        shop.get_themes()
-        for theme in shop.themes:
-            themes.append(
-                {'theme_id': theme.theme_id,
-                 'theme_name': theme.theme_name,
-                 'is_active': theme.is_active,
-                 'role': theme.role}
-            )
-        for variant_option in variant_options:
-            options.append({
-                'name': variant_option.option_name,
-                'product_affect': variant_option.product_affected,
-                'product_style': variant_option.product_style.type,
-                'collection_style': variant_option.collection_style.type,
-                'collection_page_swatch_image': variant_option.collection_page_swatch_image,
-                'product_page_swatch_image': variant_option.product_page_swatch_image,
-                'prevent_default': variant_option.prevent_default
-            })
-        for variant_style in variant_styles:
-            styles.append({
-                'type': variant_style.type,
-                'selected_swatch_outer_border': variant_style.selected_swatch_outer_border,
-                'selected_swatch_inner_border': variant_style.selected_swatch_inner_border,
-                'selected_button_border': variant_style.selected_button_border,
-                'selected_button_swatch_border': variant_style.selected_button_swatch_border,
-                'selected_button_text_color': variant_style.selected_button_text_color,
-                'selected_button_background_color': variant_style.selected_button_background_color,
-                'animation': variant_style.animation,
-
-            })
-        return json.dumps({'options': options,
-                           'theme': themes,
-                           'styles': styles,
-                           'general': general})
+        if not self.is_limit_shop_request() and self.is_shop_login(kw):
+            shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+            shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+            variant_options = request.env['variant.option'].sudo().search(
+                [('shop', '=', shop.id), ('type', '=', 'option_only')])
+            variant_styles = request.env['variant.style'].sudo().search(
+                [('shop', '=', shop.id)])
+            settings = request.env['variant.option'].sudo().search(
+                [('shop', '=', shop.id), ('type', '=', 'general')], limit=1)
+            general = {
+                'inventory_threshold': settings.inventory_threshold,
+                'notification_message': settings.notification_message,
+                'option_label': settings.option_label,
+                'add_to_cart_label': settings.add_to_cart_label
+            }
+            options = []
+            themes = []
+            styles = []
+            shop.get_themes()
+            used_style = set()
+            for theme in shop.themes:
+                themes.append(
+                    {'theme_id': theme.theme_id,
+                     'theme_name': theme.theme_name,
+                     'is_active': theme.is_active,
+                     'role': theme.role}
+                )
+            for variant_option in variant_options:
+                options.append({
+                    'name': variant_option.option_name,
+                    'product_affect': variant_option.product_affected,
+                    'product_style': variant_option.product_style.type,
+                    'collection_style': variant_option.collection_style.type,
+                    'collection_page_swatch_image': variant_option.collection_page_swatch_image,
+                    'product_page_swatch_image': variant_option.product_page_swatch_image,
+                    'prevent_default': variant_option.prevent_default
+                })
+                used_style.add(variant_option.product_style.type)
+                used_style.add(variant_option.collection_style.type)
+            for variant_style in variant_styles:
+                styles.append({
+                    'type': variant_style.type,
+                    'selected_swatch_outer_border': variant_style.selected_swatch_outer_border,
+                    'selected_swatch_inner_border': variant_style.selected_swatch_inner_border,
+                    'selected_button_border': variant_style.selected_button_border,
+                    'selected_button_swatch_border': variant_style.selected_button_swatch_border,
+                    'selected_button_text_color': variant_style.selected_button_text_color,
+                    'selected_button_background_color': variant_style.selected_button_background_color,
+                    'animation': variant_style.animation,
+                    'example_option': variant_style.example_option,
+                    'example_text1': variant_style.example_text1,
+                    'example_text2': variant_style.example_text2,
+                    'example_image_url1': variant_style.example_image_url1,
+                    'example_image_url2': variant_style.example_image_url2,
+                    'in_use': True if variant_style.type in used_style else False,
+                    'id': variant_style.id,
+                })
+            return json.dumps({'options': options,
+                               'theme': themes,
+                               'styles': styles,
+                               'general': general})
+        return False
 
     @http.route('/king_variant/save/option_data', auth='public', type='json')
     def save_option_data(self, **kwargs):
@@ -267,16 +265,126 @@ class KingVariant(http.Controller):
         res = json.loads(request.httprequest.data)
         shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
         shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
-        for theme in res['themes ']:
+        for theme in res['themes']:
             theme_exist = request.env['shopify.theme'].sudo().search(
                 [('shop', '=', shop.id), ('theme_id', '=', theme['theme_id'])], limit=1)
-            print(theme_exist)
+            theme_exist.write({
+                'is_active': theme['is_active']
+            })
+            if theme['is_active']:
+                shop.put_asset_theme(theme['theme_id'])
+            else:
+                shop.restore_theme(theme['theme_id'])
         print('haha')
         return True
+
+    @http.route('/king_variant/save/style', auth='public', type='json')
+    def save_style(self, **kwargs):
+        try:
+            res = json.loads(request.httprequest.data)
+            shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+            shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+            print(res['type'])
+            style = request.env['variant.style'].sudo().search([('shop', '=', shop.id), ('type', '=', res['type'])])
+            print(style)
+            style.write({
+                'selected_button_background_color': res['selected_button_background_color'],
+                'selected_button_border': res['selected_button_border'],
+                'selected_button_swatch_border': res['selected_button_swatch_border'],
+                'selected_button_text_color': res['selected_button_text_color'],
+                'selected_swatch_inner_border': res['selected_swatch_inner_border'],
+                'selected_swatch_outer_border': res['selected_swatch_outer_border'],
+                'animation': res['animation']
+            })
+            return res
+        except Exception as e:
+            print(e)
+            return False
+
+    @http.route('/king_variant/show', auth='public', type='json')
+    def show(self, **kwargs):
+        try:
+            res = json.loads(request.httprequest.data)
+            shop_url = res['shop_url']
+            shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+            print(res)
+            variant_options = request.env['variant.option'].sudo().search(
+                [('shop', '=', shop.id), ('type', '=', 'option_only')])
+            variant_styles = request.env['variant.style'].sudo().search(
+                [('shop', '=', shop.id)])
+            settings = request.env['variant.option'].sudo().search(
+                [('shop', '=', shop.id), ('type', '=', 'general')], limit=1)
+            general = {
+                'inventory_threshold': settings.inventory_threshold,
+                'notification_message': settings.notification_message,
+                'option_label': settings.option_label,
+                'add_to_cart_label': settings.add_to_cart_label
+            }
+            options = []
+            button = {}
+            swatch = {}
+            swatch_in_pill = {}
+            used_style = set()
+            for variant_option in variant_options:
+                options.append({
+                    'name': variant_option.option_name,
+                    'product_affect': variant_option.product_affected,
+                    'product_style': variant_option.product_style.type,
+                    'collection_style': variant_option.collection_style.type,
+                    'collection_page_swatch_image': variant_option.collection_page_swatch_image,
+                    'product_page_swatch_image': variant_option.product_page_swatch_image,
+                    'prevent_default': variant_option.prevent_default
+                })
+                used_style.add(variant_option.product_style.type)
+                used_style.add(variant_option.collection_style.type)
+            for variant_style in variant_styles:
+                style = {
+                    'selected_swatch_outer_border': variant_style.selected_swatch_outer_border,
+                    'selected_swatch_inner_border': variant_style.selected_swatch_inner_border,
+                    'selected_button_border': variant_style.selected_button_border,
+                    'selected_button_swatch_border': variant_style.selected_button_swatch_border,
+                    'selected_button_text_color': variant_style.selected_button_text_color,
+                    'selected_button_background_color': variant_style.selected_button_background_color,
+                    'animation': variant_style.animation,
+                    'example_option': variant_style.example_option,
+                    'example_text1': variant_style.example_text1,
+                    'example_text2': variant_style.example_text2,
+                    'example_image_url1': variant_style.example_image_url1,
+                    'example_image_url2': variant_style.example_image_url2,
+                    'in_use': True if variant_style.type in used_style else False,
+                    'id': variant_style.id,
+                }
+                if variant_style.type == 'Button':
+                    button = style
+                if variant_style.type == 'Square swatch':
+                    swatch = style
+                if variant_style.type == 'Swatch in pill':
+                    swatch_in_pill = style
+            styles = {
+                'button': button,
+                'swatch': swatch,
+                'swatch_in_pill': swatch_in_pill
+            }
+            products = shop.get_product()
+            return {'options': options,
+                    'styles': styles,
+                    'general': general,
+                    'products': products,
+                    'res': res}
+        except Exception as e:
+            print(e)
+            return False
 
     @staticmethod
     def is_limit_shop_request():
         # todo
+        now = datetime.now()
+        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+        result = now - shop.recent_timestamp
+        if result.total_seconds() < 3:
+            shop.recent_timestamp = now
+            return True
         # luu recent timestamp request to shop, now - timestamp < 3 return true
         return False
 
@@ -322,3 +430,39 @@ class KingVariant(http.Controller):
             _logger.error('Secret key is not verified.' + json.dumps(request.params))
             raise Exception('Secret key is not verified')
         return True
+
+    @staticmethod
+    def expire_session(timestamp):
+        # todo
+        current_timestamp = datetime.now().timestamp()
+        timestamp = current_timestamp
+        dt_obj = datetime.fromtimestamp(timestamp)
+        print(dt_obj)
+        print(type(dt_obj))
+        shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
+        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+        print(type(dt_obj))
+        result = dt_obj - datetime.fromtimestamp(float(shop.last_login))
+        print(result)
+        if result.seconds > 30 * 60:
+            print('expire')
+            return True
+        # check last shop last login by field last_login in shop, > 30p return False
+        return False
+
+    @staticmethod
+    def is_shop_auth(self, kw):
+        shop_url = kw['shop']
+        timestamp = kw['timestamp']
+        shop = request.env['shopify.shop'].sudo().search([('url', '=', shop_url)], limit=1)
+        shop.last_login = kw['timestamp']
+        if shop and not self.expire_session(timestamp):
+            return True
+        return False
+
+    @staticmethod
+    def is_shop_login(kw):
+        shop_url = kw['shop']
+        is_shop_login = 'king_variant' in request.session and request.session['is_shop_login'] == shop_url
+        print(is_shop_login)
+        return is_shop_login
