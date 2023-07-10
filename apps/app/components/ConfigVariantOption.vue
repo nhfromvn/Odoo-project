@@ -87,29 +87,29 @@ export default defineComponent({
       </div>
 
     </div>
-    <div style="border: solid #000000 1px; padding: 20px 20px 20px 20px">
-      <h2>Low stock alert</h2>
-      <div>Add an alert to the product page if the inventory of a variant falls below threshold level. This creates an
-        urgency and helps to sell products faster. You can add this alert using the "Low Stock Alert" app block.
-      </div>
-      <div class="general_line">
-        <label>Inventory threshold</label>
-        <input type="number" v-model="proptemp.general.inventory_threshold"/>
-      </div>
-      <div class="general_line">
-        <label>Notification message</label>
-        <input type="text" v-model="proptemp.general.notification_message"/>
-      </div>
-      <h2>Text settings for manually selected options</h2>
-      <div class="general_line">
-        <label>Option label text when a value is not selected</label>
-        <input type="text" v-model="proptemp.general.option_label"/>
-      </div>
-      <div class="general_line">
-        <label>"Add to cart" button text when an option is not selected</label>
-        <input type="text" v-model="proptemp.general.add_to_cart_label"/>
-      </div>
-    </div>
+<!--    <div style="border: solid #000000 1px; padding: 20px 20px 20px 20px">-->
+<!--      <h2>Low stock alert</h2>-->
+<!--      <div>Add an alert to the product page if the inventory of a variant falls below threshold level. This creates an-->
+<!--        urgency and helps to sell products faster. You can add this alert using the "Low Stock Alert" app block.-->
+<!--      </div>-->
+<!--      <div class="general_line">-->
+<!--        <label>Inventory threshold</label>-->
+<!--        <input type="number" v-model="proptemp.general.inventory_threshold"/>-->
+<!--      </div>-->
+<!--      <div class="general_line">-->
+<!--        <label>Notification message</label>-->
+<!--        <input type="text" v-model="proptemp.general.notification_message"/>-->
+<!--      </div>-->
+<!--      <h2>Text settings for manually selected options</h2>-->
+<!--      <div class="general_line">-->
+<!--        <label>Option label text when a value is not selected</label>-->
+<!--        <input type="text" v-model="proptemp.general.option_label"/>-->
+<!--      </div>-->
+<!--      <div class="general_line">-->
+<!--        <label>"Add to cart" button text when an option is not selected</label>-->
+<!--        <input type="text" v-model="proptemp.general.add_to_cart_label"/>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 
 </template>
