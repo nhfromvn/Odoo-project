@@ -4,6 +4,8 @@ from odoo.http import request
 
 
 class ShopifyShop(models.Model):
+    # todo
+    # a ve database dat ten hộ cho bảng rồi vào đây lại sửa lại tên bảng
     _name = 'shopify.shop'
     shop_name = fields.Char()
     access_token = fields.Char()
@@ -16,6 +18,8 @@ class ShopifyShop(models.Model):
     recent_timestamp = fields.Datetime()
 
     def put_asset_theme(self, theme_id):
+        # todo
+        # chuyen qua dung theme extension 3.0, tao app block
         new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
             'king.variant.api_version_king_variant'),
                                       token=self.access_token)
@@ -102,6 +106,8 @@ class ShopifyShop(models.Model):
                 })
 
     def get_product(self):
+        # todo
+        # viet ham active shopify session cho shop rieng ra de dung o tat cac cac cho khac, k viet lai code ntn
         new_session = shopify.Session(self.url, request.env['ir.config_parameter'].sudo().get_param(
             'king.variant.api_version_king_variant'),
                                       token=self.access_token)
@@ -109,6 +115,8 @@ class ShopifyShop(models.Model):
         products = shopify.Product.find()
         existing_script_tags = shopify.ScriptTag.find()
         vals = []
+        # todo
+        # giai thich a cong dung ham nay
         setting = request.env['variant.option'].sudo().search([('shop', '=', self.id), ('type', '=', 'general')])
         if not setting:
             request.env['variant.option'].sudo().create({
@@ -218,6 +226,8 @@ class KingVariantConfig(models.TransientModel):
 
     @api.model
     def get_values(self):
+        # todo
+        # không dc code ntn parameter là cố định, k thay đổi, k có parameter shop_url, parameter phải tự điền bằng tay
         res = super().get_values()
         params = self.env['ir.config_parameter'].sudo()
         res.update(
