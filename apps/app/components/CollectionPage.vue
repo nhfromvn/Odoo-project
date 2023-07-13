@@ -34,7 +34,6 @@ export default defineComponent({
 
 <template>
   <div style="z-index: 2;position: relative">
-    <div>Hello</div>
     <template v-for="option in product.options">
       <div style="display: flex; margin:10px">
         <div v-if="option.setting.collection_style=='Square swatch'" style="display: flex;gap: 15px;padding: 10px">
@@ -92,12 +91,12 @@ export default defineComponent({
                 <div>{{ option_value.name }}</div>
               </div>
               <div v-if="option.selected==option_value&&option_value.hover"
-
                    @mouseleave="option_value.hover=false"
                    :style="{color:temp.styles.button.selected_button_text_color,
                   backgroundColor:temp.styles.button.selected_button_background_color,
                   borderColor:temp.styles.button.selected_button_border,
-                  transform: 'scale(1.2)'}"
+                  transform: 'scale(1.2)',
+                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'}"
                    class="button_square_selected">
                 <div>{{ option_value.name }}</div>
               </div>

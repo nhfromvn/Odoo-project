@@ -240,14 +240,17 @@ export default defineComponent({
                 <div @mouseenter="selected_style.hover=true" @mouseleave="selected_style.hover=false"
                      v-if="!selected_style.hover||selected_style.animation=='no effect'" :style="{color:selected_style.selected_button_text_color,
                 backgroundColor:selected_style.selected_button_background_color,
-                borderColor:selected_style.selected_button_border}" class="button_square_selected">
+                borderColor:selected_style.selected_button_border,
+                    boxShadow: '0 10px 4px rgba(0, 0, 0, 0.1)',}" class="button_square_selected">
                   <div>{{ selected_style.example_text1 }}</div>
                 </div>
                 <div @mouseenter="selected_style.hover=true" @mouseleave="selected_style.hover=false"
                      v-if="selected_style.hover&&selected_style.animation=='Increase size'" :style="{color:selected_style.selected_button_text_color,
                 backgroundColor:selected_style.selected_button_background_color,
                 borderColor:selected_style.selected_button_border,
-                transform: 'scale(1.2)'}" class="button_square_selected">
+
+                // transform: 'scale(1.2)'
+                     }" class="button_square_selected">
                   <div>{{ selected_style.example_text1 }}</div>
                 </div>
                 <div class="button_square">
