@@ -126,7 +126,8 @@ export default defineComponent({
 </template>
 
 <style scoped>
-
+//todo
+//tach css ra file rieng, dung thu vien antd de chia layout
 #image_wrapper {
   display: flex;
   gap: 10px;

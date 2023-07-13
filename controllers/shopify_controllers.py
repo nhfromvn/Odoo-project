@@ -120,15 +120,21 @@ class KingVariant(http.Controller):
             shopify_session = shopify.Session(kw['shop'], api_version)
             token = shopify_session.request_token(kw)
             shop = request.env['shopify.shop'].sudo().search([('url', '=', kw['shop'])], limit=1)
+            # todo
+            # chỗ này set parameter này để làm gì nhỉ ?
             param = request.env['ir.config_parameter'].sudo()
             param.set_param('king.variant.shop_url', kw['shop'])
             if not shop:
+                # todo
+                # shop cần có các thông tin: currency, country, primary domain, email, timezone
                 shop = request.env['shopify.shop'].sudo().create({
                     'url': kw['shop'],
                     'access_token': token
                 })
             else:
                 shop.access_token = token
+            # todo
+            # Không dùng script tag nữa, tạo 1 theme extension làm công việc add js file vào header theme
             shop.script_tags_register()
             request.session['king_variant'] = kw['shop']
             redirect_url = 'https://' + kw['shop'] + '/admin/apps/' + api_key
@@ -140,6 +146,8 @@ class KingVariant(http.Controller):
 
     @http.route('/king_variant', auth='public')
     def main(self, **kw):
+        # todo
+        # shop url lay tu request params
         shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
         self.verify_request()
         headers = {
@@ -154,6 +162,9 @@ class KingVariant(http.Controller):
         return False
 
     @http.route('/king_variant/get_product', auth='public')
+    # todo
+    # tat ca cac api public deu phai verify request thong qua request params
+    # tach tat cac cac api sang file controller khac, file nay chi co cac ham authen thoi
     def get_product(self, **kw):
         if not self.is_limit_shop_request() and self.is_shop_login(kw):
             shop_url = request.env['ir.config_parameter'].sudo().get_param('king.variant.shop_url')
@@ -185,6 +196,8 @@ class KingVariant(http.Controller):
             styles = []
             shop.get_themes()
             used_style = set()
+            # todo
+            # ham hoi lộn xộn, tách hàm get data của từng model riêng vào trong model.
             for theme in shop.themes:
                 themes.append(
                     {'theme_id': theme.theme_id,
@@ -205,6 +218,8 @@ class KingVariant(http.Controller):
                 used_style.add(variant_option.product_style.type)
                 used_style.add(variant_option.collection_style.type)
             for variant_style in variant_styles:
+                # todo
+                # dat ten bien cẩu thả quá, k đặt là 1, 2 gì cả, viết rõ ra first second hoặc nghĩ ra tên để phân biệt
                 styles.append({
                     'type': variant_style.type,
                     'selected_swatch_outer_border': variant_style.selected_swatch_outer_border,
@@ -222,6 +237,8 @@ class KingVariant(http.Controller):
                     'in_use': True if variant_style.type in used_style else False,
                     'id': variant_style.id,
                 })
+            # todo
+            # return han json luon len front end dung luon chu
             return json.dumps({'options': options,
                                'theme': themes,
                                'styles': styles,
@@ -450,6 +467,8 @@ class KingVariant(http.Controller):
         # check last shop last login by field last_login in shop, > 30p return False
         return False
 
+    # todo
+    # ham nay k can dung, chi dung ham check login thoi, dk la session co is_shop_login = 'king_variant' in request.session and request.session['king_variant'] == shop_url
     @staticmethod
     def is_shop_auth(self, kw):
         shop_url = kw['shop']
