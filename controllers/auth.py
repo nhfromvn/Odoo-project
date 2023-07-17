@@ -135,7 +135,7 @@ class KingVariantAuth(http.Controller):
                 shop.access_token = token
             # todo
             # Không dùng script tag nữa, tạo 1 theme extension làm công việc add js file vào header theme
-            shop.script_tags_register()
+            # shop.script_tags_register()
             request.session['king_variant'] = kw['shop']
             redirect_url = 'https://' + kw['shop'] + '/admin/apps/' + api_key
             return werkzeug.utils.redirect(redirect_url)

@@ -55,13 +55,13 @@ export default defineComponent({
                 {{ style.type }}
               </option>
             </select>
-            <select v-model="option.product_page_swatch_image"
-                    v-if="option.product_style.toLowerCase().includes('swatch')">
-              <option v-for="val in ['Use 1st image of variant','Use 2st image of variant','Use last image of variant']"
-                      :value="val">
-                {{ val }}
-              </option>
-            </select>
+<!--            <select v-model="option.product_page_swatch_image"-->
+<!--                    v-if="option.product_style.toLowerCase().includes('swatch')">-->
+<!--              <option v-for="val in ['Use 1st image of variant','Use 2st image of variant','Use last image of variant']"-->
+<!--                      :value="val">-->
+<!--                {{ val }}-->
+<!--              </option>-->
+<!--            </select>-->
           </div>
           <div>Display style on collections:</div>
           <div class="option_line">
@@ -70,13 +70,13 @@ export default defineComponent({
                 {{ style.type }}
               </option>
             </select>
-            <select v-model="option.collection_page_swatch_image"
-                    v-if="option.collection_style.toString().includes('swatch')">
-              <option v-for="val in ['Use 1st image of variant','Use 2st image of variant','Use last image of variant']"
-                      :value="val">
-                {{ val }}
-              </option>
-            </select>
+<!--            <select v-model="option.collection_page_swatch_image"-->
+<!--                    v-if="option.collection_style.toString().includes('swatch')">-->
+<!--              <option v-for="val in ['Use 1st image of variant','Use 2st image of variant','Use last image of variant']"-->
+<!--                      :value="val">-->
+<!--                {{ val }}-->
+<!--              </option>-->
+<!--            </select>-->
           </div>
 <!--          <div>Prevent default selection</div>-->
 <!--          <div style="display: flex; gap: 10px"><input type="checkbox" v-model="option.prevent_default">Make your-->

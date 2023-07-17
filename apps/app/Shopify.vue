@@ -18,7 +18,7 @@ export default defineComponent({
 
 <template>
   <CollectionPage v-if="collection" :product_id="product_id" :temp="temp"/>
-  <ProductPage v-else :att_product_page="att_product_page" :temp="temp" :product_id="product_id.toString()"/>
+  <ProductPage v-else :att_product_page="att_product_page" :temp="temp" :product_id="product_id"/>
 </template>
 <style scoped>
 

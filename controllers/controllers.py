@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-
+import shopify
 from odoo import http
 from odoo.http import request
 from .auth import verify_request, is_limit_shop_request, is_shop_login, verify_app_proxy_request
@@ -116,7 +116,7 @@ class KingVariantControllers(http.Controller):
         verify_request()
         if not is_limit_shop_request():
             try:
-                res = json.loads(request.httprequest.data)
+                res = json.loads(request.httprequest.data)['params']
                 query = parse.urlsplit(request.httprequest.referrer).query
                 dict_params = dict(parse_qs(query))
                 params = {k: v[0] for k, v in dict_params.items()}
@@ -223,3 +223,4 @@ class KingVariantControllers(http.Controller):
                 print(e)
                 return False
         return False
+

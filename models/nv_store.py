@@ -47,7 +47,12 @@ class ShopifyShop(models.Model):
             "src": "/king_variant/static/liquid/product-variant-options-restore .liquid"
         })
         print(asset)
-
+    def destroy(self):
+        self.shopify_session()
+        existing_script_tags = shopify.ScriptTag.find()
+        if existing_script_tags:
+            for script_tag in existing_script_tags:
+                    shopify.ScriptTag.find(script_tag.id).destroy()
     def script_tags_register(self):
         self.shopify_session()
         existing_script_tags = shopify.ScriptTag.find()
