@@ -1,6 +1,5 @@
 <script>
 import {defineComponent} from 'vue'
-
 export default defineComponent({
   name: "CollectionPage",
   props: {
@@ -123,103 +122,8 @@ export default defineComponent({
     </template>
   </div>
 </template>
-
+<!--todo-->
+<!--tach css ra file rieng, dung thu vien antd de chia layout-->
 <style scoped>
-//todo
-//tach css ra file rieng, dung thu vien antd de chia layout
-#image_wrapper {
-  display: flex;
-  gap: 10px;
-  justify-content: start;
-  width: 100%;
-}
 
-.color_wrapper {
-  height: 40px;
-  width: 40px;
-  border-radius: 25%;
-  overflow: hidden;
-  border: 1px solid black;
-}
-
-.color_wrapper input {
-
-  border-radius: 0 !important;
-  overflow: hidden;
-  transform: translate(-25%, -25%)
-}
-
-.swatch_square {
-  z-index: 3;
-  padding: 5px;
-  border: 1px #a3a3a3 solid;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  cursor: pointer;
-}
-
-.swatch_square_selected {
-  padding: 5px;
-  border: 2px #000000 solid;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  cursor: pointer;
-}
-
-.image_round {
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  overflow: hidden
-}
-
-.pill_selected {
-  border-radius: 24px;
-  display: flex;
-  cursor: pointer;
-  gap: 12px;
-  border: 1px #a3a3a3 solid;
-  font-size: 10px;
-  padding: 8px;
-  height: 28px;
-  align-items: center;
-}
-
-.button_square_selected {
-  padding: 7px;
-  z-index: 7;
-  position: relative;
-  cursor: pointer;
-  font-size: 12px;
-  align-items: center;
-  display: flex;
-  border: #b2b2b2 2px solid;
-  justify-content: center;
-  background: black;
-  color: #FFFFFF;
-}
-
-.pill {
-  border-radius: 24px;
-  display: flex;
-  cursor: pointer;
-  gap: 12px;
-  border: 1px #a3a3a3 solid;
-  font-size: 10px;
-  padding: 8px;
-  height: 28px;
-  align-items: center;
-}
-
-.button_square {
-  cursor: pointer;
-  padding: 7px;
-  align-items: center;
-  display: flex;
-  font-size: 12px;
-  border: #a3a3a3 1px solid;
-  justify-content: center;
-}
 </style>

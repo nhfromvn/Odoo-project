@@ -46,17 +46,6 @@
                                     <field name="api_version_king_variant"/>
                                 </div>
                             </div>
-                            <div class="col-md-6 o_setting_box">
-                                <div class="o_setting_right_pane">
-                                    <label for="shop_url" class="oe_inline o_form_label"/>
-                                    <div class="text-muted">
-                                       Shop url
-                                    </div>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <field name="shop_url"/>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </xpath>

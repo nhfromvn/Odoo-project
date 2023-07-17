@@ -24,22 +24,5 @@ export default defineComponent({
 
 
 <style scoped>
-.theme_line {
-  display: flex;
-  justify-content: space-between;
-  padding: 2rem 2rem;
-  align-items: center;
-  width: 100%;
-  cursor: pointer;
-  appearance: none;
-  margin: 0;
-  background: #d5d5d5;
-  border: none;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-  text-align: left;
-  position: relative;
-  border-radius: 10px;
-}
+
 </style>

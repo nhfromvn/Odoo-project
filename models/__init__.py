@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from . import shopify_shop
-from . import theme
-from . import variant_style
-from . import variant_option
+from . import nv_store_style
+from . import nv_store
+from . import nv_store_settings_options
+from . import nv_theme_active

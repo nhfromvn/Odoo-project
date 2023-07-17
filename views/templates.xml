@@ -16,6 +16,10 @@
             <!-- use in local instead assets (ctrl + f5) refresh code-->
             <script type="text/javascript" src="/king_variant/static/js/index.js?v=8"/>
             <script type="text/javascript" src="/king_variant/static/js/extension.js?v=8"/>
+
+
+
+
         </template>
     </data>
 </odoo>

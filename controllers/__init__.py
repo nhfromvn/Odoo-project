@@ -1,3 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import shopify_controllers
+from . import controllers
+from . import auth
+from . import main

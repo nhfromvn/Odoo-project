@@ -45,7 +45,7 @@ export default {
   computed: {},
   methods: {
     savePoductStyle(param) {
-      axios.post('/king_variant/save/style', param).then((res) => {
+      axios.post('/king_variant/save/style', {params: param, jsonrpc: '2.0'}).then((res) => {
         console.log(res)
         if (res.data.result) {
           alert('Save success')
@@ -59,7 +59,7 @@ export default {
     },
     saveDataConfigVariant(param) {
       console.log(param)
-      axios.post('/king_variant/save/option_data', param).then((res) => {
+      axios.post('/king_variant/save/option_data', {params: param, jsonrpc: '2.0'}).then((res) => {
         console.log(res)
         if (res.data.result) {
           alert('save success')
@@ -70,7 +70,12 @@ export default {
     },
     saveTheme(param) {
       console.log(param)
-      axios.post('/king_variant/save/theme', {themes: param}).then((res) => {
+      axios.post('/king_variant/save/theme', {
+        jsonrpc: '2.0',
+        params: {
+          themes: param
+        }
+      }).then((res) => {
         console.log(res)
         if (res.data.result) {
           alert('change status success')
@@ -82,16 +87,26 @@ export default {
   },
   mounted() {
     let self = this
-    axios.get('/king_variant/get_product').then((res) => {
+    axios.post('/king_variant/get_product', {
+      jsonrpc: '2.0',
+      params: {
+        store_url: window.location,
+      }
+    }).then((res) => {
       console.log(res)
-      axios.get('/king_variant/get_data').then((res) => {
+      axios.post('/king_variant/get_data', {
+        jsonrpc: '2.0',
+        params: {
+          store_url: window.location,
+        }
+      }).then((res) => {
         console.log(res)
-        self.server_data = res.data
-        self.config_variant_temp.options = res.data.options
-        self.config_variant_temp.general = res.data.general
-        self.config_variant_temp.styles = res.data.styles
-        self.activate_app_temp = res.data.theme
-        self.customize_temp = res.data.styles
+        self.server_data = res.data.result
+        self.config_variant_temp.options = res.data.result.options
+        self.config_variant_temp.general = res.data.result.general
+        self.config_variant_temp.styles = res.data.result.styles
+        self.activate_app_temp = res.data.result.theme
+        self.customize_temp = res.data.result.styles
         console.log(self.config_variant_temp)
         console.log(self.server_data)
         console.log(self.activate_app_temp)
