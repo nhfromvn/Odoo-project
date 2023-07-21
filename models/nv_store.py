@@ -114,15 +114,18 @@ class ShopifyShop(models.Model):
 
     # get product shopify va cap nhat lai cac variant option moi khi refresh trang va tao cac customize style mac dinh neu chua co
     def get_product(self):
-        # todo
+
         # viet ham active shopify session cho shop rieng ra de dung o tat cac cac cho khac, k viet lai code ntn
         self.shopify_session()
+        #todo
+        # TH shop co qua nhieu products thi xu ly ntn
         products = shopify.Product.find()
         existing_script_tags = shopify.ScriptTag.find()
         vals = []
         # todo
         # giai thich a cong dung ham nay
         # ham nay dung de refresh product va variant option moi khi khoi dong app
+        # tai sao phai refresh
         setting = request.env['nv.store.settings.options'].sudo().search(
             [('shop', '=', self.id), ('type', '=', 'general')])
         if not setting:
@@ -130,6 +133,9 @@ class ShopifyShop(models.Model):
                 'type': 'general',
                 'shop': self.id
             })
+        # todo
+        # default data viet ham rieng active khi cai app va chay 1 lan thoi
+        # bien data json viet ham rieng ra de get
         for type in [{'type': 'Square swatch',
                       'option': 'Color',
                       'image_url_selected': '/king_variant/static/images/example.jpg',
@@ -160,6 +166,8 @@ class ShopifyShop(models.Model):
                     'example_image_url_unselected': type[
                         'image_url_unselected'] if 'image_url_unselected' in type else False
                 })
+        # todo
+        # code gon lai va giai thich tac dung cua ham, neu ra 1 so case vd
         square_swatch_id = request.env['nv.store.style'].sudo().search([('type', '=', 'Square swatch')], limit=1).id
         variant_options = request.env['nv.store.settings.options'].sudo().search([('shop', '=', self.id)])
         for variant_option in variant_options:
@@ -246,6 +254,8 @@ class KingVariantConfig(models.TransientModel):
     #     return res
 
     def set_values(self):
+        # todo
+        # ham nao k dung nua thi xoa di
         super().set_values()
         param = self.env['ir.config_parameter'].sudo()
 

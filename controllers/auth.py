@@ -79,10 +79,15 @@ class KingVariantAuth(http.Controller):
     @http.route('/king_variant/install', auth='public')
     def index(self, **kw):
         if is_shop_auth(self, kw):
-            request.session['is_shop_login'] = kw['shop']
+            # todo
+            # set is_shop_login o day lam gi nhi
+            is_shop_login = 'king_variant' in request.session and request.session['king_variant'] == kw['shop']
+            shop = request.env['nv.store'].sudo().search([('url', '=', kw['shop'])], limit=1)
+            is_shop_login = is_shop_login and shop and expire_session(shop.last_login)
             # redirect_url = 'https://' + kw['shop'] + '/apps/shopify/main'
-            redirect_url = '/king_variant?' + urlencode(request.params)
-            return werkzeug.utils.redirect(redirect_url)
+            if is_shop_login:
+                redirect_url = '/king_variant?' + urlencode(request.params)
+                return werkzeug.utils.redirect(redirect_url)
         # base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         return werkzeug.utils.redirect("/king_variant/auth?" + urlencode(request.params))
 
@@ -121,11 +126,12 @@ class KingVariantAuth(http.Controller):
             shopify_session = shopify.Session(kw['shop'], api_version)
             token = shopify_session.request_token(kw)
             shop = request.env['nv.store'].sudo().search([('url', '=', kw['shop'])], limit=1)
-            # todo
+
             # chỗ này set parameter này để làm gì nhỉ ?
             if not shop:
                 # todo
                 # shop cần có các thông tin: currency, country, primary domain, email, timezone
+                # van da co cac thong tin nay cho shop dau
                 shop = request.env['nv.store'].sudo().create({
                     'url': kw['shop'],
                     'access_token': token,
@@ -136,6 +142,7 @@ class KingVariantAuth(http.Controller):
             # todo
             # Không dùng script tag nữa, tạo 1 theme extension làm công việc add js file vào header theme
             # shop.script_tags_register()
+            # theme app extension dau
             request.session['king_variant'] = kw['shop']
             redirect_url = 'https://' + kw['shop'] + '/admin/apps/' + api_key
             return werkzeug.utils.redirect(redirect_url)
@@ -170,7 +177,7 @@ def verify_request():
                 shopify.Session.secret = api_secret
                 hmac = shopify.Session.calculate_hmac(params)
 
-                if params['hmac'] == hmac and request.session['is_shop_login'] == params['shop']:
+                if params['hmac'] == hmac and 'king_variant' in request.session and  request.session['king_variant'] == params['shop']:
                     return True
                 else:
                     raise Exception("Unauthorized request")
@@ -188,7 +195,9 @@ def verify_request():
                 api_secret = request.env['ir.config_parameter'].sudo().get_param('king.variant.secret_key_king_variant')
                 shopify.Session.secret = api_secret
                 hmac = shopify.Session.calculate_hmac(params)
-                if params['hmac'] == hmac and request.session['is_shop_login'] == params['shop']:
+                # todo
+                # cho nay la phai so sanh vs request.session['king_variant']
+                if params['hmac'] == hmac and 'king_variant' in request.session and  request.session['king_variant'] == params['shop']:
                     return True
                 else:
                     raise Exception("Unauthorized request")
@@ -255,6 +264,8 @@ def is_shop_auth(self, kw):
 
 
 def is_shop_login(kw):
+    # todo
+    # cho nay check nay vamn sai: shop login khi trong session co king_variant atrribute and request.session['king_variant'] == shop_url and not expire session
     shop_url = kw['shop']
     is_shop_login = 'king_variant' in request.session and request.session['is_shop_login'] == shop_url
     print(is_shop_login)
